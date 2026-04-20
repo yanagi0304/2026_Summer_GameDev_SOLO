@@ -1,0 +1,16 @@
+# C++ / Visual Studio / DxLib
+
+*.pch
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog
+
+Debug/
+Release/
+x64/
+x86/
+
+*.log
+*.tmp
