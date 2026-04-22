@@ -1,0 +1,224 @@
+#include "GameScene.h"
+
+#include <DxLib.h>
+#include <cmath>
+
+#include "../../Application/Application.h"
+#include "../../scene/SceneManager/SceneManager.h"
+
+#include "../../Manager/Camera/Camera.h"
+#include "../../Manager/Input/KeyManager.h"
+#include "../../Manager/Sound/SoundManager.h"
+#include "../../Manager/Font/FontManager.h"
+
+#include "../../Utility/Utility.h"
+
+#include "Pause/GamePauseh.h"
+
+#include "../Clear/ClearScene.h"
+
+#include "../Common/GameDebugScene.h"
+
+
+int GameScene::hitStop = 0;
+
+int GameScene::slow = 0;
+int GameScene::slowInter = 0;
+
+int GameScene::shake = 0;
+ShakeKinds GameScene::shakeKinds = ShakeKinds::DIAG;
+ShakeSize GameScene::shakeSize = ShakeSize::MEDIUM;
+
+GameScene::GameScene():
+	collision(nullptr),
+
+	objects(),
+
+	tomatoBossStage(nullptr),
+
+	mainScreen(-1)
+{
+}
+
+GameScene::~GameScene()
+{
+}
+
+void GameScene::Load(void)
+{
+	Snd::GetIns().ChangeScene("Game");
+
+	// 画面演出用
+	mainScreen = MakeScreen(Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y);
+
+	// 当たり判定管理クラスを生成
+	collision = new CollisionManager();
+
+	// 初期化も含めたオブジェクト生成のラムダ関数
+	auto ObjAdd = [&](ActorBase* newClass)->void {
+		// 配列の末尾に追加
+		objects.emplace_back(newClass);
+		// 共通の読み込み処理
+		objects.back()->Load();
+		// そのオブジェクトが持つコライダーを管理クラスへ追加する
+		collision->Add(objects.back()->GetCollider());
+		};
+
+	// オブジェクト生成（生成の順番がそのまま(更新/描画)順）
+	//<例>ObjAdd(new Player());
+
+}
+
+void GameScene::Init(void)
+{
+	// マウスカーソル
+	Key::GetIns().SetMouceFixed(true);
+
+	// オブジェクト全ての初期化処理
+	for (ActorBase*& obj : objects) { obj->Init(); }
+
+	// カメラ設定
+	Camera::GetIns().ChangeModeFree(Deg2Rad(3.0f), 10.0f);
+}
+
+void GameScene::Update(void)
+{
+#pragma region 画面演出
+	if (hitStop > 0) { hitStop--; return; }
+	if (shake > 0) { shake--; }
+	if (slow > 0) {
+		slow--;
+		if (slow % slowInter != 0) { return; }
+	}
+#pragma endregion
+
+	// オブジェクト全ての更新処理
+	for (ActorBase*& obj : objects) { obj->Update(); }
+
+	// 当たり判定
+	collision->Check();
+
+#pragma region 遷移判定（ポーズも含む）
+	// ポーズ判定
+	if (Key::GetIns().GetInfo(KEY_TYPE::PAUSE).down) {
+		SceneManager::GetIns().PushScene(std::make_shared<GamePause>());
+		return;
+	}
+
+	// ゲームクリア判定
+	if (Key::GetIns().GetInfo(KEY_TYPE::ENTER).down) {
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::CLEAR);
+		return;
+	}
+
+#if _DEBUG
+
+	// シーンを再読み込み
+	if (Key::GetIns().GetInfo(KEY_TYPE::DEBUG_RELOAD).down) {
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GAME);
+		return;
+	}
+
+#endif // _DEBUG
+
+#pragma endregion
+}
+
+void GameScene::Draw(void)
+{
+#pragma region 画面演出
+	// 描画先を変更
+	SetDrawScreen(mainScreen);
+
+	// 画面リセット
+	ClearDrawScreen();
+
+	// カメラ適用
+	Camera::GetIns().Apply();
+#pragma endregion
+
+#pragma region 描画処理（メイン）
+	// オブジェクト全ての描画処理
+	for (ActorBase*& obj : objects) { obj->Draw(); }
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+	for (ActorBase*& obj : objects) { obj->AlphaDraw(); }
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	DrawFormatStringToHandle(0, 0, 0xffffff, Font::GetIns().GetFont(FontKinds::DEFAULT_64), "ゲームシーン");
+#pragma endregion
+
+#pragma region 画面演出
+	// 描画先を元に戻す
+	SetDrawScreen(DX_SCREEN_BACK);
+
+	// 揺れの数値を算出
+	Vector2I s = ShakePoint();
+
+	// 揺れの数値分座標をずらして描画
+	DrawGraph(s.x, s.y, mainScreen, true);
+#pragma endregion
+
+#pragma region UI描画（画面演出をかけないもの）
+	// オブジェクト全てのUI描画処理
+	for (ActorBase*& obj : objects) { obj->UiDraw(); }
+#pragma endregion
+}
+
+void GameScene::Release(void)
+{
+	Camera::GetIns().Release();
+
+	// 当たり判定管理クラスの解放
+	if (collision) {
+		collision->Clear();
+		delete collision;
+		collision = nullptr;
+	}
+
+	// オブジェクト全ての解放処理
+	for (ActorBase*& obj : objects) {
+		if (!obj) { continue; }
+		obj->Release();
+		delete obj;
+		obj = nullptr;
+	}
+
+	// 画面演出用のメインスクリーンを解放
+	DeleteGraph(mainScreen);
+}
+
+void GameScene::Shake(ShakeKinds kinds, ShakeSize size, int time)
+{
+	if ((abs(shake - time) > 10) || shake <= 0)shake = time;
+	shakeKinds = kinds;
+	shakeSize = size;
+}
+Vector2I GameScene::ShakePoint(void)
+{
+	Vector2I ret = {};
+
+	if (shake > 0) {
+		int size = shake / 5 % 2;
+		size *= 2;
+		size -= 1;
+		switch (shakeKinds)
+		{
+		case GameScene::WID:ret.x = size;
+			break;
+		case GameScene::HIG:ret.y = size;
+			break;
+		case GameScene::DIAG:ret = size;
+			break;
+		case GameScene::ROUND:
+			size = shake / 3 % 12; size++;
+			ret = { (int)(((int)shakeSize * 1.5f) * cos(size * 30.0f)),(int)(((int)shakeSize * 1.5f) * sin(size * 30.0f)) };
+			break;
+		}
+
+		if (shakeKinds != ShakeKinds::ROUND) { ret *= shakeSize; }
+
+		DrawGraph(0, 0, mainScreen, true);
+	}
+
+	return ret;
+}

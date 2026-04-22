@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Src\Application\Application.cpp" />
+    <ClCompile Include="Src\Common\Vector2.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Manager\Camera\InstantCamera.cpp" />
+    <ClCompile Include="Src\Manager\Font\FontManager.cpp" />
+    <ClCompile Include="Src\Manager\Input\InputTextManager.cpp" />
+    <ClCompile Include="Src\Object\Common\AnimationController\AnimationController.cpp" />
+    <ClCompile Include="Src\Manager\Camera\Camera.cpp" />
+    <ClCompile Include="Src\Manager\Collision\CollisionManager.cpp" />
+    <ClCompile Include="Src\Manager\FPS\FPS.cpp" />
+    <ClCompile Include="Src\Manager\Input\KeyManager.cpp" />
+    <ClCompile Include="Src\Manager\Loading\Loading.cpp" />
+    <ClCompile Include="Src\Manager\Sound\SoundManager.cpp" />
+    <ClCompile Include="Src\Object\ActorBase.cpp" />
+    <ClCompile Include="Src\Object\Charactor\CharactorBase.cpp" />
+    <ClCompile Include="Src\Object\Common\DataLoad\ParameterLoad.cpp" />
+    <ClCompile Include="Src\Scene\Clear\ClearScene.cpp" />
+    <ClCompile Include="Src\Scene\Common\Fade\FadeInScene.cpp" />
+    <ClCompile Include="Src\Scene\Common\Fade\FadeOutScene.cpp" />
+    <ClCompile Include="Src\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Src\Scene\Game\Pause\GamePause.cpp" />
+    <ClCompile Include="Src\Scene\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="Src\Scene\Title\End\EndScene.cpp" />
+    <ClCompile Include="Src\Scene\Title\TitleScene.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Application\Application.h" />
+    <ClInclude Include="Src\Common\Vector2.h" />
+    <ClInclude Include="Src\Common\Vector3.h" />
+    <ClInclude Include="Src\Manager\Camera\InstantCamera.h" />
+    <ClInclude Include="Src\Manager\Font\FontManager.h" />
+    <ClInclude Include="Src\Manager\Input\InputTextManager.h" />
+    <ClInclude Include="Src\Object\Charactor\CharactorStateBase.h" />
+    <ClInclude Include="Src\Object\Common\AnimationController\AnimationController.h" />
+    <ClInclude Include="Src\Manager\Camera\Camera.h" />
+    <ClInclude Include="Src\Manager\Collision\CollisionManager.h" />
+    <ClInclude Include="Src\Manager\FPS\FPS.h" />
+    <ClInclude Include="Src\Manager\Input\KeyManager.h" />
+    <ClInclude Include="Src\Manager\Loading\Loading.h" />
+    <ClInclude Include="Src\Manager\Sound\SoundManager.h" />
+    <ClInclude Include="Src\Object\ActorBase.h" />
+    <ClInclude Include="Src\Object\Charactor\CharactorBase.h" />
+    <ClInclude Include="Src\Object\Common\Collider\BoxCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\ColliderBase.h" />
+    <ClInclude Include="Src\Object\Common\Collider\CapsuleCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\LineCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\ModelCollider.h" />
+    <ClInclude Include="Src\Object\Common\Collider\SphereCollider.h" />
+    <ClInclude Include="Src\Object\Common\DataLoad\ParameterLoad.h" />
+    <ClInclude Include="Src\Object\Common\DebugObject\BoxDebugObject.h" />
+    <ClInclude Include="Src\Object\Common\Transform.h" />
+    <ClInclude Include="Src\Scene\Clear\ClearScene.h" />
+    <ClInclude Include="Src\Scene\Common\Fade\FadeInScene.h" />
+    <ClInclude Include="Src\Scene\Common\Fade\FadeOutScene.h" />
+    <ClInclude Include="Src\Scene\Game\GameScene.h" />
+    <ClInclude Include="Src\Scene\Common\GameDebugScene.h" />
+    <ClInclude Include="Src\Scene\Game\Pause\GamePauseh.h" />
+    <ClInclude Include="Src\Scene\SceneBase.h" />
+    <ClInclude Include="Src\Scene\SceneManager\SceneManager.h" />
+    <ClInclude Include="Src\Scene\Title\End\EndScene.h" />
+    <ClInclude Include="Src\Scene\Title\TitleScene.h" />
+    <ClInclude Include="Src\Utility\Utility.h" />
+  </ItemGroup>
+</Project>
