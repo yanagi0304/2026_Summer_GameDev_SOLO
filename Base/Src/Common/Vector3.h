@@ -39,14 +39,14 @@ struct Vector3
 	//Z‚Ì‚Ý
 	static Vector3 Zonly(float value) {return Vector3(0.0f, 0.0f, value); }
 
-	//XY‚Ì‚Ý
-	static Vector3 XYonly(float value) { return Vector3(value, value, 0.0f); }
+	// XY‚Ì‚Ý
+	static Vector3 XYonly(float x, float y) { return Vector3(x, y, 0.0f); }
 
-	//XZ‚Ì‚Ý
-	static Vector3 XZonly(float value) { return Vector3(value, 0.0f, value); }
+	// XZ‚Ì‚Ý
+	static Vector3 XZonly(float x, float z) { return Vector3(x, 0.0f, z); }
 
-	//YZ‚Ì‚Ý
-	static Vector3 YZonly(float value) { return Vector3(0.0f, value, value); }
+	// YZ‚Ì‚Ý
+	static Vector3 YZonly(float y, float z) { return Vector3(0.0f, y, z); }
 
 #pragma endregion
 

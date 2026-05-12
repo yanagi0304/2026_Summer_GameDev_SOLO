@@ -143,6 +143,7 @@
     <ClInclude Include="Src\Manager\FPS\FPS.h" />
     <ClInclude Include="Src\Application\Application.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
+    <ClInclude Include="Src\Utility\Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
