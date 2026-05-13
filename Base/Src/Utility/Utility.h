@@ -394,3 +394,26 @@ static void MV1ModelMatrix(int& model, const T& pos, const std::initializer_list
 	MV1SetRotationMatrix(model, m);
 	MV1SetPosition(model, pos);
 }
+
+template <typename T>
+static void MV1ModelMatrix(int& model, const T& scale, const T& pos, const std::initializer_list<T>& angle) {
+	MATRIX m = MGetIdent();
+
+	m.m[0][0] = scale.x;
+	m.m[1][1] = scale.y;
+	m.m[2][2] = scale.z;
+
+	//角度をセット順に合成
+	for (const aut& a : angle) {
+		m = MMult(m, MGetRotX(a.x));
+		m = MMult(m, MGetRotY(a.y));
+		m = MMult(m, MGetRotZ(a.z));
+	}
+
+	m.m[3][0] = pos.x;
+	m.m[3][1] = pos.y;
+	m.m[3][2] = pos.z;
+
+	MV1SetRotationMatrix(model, m);
+
+}
