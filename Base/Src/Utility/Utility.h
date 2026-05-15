@@ -404,7 +404,7 @@ static void MV1ModelMatrix(int& model, const T& scale, const T& pos, const std::
 	m.m[2][2] = scale.z;
 
 	//角度をセット順に合成
-	for (const aut& a : angle) {
+	for (const auto& a : angle) {
 		m = MMult(m, MGetRotX(a.x));
 		m = MMult(m, MGetRotY(a.y));
 		m = MMult(m, MGetRotZ(a.z));
@@ -416,4 +416,84 @@ static void MV1ModelMatrix(int& model, const T& scale, const T& pos, const std::
 
 	MV1SetRotationMatrix(model, m);
 
+}
+
+static Vector3 VTransform(const Vector3& v, const MATRIX& m) {
+	if (v == 0) { return Vector3(); }
+	return Vector3(VTransform(v.ToVECTOR(), m));
+}
+
+static std::string WStringToString(const std::wstring& ws) {
+	int len = WideCharToMultiByte(932, 0, ws.c_str(), -1, nullptr, 0, nullptr, nullptr);
+	if (len <= 0)return {};
+	std::string s(len - 1, '\0');
+	WideCharToMultiByte(932, 0, ws.c_str(), -1, &s[0], len, nullptr, nullptr);
+	return s;
+}
+
+/// <summary>
+/// 値を最小値と最大値の間で正規化する
+/// </summary>
+/// <param name="value">現在の値</param>
+/// <param name="minValue">その値における最小値</param>
+/// <param name="maxValue">その値における最大値</param>
+/// <returns>現在の値がその値においてどこに位置しているか（ 割合 : 0.0f～1.0f ）</returns>
+static float ValueNormalizeRatio(float value, float minValue, float maxValue) {
+	// 0除算防止
+	if (maxValue - minValue == 0.0f) { return 0.0f; }
+
+	return (value - minValue) / (maxValue - minValue);
+}
+
+//割合を反転させる
+static float RationReverse(float ratio) { return (1.0f - ratio); }
+
+//RGBの数値をカラーコードに変換
+static unsigned int RGBToColorCode(unsigned char r, unsigned char g, unsigned char b) { return ((r << 16) | (g << 8) | b); }
+
+//MagicVoxelによって作成したCSVファイルの1行の情報の番号
+enum CSV_SDDRESS { X, Z, Y, R, G, B };
+
+//MagicaVoxelによって作成したCSVファイルから1行から情報を抜き出す構造体
+struct MagicaVoxelCSVRow {
+	int x = -1, y = -1, z = -1;
+	int number = 0;
+
+	MagicaVoxelCSVRow(std::vector < std::string> line) {
+		//XYZ
+		x = std::stoi(line.at(CSV_SDDRESS::X));
+		y = std::stoi(line.at(CSV_SDDRESS::Y));
+		z = std::stoi(line.at(CSV_SDDRESS::Z));
+
+		//RGBをカラーコードに変換してそれを番号として使う
+		number = RGBToColorCode(
+			std::stoi(line.at(CSV_SDDRESS::R)),
+			std::stoi(line.at(CSV_SDDRESS::G)),
+			std::stoi(line.at(CSV_SDDRESS::B))
+		);
+	}
+};
+
+
+/// <summary>
+/// 配列全ての要素を変換する関数（例：std::vector<int>からstd::vector<float>へ）
+/// </summary>
+/// <typeparam name="before">変換元の型</typeparam>
+/// <typeparam name="after">変換先の型</typeparam>
+/// <param name="array">変換元の型の要素を持つ配列</param>
+/// <returns>変換後の型の要素を持つ配列</returns>
+template<typename before, typename after>
+static std::vector<after> ArrayCast(const std::vector<before>& array) {
+
+	// 配列数取得
+	size_t size = array.size();
+
+	// 変換後の型の配列を作成する（初期値は0）
+	std::vector<after> ret(size, 0);
+
+	// 変換前の型の配列を変換後の型の配列にコピーしていく
+	for (size_t i = 0; i < size; i++) { ret.at(i) = (after)array.at(i); }
+
+	// 変換後の型の配列を返す
+	return ret;
 }

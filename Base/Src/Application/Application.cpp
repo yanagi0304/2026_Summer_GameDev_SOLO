@@ -3,6 +3,7 @@
 #include <DxLib.h>
 
 #include "../Manager/FPS/FPS.h"
+#include "KeyManager.h"
 
 Application* Application::ins = nullptr;
 
@@ -72,6 +73,21 @@ void Application::Run(void)
 		// •`‰æ‚ªŠ®—¹‚µ‚½”w–Ê‰æ–Ê‚ğ•\‚É‚Á‚Ä‚­‚é
 		ScreenFlip();
 	}
+}
+
+bool KeyManager::GetControllerConnect(void) const
+{
+	return false;
+}
+
+Vector2 KeyManager::GetRightStickVec(void) const
+{
+	return Vector2();
+}
+
+Vector2 KeyManager::GetLeftStickVec(void) const
+{
+	return Vector2();
 }
 
 void Application::Release(void)
