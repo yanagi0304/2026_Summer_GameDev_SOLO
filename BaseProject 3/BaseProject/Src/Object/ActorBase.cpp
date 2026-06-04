@@ -11,7 +11,6 @@ ActorBase::ActorBase() :
 
 	pushFlg(true),
 	pushWeight(0),
-
 	prevPos(trans.pos),
 
 	accelSum(0.0f),

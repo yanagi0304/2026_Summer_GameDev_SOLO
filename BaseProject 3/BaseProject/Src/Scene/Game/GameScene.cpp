@@ -20,6 +20,9 @@
 
 #include "../Common/GameDebugScene.h"
 
+#include "../../Object/Stage/Stage.h"
+#include "../../Object/Stage/StageTutrial/StageTutrial.h"
+
 int GameScene::hitStop = 0;
 
 int GameScene::slow = 0;
@@ -62,6 +65,9 @@ void GameScene::Load(void)
 
 	// オブジェクト生成（生成の順番がそのまま(更新/描画)順）
 	//<例>ObjAdd(new Player());
+	//ObjAdd(new Stage("../../../Data/Parameter/Stage/BattleStage"));
+	ObjAdd(new StageTutrial());
+
 
 }
 

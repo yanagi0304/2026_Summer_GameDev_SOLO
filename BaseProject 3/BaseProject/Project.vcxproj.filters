@@ -38,6 +38,8 @@
     <ClCompile Include="Src\Manager\Net\Enet\win32.c" />
     <ClCompile Include="Src\Manager\Effect\EffectManager.cpp" />
     <ClCompile Include="Src\Manager\Effect\TackleMove\EffectTackleMove.cpp" />
+    <ClCompile Include="Src\Object\Stage\Stage.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h" />
@@ -156,6 +158,8 @@
     <ClInclude Include="Src\Manager\Effect\EffectFactory.h" />
     <ClInclude Include="Src\Manager\Effect\EffectManager.h" />
     <ClInclude Include="Src\Manager\Effect\TackleMove\EffectTackleMove.h" />
+    <ClInclude Include="Src\Object\Stage\Stage.h" />
+    <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">
