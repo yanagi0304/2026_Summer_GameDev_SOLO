@@ -10,5 +10,5 @@ StageTutrial::StageTutrial(const std::string& parameterPath)
 
 void StageTutrial::Load(void)
 {
-	trans.Load("Stage/Stage_Tutorial");
+	trans.Load("Stage/Doujou");
 }
