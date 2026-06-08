@@ -23,6 +23,8 @@
 #include "../../Object/Stage/Stage.h"
 #include "../../Object/Stage/StageTutrial/StageTutrial.h"
 
+#include "../../Object/Character/Jazz/Jazz.h"
+
 int GameScene::hitStop = 0;
 
 int GameScene::slow = 0;
@@ -67,6 +69,7 @@ void GameScene::Load(void)
 	//<—á>ObjAdd(new Player());
 	//ObjAdd(new Stage("../../../Data/Parameter/Stage/BattleStage"));
 	ObjAdd(new StageTutrial());
+	ObjAdd(new Jazz());
 
 
 }

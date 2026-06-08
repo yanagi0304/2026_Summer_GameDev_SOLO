@@ -14,3 +14,7 @@ x86/
 
 *.log
 *.tmp
+
+BaseProject 3/BaseProject/.vs
+BaseProject 3/BaseProject/x64
+BaseProject 3/BaseProject/Project

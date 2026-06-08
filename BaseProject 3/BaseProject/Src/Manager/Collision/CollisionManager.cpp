@@ -15,33 +15,12 @@ void CollisionManager::Add(ColliderBase* collider)
 
 		//プレイヤー系
 	case COLLIDER_TAG::PLAYER:
-	case COLLIDER_TAG::PLAYER_ATTACK:
-	case COLLIDER_TAG::PLAYER_COMMON:
-
 		playerColliders.emplace_back(collider);
-		break;
-
-		// エネミー系
-	case COLLIDER_TAG::BOSS:
-	case COLLIDER_TAG::ENEMY:
-
-		enemyColliders.emplace_back(collider);
 		break;
 
 		// ステージ系
 	case COLLIDER_TAG::STAGE:
 		stageColliders.emplace_back(collider);
-		break;
-
-	case COLLIDER_TAG::TOMATO_BOSS_DISTANCE:
-	case COLLIDER_TAG::BOSS_ATTACK:
-
-		enemyPlayerOnlyColliders.emplace_back(collider);
-		break;
-
-	case COLLIDER_TAG::BOSS_ATTACK_AREA:
-
-		enemyAttackAreaColliders.emplace_back(collider);
 		break;
 
 		// それ以外

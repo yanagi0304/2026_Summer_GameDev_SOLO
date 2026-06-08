@@ -8,5 +8,6 @@ public:
     StageTutrial(const std::string& parameterPath);
     ~StageTutrial() = default;
 	void Load(void) override;
+    void SubInit(void) override;
 };
 
