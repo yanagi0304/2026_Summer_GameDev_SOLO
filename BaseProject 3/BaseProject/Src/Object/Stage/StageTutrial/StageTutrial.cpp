@@ -2,7 +2,7 @@
 #include "../../Common/Collider/BoxCollider.h"
 
 StageTutrial::StageTutrial():
-	ActorBase("Data/Parameter/Stage/BattleStage/")
+	ActorBase("Data/Parameter/Stage/TutrialStage/")
 {
 }
 
@@ -21,4 +21,5 @@ void StageTutrial::Load(void)
 
 void StageTutrial::SubInit(void)
 {
+	trans.scale = GetParameterToVector3("Init", "1");
 }

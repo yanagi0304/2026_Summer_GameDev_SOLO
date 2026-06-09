@@ -83,7 +83,8 @@ void GameScene::Init(void)
 	for (ActorBase* obj : objects) { obj->Init(); }
 
 	// ƒJƒƒ‰İ’è
-	Camera::GetIns().ChangeModeFree(Deg2Rad(5.0f), 10.0f);
+	Camera::GetIns().ChangeModeFollowRemote(&ObjSerch<Jazz>()->GetTrans().pos,Vector3(0, 150, 0)
+	,Vector3::YZonly(250.0f,-400.0f));
 }
 
 void GameScene::Update(void)
