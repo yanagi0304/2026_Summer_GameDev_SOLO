@@ -1,11 +1,25 @@
 #pragma once
 #include "../CharacterBase.h"
+#include <map>
+#include <memory>
+
+class WeaponBase;
+
 class Jazz :
 	public CharacterBase
 {
 public:
 	Jazz();
 	~Jazz() override = default;
+
+private:
+
+	//•Ší‚ÌˆÊ’u
+	Transform weaponTrans_;
+	Vector3 prevPos;
+
+	//Š•Ší
+	std::map<bool,std::unique_ptr<WeaponBase>> weaponSet_;
 
 private:
 
@@ -16,6 +30,5 @@ private:
 	void CharactorAlphaDraw(void)override;
 	void CharacterUiDraw(void)override;
 	void CharactorRelease(void)override;
-	void SubUpdate(void)override;
 };
 

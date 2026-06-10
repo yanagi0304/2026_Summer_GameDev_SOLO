@@ -6,6 +6,7 @@ enum class COLLIDER_TAG
 	NON = -1,
 
 	PLAYER,
+	PLAYER_HAND,
 
 	STAGE,
 

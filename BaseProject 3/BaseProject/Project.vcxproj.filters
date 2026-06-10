@@ -41,6 +41,8 @@
     <ClCompile Include="Src\Object\Stage\Stage.cpp" />
     <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
     <ClCompile Include="Src\Object\Character\Jazz\Jazz.cpp" />
+    <ClCompile Include="Src\Object\Weapon\WeaponBase.cpp" />
+    <ClCompile Include="Src\Object\Weapon\Kogetsu\Kogetsu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h" />
@@ -162,6 +164,8 @@
     <ClInclude Include="Src\Object\Stage\Stage.h" />
     <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
     <ClInclude Include="Src\Object\Character\Jazz\Jazz.h" />
+    <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
+    <ClInclude Include="Src\Object\Weapon\Kogetsu\Kogetsu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">
