@@ -22,7 +22,9 @@ CharacterBase::CharacterBase(
 	isInviEffect(false),
 
 	operatorSenderId(MSG_SENDER_ID::None),
-	isOwnOperator(false)
+	isOwnOperator(false),
+
+	animeType_(CHARACTER_ANIME::T)
 {
 }
 
@@ -50,7 +52,9 @@ CharacterBase::CharacterBase(
 	operatorSenderId(MSG_SENDER_ID::None),
 	isOwnOperator(false),
 
-	isDeath(false)
+	isDeath(false),
+
+	animeType_(CHARACTER_ANIME::T)
 {
 }
 	

@@ -14,7 +14,7 @@ class CollisionManager
 public:
 	CollisionManager() :
 		playerColliders(),
-		enemyColliders(),
+		weaponColliders(),
 		stageColliders(),
 		otherColliders(),
 		enemyPlayerOnlyColliders()
@@ -33,7 +33,7 @@ public:
 	// 解放
 	void Clear(void) {
 		playerColliders.clear();
-		enemyColliders.clear();
+		weaponColliders.clear();
 		stageColliders.clear();
 		otherColliders.clear();
 		enemyPlayerOnlyColliders.clear();
@@ -44,8 +44,8 @@ private:
 #pragma region タイプ別コライダー格納配列
 	// プレイヤー系
 	std::vector<ColliderBase*>playerColliders;
-	// エネミー系	
-	std::vector<ColliderBase*>enemyColliders;
+	// 武器系
+	std::vector<ColliderBase*>weaponColliders;
 	// ステージ系
 	std::vector<ColliderBase*>stageColliders;
 

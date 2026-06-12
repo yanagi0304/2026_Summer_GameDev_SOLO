@@ -10,6 +10,16 @@
 
 class UI_Base;
 
+enum CHARACTER_ANIME
+{
+	SLASH_A1,
+	SWORD_IDLE,
+	T,
+	WALK,
+	IDLE,
+	MAX,
+};
+
 class CharacterBase : public ActorBase
 {
 public:
@@ -141,6 +151,8 @@ protected:
 	float GetAnimeRatio(void)const { return anime->GetAnimeRatio();}
 
 	int GetAnimePlayType(void)const { return anime->GetPlayType(); }
+
+	CHARACTER_ANIME animeType_;
 	
 #pragma endregion オーバーライド不可(使用のみ)
 

@@ -115,7 +115,7 @@ protected:
 	// 横軸加速度の１フレームごとの減衰量
 	float ATTENUATION = 3.0f;
 	// 横軸加速度の最大値
-	float ACCEL_MAX = 30.0f;
+	float ACCEL_MAX = 15.0f;
 
 	// 接地判定(派生先で参照用)
 	const bool& isGround = isGroundMaster;

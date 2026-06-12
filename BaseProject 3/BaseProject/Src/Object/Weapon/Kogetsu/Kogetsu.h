@@ -5,7 +5,9 @@ class Kogetsu :
 {
 public:
 
-    Kogetsu();
+
+	Kogetsu();
+    Kogetsu(const Transform& ownerTrans);
 	~Kogetsu() override = default;
 
 private:
@@ -17,6 +19,8 @@ private:
     void WeaponAlphaDraw(void) override;
     void WeaponUiDraw(void) override;
 	void WeaponRelease(void) override;
+
+
 
 };
 

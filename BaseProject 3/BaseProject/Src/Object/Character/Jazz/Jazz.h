@@ -12,6 +12,9 @@ public:
 	Jazz();
 	~Jazz() override = default;
 
+	//武器のコライダーを合わせた全コライダーを取得
+	std::vector<ColliderBase*> GetCollider(void)const override;
+
 private:
 
 	//武器の位置
@@ -30,5 +33,6 @@ private:
 	void CharactorAlphaDraw(void)override;
 	void CharacterUiDraw(void)override;
 	void CharactorRelease(void)override;
+	
 };
 

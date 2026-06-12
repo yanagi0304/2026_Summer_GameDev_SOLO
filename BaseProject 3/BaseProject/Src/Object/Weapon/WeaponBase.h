@@ -3,6 +3,8 @@
 #include "../Common/AnimationController/AnimationController.h"
 #include "../../Application/Application.h"
 #include <map>
+#include <memory>
+#include <optional>
 
 
 class WeaponBase :
@@ -70,6 +72,15 @@ protected:
 
 #pragma endregion
 
+#pragma region セッター関連
+
+	//武器を持たせる場所を指定
+	void SetHavePos(const Vector3& pos) { trans.pos = pos; }
+
+
+#pragma endregion
+
+	std::optional<std::reference_wrapper<const Transform>> ownerTrans_;
 
 };
 

@@ -18,6 +18,10 @@ void CollisionManager::Add(ColliderBase* collider)
 		playerColliders.emplace_back(collider);
 		break;
 
+		//武器
+	case COLLIDER_TAG::KOGETSU:
+		weaponColliders.emplace_back(collider);
+
 		// ステージ系
 	case COLLIDER_TAG::STAGE:
 		stageColliders.emplace_back(collider);
@@ -36,19 +40,19 @@ void CollisionManager::Check(void)
 	Matching(playerColliders, stageColliders);
 
 	// エネミー系×ステージ系
-	Matching(enemyColliders, stageColliders);
+	Matching(weaponColliders, stageColliders);
 
 	// それ以外×ステージ系
 	Matching(otherColliders, stageColliders);
 	
 	// プレイヤー系×エネミー系
-	Matching(playerColliders, enemyColliders);
+	Matching(playerColliders, weaponColliders);
 	
 	// プレイヤー系×それ以外
 	Matching(playerColliders, otherColliders);
 
 	// エネミー系×それ以外
-	Matching(enemyColliders, otherColliders);
+	Matching(weaponColliders, otherColliders);
 
 	// それ以外×それ以外
 	Matching(otherColliders);
