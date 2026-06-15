@@ -23,6 +23,8 @@
 #include "../../Object/Stage/Stage.h"
 #include "../../Object/Stage/StageTutrial/StageTutrial.h"
 
+#include "../../Object/Mannequin/Mannequin.h"
+
 #include "../../Object/Character/Jazz/Jazz.h"
 
 int GameScene::hitStop = 0;
@@ -70,6 +72,7 @@ void GameScene::Load(void)
 	//ObjAdd(new Stage("../../../Data/Parameter/Stage/BattleStage"));
 	ObjAdd(new StageTutrial());
 	ObjAdd(new Jazz());
+	ObjAdd(new Mannequin());
 
 
 }

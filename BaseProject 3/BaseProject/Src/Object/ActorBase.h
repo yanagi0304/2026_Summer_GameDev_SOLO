@@ -281,10 +281,13 @@ protected:
 	virtual void SubInit(void) {}
 	// 派生先追加更新
 	virtual void SubUpdate(void) {}
+	//派生子オブジェクト更新
+	virtual void SubObjectUpdate(void) {}
 	// 派生先追加描画
 	virtual void SubDraw(void) {}
 	// 派生先追加アルファ描画
 	virtual void SubAlphaDraw(void) {}
 	// 派生先追加解放
 	virtual void SubRelease(void) {}
+
 };

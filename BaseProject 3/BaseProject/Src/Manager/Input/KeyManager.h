@@ -49,8 +49,8 @@ public:
 		//	ダッシュ
 		PLAYER_DASH,
 
-		// スキル1（基本的に「通常攻撃」）
-		PLAYER_SKILL_1,
+		// メイントリガー
+		PLAYER_MAIN,
 		// スキル2（キャラごとの「特殊技」）
 		PLAYER_SKILL_2,
 		// スキル3（キャラごとの「特殊技」）

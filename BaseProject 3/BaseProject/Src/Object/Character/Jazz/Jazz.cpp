@@ -68,7 +68,7 @@ void Jazz::CharacterLoad(void)
 		}
 	}
 
-	animeType_ = CHARACTER_ANIME::SLASH_A1;
+	animeType_ = CHARACTER_ANIME::SWORD_IDLE;
 
 }
 
@@ -82,7 +82,24 @@ void Jazz::CharactorInit(void)
 
 void Jazz::CharactorUpdate(void)
 {
-	animeType_ = CHARACTER_ANIME::SLASH_A1;
+	
+	bool isAttacking = (animeType_ == CHARACTER_ANIME::SLASH_A1);
+	if (isAttacking && !IsAnimeEnd())
+	{
+		Attack(); 
+		
+		return;
+	}
+	else if (isAttacking && IsAnimeEnd())
+	{
+		// 攻撃アニメーションが終わったら自然に待機モーションに戻す
+		animeType_ = CHARACTER_ANIME::SWORD_IDLE;
+	}
+
+	// 攻撃中でなければ、デフォルトは待機状態
+	if (!isAttacking) {
+		animeType_ = CHARACTER_ANIME::SWORD_IDLE;
+	}
 
 	Vector3 angle = Camera::GetIns().GetAngle();
 	float sinY = sinf(angle.y);
@@ -96,29 +113,23 @@ void Jazz::CharactorUpdate(void)
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_LEFT).now) { localAngle.x -= MOVE_POWER; }
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_RIGHT).now) { localAngle.x += MOVE_POWER; }
 
-	
-
-
 	if (localAngle != 0.0f)
 	{
 		trans.angle.y = atan2f(-localAngle.x, -localAngle.z) + angle.y;
 		accelSum.x += localAngle.x * cosY + localAngle.z * sinY;
 		accelSum.z += localAngle.z * cosY - localAngle.x * sinY;
-		animeType_ = CHARACTER_ANIME::WALK;
+
+		// 攻撃中でない場合のみ、移動アニメーションにする
+		if (!isAttacking) {
+			animeType_ = CHARACTER_ANIME::WALK;
+		}
 	}
 
 	AnimePlay((int)animeType_);
 
-
-	for (auto& w : weaponSet_) {
-		if (w.first) {
-			w.second->Update();
-		}
-	}
-
-
+	// 攻撃ボタンの入力をチェック
+	Attack();
 }
-
 void Jazz::CharactorDraw(void)
 {
 	//weaponTrans_.Draw();
@@ -150,6 +161,23 @@ void Jazz::CharactorRelease(void)
 		w.second = nullptr;
 	}
 	weaponSet_.clear();
+}
+
+void Jazz::SubObjectUpdate(void)
+{
+	for (auto& w : weaponSet_) {
+		if (w.first) {
+			w.second->Update();
+		}
+	}
+}
+
+void Jazz::Attack(void)
+{
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MAIN).down) {
+		animeType_ = CHARACTER_ANIME::SLASH_A1;
+		AnimePlay((int)animeType_, false);
+	}
 }
 
 

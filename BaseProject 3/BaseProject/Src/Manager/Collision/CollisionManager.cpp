@@ -26,7 +26,8 @@ void CollisionManager::Add(ColliderBase* collider)
 	case COLLIDER_TAG::STAGE:
 		stageColliders.emplace_back(collider);
 		break;
-
+	case COLLIDER_TAG::MANNEQUIN:
+		stageColliders.emplace_back(collider);
 		// ‚»‚êˆÈŠO
 	default:
 		otherColliders.emplace_back(collider);

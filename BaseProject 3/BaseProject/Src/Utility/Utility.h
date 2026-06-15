@@ -646,3 +646,29 @@ constexpr T UtilityClamp(const T& value, const T& min, const T& max)
 
     return value;
 }
+
+
+/// <summary>
+/// 親と子の行列を合成してモデルにセットする
+/// </summary>
+/// <param name="model">子のモデルID</param>
+/// <param name="pos">子の位置</param>
+/// <param name="angle">子の角度リスト</param>
+/// <param name="parentMatrix">親の行列</param>
+template<typename T>
+static void MatrixCombineParentChild(int& model, const T& pos, const std::initializer_list<T>& angle ,MATRIX& parentMatrix) {
+    MATRIX m = MGetIdent();
+    // 角度セットを順に合成
+    for (const auto& a : angle) {
+        m = MMult(m, MGetRotX(a.x));
+        m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotZ(a.z));
+    }
+
+    m = MMult(m, MGetTranslate(pos.ToVECTOR()));
+
+	// 親の行列と合成
+    m = MMult(parentMatrix, m);
+
+    MV1SetMatrix(model, m);
+}

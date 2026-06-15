@@ -1,5 +1,6 @@
 #include "Kogetsu.h"
 #include "../../Common/Collider/CapsuleCollider.h"
+#include "../../../Utility/Utility.h"
 #include <DxLib.h>
 
 Kogetsu::Kogetsu()
@@ -38,6 +39,11 @@ void Kogetsu::WeaponUpdate(void)
 {
 	trans.pos = MV1GetFramePosition(ownerTrans_->get().model, 22);
 	trans.pos.y += GetParameter("Init", "modelOffset");
+
+	//MATRIX handMatrix = MV1GetFrameLocalWorldMatrix(ownerTrans_->get().model, 22);
+
+	//MatrixCombineParentChild(trans.model, trans.pos, { trans.angle }, handMatrix);
+
 }
 
 void Kogetsu::WeaponDraw(void)

@@ -33,6 +33,12 @@ private:
 	void CharactorAlphaDraw(void)override;
 	void CharacterUiDraw(void)override;
 	void CharactorRelease(void)override;
+
+	//サブオブジェクト更新
+	void SubObjectUpdate(void)override;
+
+	//攻撃
+	void Attack(void);
 	
 };
 

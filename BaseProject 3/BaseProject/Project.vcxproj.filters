@@ -43,6 +43,8 @@
     <ClCompile Include="Src\Object\Character\Jazz\Jazz.cpp" />
     <ClCompile Include="Src\Object\Weapon\WeaponBase.cpp" />
     <ClCompile Include="Src\Object\Weapon\Kogetsu\Kogetsu.cpp" />
+    <ClCompile Include="Src\Object\Mannequin\Mannequin.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\MeshSlicer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h" />
@@ -166,6 +168,8 @@
     <ClInclude Include="Src\Object\Character\Jazz\Jazz.h" />
     <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
     <ClInclude Include="Src\Object\Weapon\Kogetsu\Kogetsu.h" />
+    <ClInclude Include="Src\Object\Mannequin\Mannequin.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshSlicer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">

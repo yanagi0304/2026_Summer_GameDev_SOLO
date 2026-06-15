@@ -79,6 +79,9 @@ void ActorBase::Update(void)
 
 	// 接地判定のリセット
 	if (dynamicFlg) { isGroundMaster = false; }
+
+	//サブオブジェクトの更新
+	SubObjectUpdate();
 }
 
 void ActorBase::Draw(void)
