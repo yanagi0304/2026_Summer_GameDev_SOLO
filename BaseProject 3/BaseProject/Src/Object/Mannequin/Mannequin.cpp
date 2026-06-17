@@ -19,4 +19,6 @@ void Mannequin::SubInit(void)
 {
 	trans.scale = GetParameter("Init", "Scale");
 
+	int vertexCount = MV1GetMeshVertexNum(trans.model, 0);
+
 }
