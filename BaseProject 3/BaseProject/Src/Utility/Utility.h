@@ -649,26 +649,37 @@ constexpr T UtilityClamp(const T& value, const T& min, const T& max)
 
 
 /// <summary>
-/// 親と子の行列を合成してモデルにセットする
+/// Matrixとモデルの合成
 /// </summary>
-/// <param name="model">子のモデルID</param>
-/// <param name="pos">子の位置</param>
-/// <param name="angle">子の角度リスト</param>
-/// <param name="parentMatrix">親の行列</param>
+/// <typeparam name="T"></typeparam>
+/// <param name="model"></param>
+/// <param name="rotMat"></param>
+/// <param name="pos"></param>
 template<typename T>
-static void MatrixCombineParentChild(int& model, const T& pos, const std::initializer_list<T>& angle ,MATRIX& parentMatrix) {
-    MATRIX m = MGetIdent();
-    // 角度セットを順に合成
-    for (const auto& a : angle) {
-        m = MMult(m, MGetRotX(a.x));
-        m = MMult(m, MGetRotY(a.y));
-        m = MMult(m, MGetRotZ(a.z));
+static void MV1ModelMatrix(
+    int& model,
+    const MATRIX& rotMat,
+    const T& pos)
+{
+    MV1SetRotationMatrix(model, rotMat);
+    MV1SetPosition(model, pos.ToVECTOR());
+}
+
+static Vector3 MatrixToEulerXYZ(const MATRIX& mat) {
+    Vector3 angle;
+
+    angle.y = asinf(-mat.m[2][0]);
+
+    if (fabsf(cosf(angle.y)) > 0.0001f)
+    {
+        angle.x = atan2f(mat.m[2][1], mat.m[2][2]);
+        angle.z = atan2f(mat.m[1][0], mat.m[0][0]);
+    }
+    else
+    {
+        angle.x = atan2f(-mat.m[1][2], mat.m[1][1]);
+        angle.z = 0.0f;
     }
 
-    m = MMult(m, MGetTranslate(pos.ToVECTOR()));
-
-	// 親の行列と合成
-    m = MMult(parentMatrix, m);
-
-    MV1SetMatrix(model, m);
+    return angle;
 }

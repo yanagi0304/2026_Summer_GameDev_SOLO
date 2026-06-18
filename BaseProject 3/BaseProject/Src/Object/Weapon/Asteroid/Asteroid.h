@@ -1,16 +1,14 @@
 #pragma once
 #include "../WeaponBase.h"
-class Kogetsu :
+class Asteroid :
     public WeaponBase
 {
 public:
 
 
-	Kogetsu();
-    Kogetsu(const Transform& ownerTrans);
-	~Kogetsu() override = default;
-
-    void Draw(void)override;
+    Asteroid();
+    Asteroid(const Transform& ownerTrans);
+    ~Asteroid() override = default;
 
 private:
 
@@ -20,9 +18,6 @@ private:
     void WeaponDraw(void) override;
     void WeaponAlphaDraw(void) override;
     void WeaponUiDraw(void) override;
-	void WeaponRelease(void) override;
-
-    MATRIX weaponMatrix_;
-
+    void WeaponRelease(void) override;
 };
 

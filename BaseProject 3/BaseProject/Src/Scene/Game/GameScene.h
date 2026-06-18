@@ -9,6 +9,8 @@
 
 #include"../../Object/ActorBase.h"
 
+#include "../../Object/Common/LockOn/LockOn.h"
+
 class GameScene : public SceneBase
 {
 public:
@@ -49,6 +51,8 @@ public:
 private:
 	// 当たり判定管理クラス
 	CollisionManager* collision;
+	//ロックオン機能
+	LockOn lockOn_;
 
 #pragma region 画面演出用
 	// ヒットストップカウンター

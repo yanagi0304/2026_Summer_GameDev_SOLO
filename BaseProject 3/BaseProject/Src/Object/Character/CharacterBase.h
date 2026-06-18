@@ -17,6 +17,7 @@ enum CHARACTER_ANIME
 	T,
 	WALK,
 	IDLE,
+	AsteroidIdle,
 	MAX,
 };
 

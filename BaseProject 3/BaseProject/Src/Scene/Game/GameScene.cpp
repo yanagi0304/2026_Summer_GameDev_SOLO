@@ -72,9 +72,9 @@ void GameScene::Load(void)
 	//ObjAdd(new Stage("../../../Data/Parameter/Stage/BattleStage"));
 	ObjAdd(new StageTutrial());
 	ObjAdd(new Jazz());
-	ObjAdd(new Mannequin());
+	//ObjAdd(new Mannequin());
 
-
+	lockOn_.Load();
 }
 
 void GameScene::Init(void)
@@ -87,7 +87,7 @@ void GameScene::Init(void)
 
 	// カメラ設定
 	Camera::GetIns().ChangeModeFollowRemote(&ObjSerch<Jazz>()->GetTrans().pos,Vector3(0, 150, 0)
-	,Vector3::YZonly(250.0f,-400.0f));
+	,Vector3::YZonly(350.0f,-550.0f));
 }
 
 void GameScene::Update(void)
@@ -137,6 +137,13 @@ void GameScene::Update(void)
 	}
 #endif // _DEBUG
 #pragma endregion
+
+#pragma region UI
+	// ロックオン
+	//lockOn_.Update(ObjSerch<Jazz>()->GetTrans().pos, ObjSerch<Mannequin>());
+
+#pragma endregion
+
 }
 
 void GameScene::Draw(void)
@@ -186,6 +193,7 @@ void GameScene::Draw(void)
 #pragma region UI描画（画面演出をかけないもの）
 	// オブジェクト全てのUI描画処理
 	for (ActorBase* obj : objects) { obj->UiDraw(); }
+	lockOn_.Draw();
 #pragma endregion
 }
 
