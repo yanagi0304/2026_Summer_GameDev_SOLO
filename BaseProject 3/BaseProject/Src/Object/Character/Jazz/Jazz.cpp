@@ -9,6 +9,8 @@
 
 #include "../../Weapon/WeaponBase.h"
 #include "../../Weapon/Kogetsu/Kogetsu.h"
+#include "../../Weapon/Asteroid/Asteroid.h"
+#include <iostream>
 
 
 
@@ -25,14 +27,14 @@ std::vector<ColliderBase*> Jazz::GetCollider(void) const
 {
 	std::vector<ColliderBase*> ret = {};
 
-	//自身のコライダーを一時的に保管
+	// 自身のコライダーを一時的に保管
 	for (ColliderBase*& c : ActorBase::GetCollider()) { ret.emplace_back(c); }
 
-	//武器のコライダーを保管
-	auto it = weaponSet_.find(true);
+	//装備している武器を送る
+	auto it = weaponSet_.find(currentWeaponID_);
 	if (it != weaponSet_.end() && it->second != nullptr)
 	{
-		for (ColliderBase*& c : it->second->GetCollider()) {ret.emplace_back(c);}
+		for (ColliderBase*& c : it->second->GetCollider()) { ret.emplace_back(c); }
 	}
 
 	return ret;
@@ -42,10 +44,11 @@ std::vector<ColliderBase*> Jazz::GetCollider(void) const
 void Jazz::CharacterLoad(void)
 {
 	trans.Load("Character/Jazz/Wochamole");
-	weaponTrans_.Load("Weapon/Kogetsu");
+	
 
 	//武器の設定
-	weaponSet_.emplace(true, std::make_unique<Kogetsu>(trans));
+	weaponSet_.emplace("Kogetsu", std::make_unique<Kogetsu>(trans));
+	weaponSet_.emplace("Asteroid", std::make_unique<Asteroid>(trans));
 
 
 	SetJudge(true);
@@ -58,17 +61,15 @@ void Jazz::CharacterLoad(void)
 
 
 	CreateAnimationController();
-	AddInFbxAnimation(CHARACTER_ANIME::MAX, 0.5f);
-
-	weaponTrans_.scale = (0.6f);
+	AddInFbxAnimation(AnimationController::CHARACTER_ANIME::MAX, 0.5f);
 
 	for (auto& w : weaponSet_) {
-		if (w.first) {
-			w.second->Load();
-		}
+		w.second->Load();
 	}
 
-	animeType_ = CHARACTER_ANIME::SWORD_IDLE;
+	animeType_ = AnimationController::CHARACTER_ANIME::SWORD_IDLE;
+
+	currentWeaponID_ = "Kogetsu";
 
 }
 
@@ -83,22 +84,33 @@ void Jazz::CharactorInit(void)
 void Jazz::CharactorUpdate(void)
 {
 	
-	bool isAttacking = (animeType_ == CHARACTER_ANIME::SLASH_A1);
+	// 現在装備中の武器のポインタ
+	WeaponBase* currentWeapon = nullptr;
+	auto it = weaponSet_.find(currentWeaponID_);
+	if (it != weaponSet_.end()) { currentWeapon = it->second.get(); }
+
+
+	// 現在の武器の攻撃アニメーションIDと比較する
+	bool isAttacking = (currentWeapon != nullptr && (int)animeType_ == currentWeapon->GetAttackAnimeID());
+
 	if (isAttacking && !IsAnimeEnd())
 	{
-		Attack(); 
-		
+		Attack();
 		return;
 	}
 	else if (isAttacking && IsAnimeEnd())
 	{
-		// 攻撃アニメーションが終わったら自然に待機モーションに戻す
-		animeType_ = CHARACTER_ANIME::SWORD_IDLE;
+		// 攻撃が終わったら、その武器の待機モーションに戻す
+		if (currentWeapon != nullptr) {
+			animeType_ = (AnimationController::CHARACTER_ANIME)currentWeapon->GetIdleAnimeID();
+		}
 	}
 
-	// 攻撃中でなければ、デフォルトは待機状態
 	if (!isAttacking) {
-		animeType_ = CHARACTER_ANIME::SWORD_IDLE;
+		// デフォルトは現在の武器の待機状態
+		if (currentWeapon != nullptr) {
+			animeType_ = (AnimationController::CHARACTER_ANIME)currentWeapon->GetIdleAnimeID();
+		}
 	}
 
 	Vector3 angle = Camera::GetIns().GetAngle();
@@ -121,7 +133,7 @@ void Jazz::CharactorUpdate(void)
 
 		// 攻撃中でない場合のみ、移動アニメーションにする
 		if (!isAttacking) {
-			animeType_ = CHARACTER_ANIME::WALK;
+			animeType_ = AnimationController::CHARACTER_ANIME::WALK;
 		}
 	}
 
@@ -129,23 +141,24 @@ void Jazz::CharactorUpdate(void)
 
 	// 攻撃ボタンの入力をチェック
 	Attack();
+
+	WeaponChange();
 }
 void Jazz::CharactorDraw(void)
 {
-	//weaponTrans_.Draw();
-	for(auto& w : weaponSet_) {
-		if (w.first) {
-			w.second->Draw();
-		}
+	auto it = weaponSet_.find(currentWeaponID_);
+	if (it != weaponSet_.end() && it->second != nullptr)
+	{
+		it->second->Draw();
 	}
 }
 
 void Jazz::CharactorAlphaDraw(void)
 {
-	for (auto& w : weaponSet_) {
-		if (w.first) {
-			w.second->AlphaDraw();
-		}
+	auto it = weaponSet_.find(currentWeaponID_);
+	if (it != weaponSet_.end() && it->second != nullptr)
+	{
+		it->second->AlphaDraw();
 	}
 }
 
@@ -165,18 +178,36 @@ void Jazz::CharactorRelease(void)
 
 void Jazz::SubObjectUpdate(void)
 {
-	for (auto& w : weaponSet_) {
-		if (w.first) {
-			w.second->Update();
-		}
+	auto it = weaponSet_.find(currentWeaponID_);
+	if (it != weaponSet_.end() && it->second != nullptr)
+	{
+		it->second->Update();
 	}
 }
 
 void Jazz::Attack(void)
 {
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MAIN).down) {
-		animeType_ = CHARACTER_ANIME::SLASH_A1;
+		animeType_ = AnimationController::CHARACTER_ANIME::SLASH_A1;
 		AnimePlay((int)animeType_, false);
+	}
+}
+
+void Jazz::WeaponChange(void)
+{
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MAIN_SWITCH).down)
+	{
+		// 交互に切り替えるシンプルな仕組み
+		if (currentWeaponID_ == "Kogetsu")
+		{
+			currentWeaponID_ = "Asteroid";
+		}
+		else
+		{
+			currentWeaponID_ = "Kogetsu";
+		}
+
+		std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
 	}
 }
 

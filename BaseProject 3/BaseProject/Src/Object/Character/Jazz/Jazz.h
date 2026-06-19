@@ -22,7 +22,10 @@ private:
 	Vector3 prevPos;
 
 	//Š•Ší
-	std::map<bool,std::unique_ptr<WeaponBase>> weaponSet_;
+	std::map<std::string,std::unique_ptr<WeaponBase>> weaponSet_;
+
+	//Œ»İ‚Ì‘•”õ‚ğ•Û‘¶
+	std::string currentWeaponID_;
 
 private:
 
@@ -39,6 +42,8 @@ private:
 
 	//UŒ‚
 	void Attack(void);
+	//•Ší‚ÌØ‚è‘Ö‚¦
+	void WeaponChange(void);
 	
 };
 

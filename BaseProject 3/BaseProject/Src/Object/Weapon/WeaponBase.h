@@ -21,6 +21,10 @@ public:
 
 	void Load(void) override;
 
+	//所持武器専用アニメーション
+	virtual int GetIdleAnimeID(void) const = 0;
+	virtual int GetAttackAnimeID(void) const = 0;
+
 private:
 
 	//初期化

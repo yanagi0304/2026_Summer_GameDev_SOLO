@@ -12,6 +12,9 @@ public:
 
     void Draw(void)override;
 
+    int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SWORD_IDLE; }
+    int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
+
 private:
 
     void WeaponLoad(void) override;

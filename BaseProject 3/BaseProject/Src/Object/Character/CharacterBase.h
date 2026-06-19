@@ -10,16 +10,7 @@
 
 class UI_Base;
 
-enum CHARACTER_ANIME
-{
-	SLASH_A1,
-	SWORD_IDLE,
-	T,
-	WALK,
-	IDLE,
-	AsteroidIdle,
-	MAX,
-};
+
 
 class CharacterBase : public ActorBase
 {
@@ -153,7 +144,7 @@ protected:
 
 	int GetAnimePlayType(void)const { return anime->GetPlayType(); }
 
-	CHARACTER_ANIME animeType_;
+	AnimationController::CHARACTER_ANIME animeType_;
 	
 #pragma endregion オーバーライド不可(使用のみ)
 

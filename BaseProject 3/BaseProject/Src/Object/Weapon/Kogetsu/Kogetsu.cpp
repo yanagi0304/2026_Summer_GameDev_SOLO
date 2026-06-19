@@ -30,7 +30,7 @@ void Kogetsu::WeaponLoad(void)
 
 	SetJudge(true);
 	SetDynamicFlg(true);
-	SetPushFlg(false);
+	SetPushFlg(true);
 
 	ColliderCreate(new CapsuleCollider(COLLIDER_TAG::KOGETSU, GetParameter("Collider", "ColliderStartPos")
 	,GetParameterToVector3("Collider", "ColliderEndPos"), GetParameter("Collider", "Radius")));
@@ -49,21 +49,21 @@ void Kogetsu::WeaponUpdate(void)
 	auto framePos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
 	auto handMatrix = MV1GetFrameLocalWorldMatrix(ownerTrans_->get().model, frameIndex);
 
-	trans.pos = framePos;
-	trans.angle = MatrixToEulerXYZ(handMatrix);
+	//trans.pos = framePos;
+	//trans.angle = MatrixToEulerXYZ(handMatrix);
 
-	//MATRIX scaleMat = MGetScale(trans.scale.ToVECTOR());
-	//MATRIX offsetRotMat = MGetRotY(DX_PI_F / 2.0f);
-	//MATRIX offsetPosMat = MGetTranslate(trans.pos.ToVECTOR());
+	MATRIX scaleMat = MGetScale(trans.scale.ToVECTOR());
+	MATRIX offsetRotMat = MGetRotY(DX_PI_F / 2.0f);
+	MATRIX offsetPosMat = MGetTranslate(trans.pos.ToVECTOR());
 
-	//// 回転行列の合成
-	//// スケールの行列を剣と合成
-	//MATRIX localMat = MMult(scaleMat, offsetRotMat);
-	//// 武器のローカル位置の変換行列を合成
-	//localMat = MMult(localMat, offsetPosMat);
-	//// 親子の回転行列を合成(子:武器, 親:手と指定すると親⇒子の順に適用される)
-	//weaponMatrix_ = MMult(localMat, handMatrix);
-	//MV1SetMatrix(trans.model, weaponMatrix_);
+	// 回転行列の合成
+	// スケールの行列を剣と合成
+	MATRIX localMat = MMult(scaleMat, offsetRotMat);
+	// 武器のローカル位置の変換行列を合成
+	localMat = MMult(localMat, offsetPosMat);
+	// 親子の回転行列を合成(子:武器, 親:手と指定すると親⇒子の順に適用される)
+	weaponMatrix_ = MMult(localMat, handMatrix);
+	MV1SetMatrix(trans.model, weaponMatrix_);
 
 }
 

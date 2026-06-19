@@ -1,5 +1,7 @@
 #pragma once
 #include "../WeaponBase.h"
+
+
 class Asteroid :
     public WeaponBase
 {
@@ -9,6 +11,9 @@ public:
     Asteroid();
     Asteroid(const Transform& ownerTrans);
     ~Asteroid() override = default;
+
+    int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::AsteroidIdle; }
+    int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
 
 private:
 

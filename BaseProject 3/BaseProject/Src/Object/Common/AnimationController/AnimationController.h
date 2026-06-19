@@ -7,6 +7,17 @@ class AnimationController
 {
 public:
 
+	enum CHARACTER_ANIME
+	{
+		SLASH_A1,
+		SWORD_IDLE,
+		T,
+		WALK,
+		IDLE,
+		AsteroidIdle,
+		MAX,
+	};
+
 	// アニメーションデータ
 	struct Animation
 	{

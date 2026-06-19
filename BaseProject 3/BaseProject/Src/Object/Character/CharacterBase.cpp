@@ -24,7 +24,7 @@ CharacterBase::CharacterBase(
 	operatorSenderId(MSG_SENDER_ID::None),
 	isOwnOperator(false),
 
-	animeType_(CHARACTER_ANIME::T)
+	animeType_(AnimationController::CHARACTER_ANIME::T)
 {
 }
 
@@ -54,7 +54,7 @@ CharacterBase::CharacterBase(
 
 	isDeath(false),
 
-	animeType_(CHARACTER_ANIME::T)
+	animeType_(AnimationController::CHARACTER_ANIME::T)
 {
 }
 	

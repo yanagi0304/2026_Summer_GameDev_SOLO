@@ -57,6 +57,8 @@ public:
 		PLAYER_SKILL_3,
 		// スペシャルスキル（キャラごとの「必殺技」）
 		PLAYER_SPECIAL_SKILL,
+		// メインスイッチ
+		PLAYER_MAIN_SWITCH,
 
 
 #pragma endregion
