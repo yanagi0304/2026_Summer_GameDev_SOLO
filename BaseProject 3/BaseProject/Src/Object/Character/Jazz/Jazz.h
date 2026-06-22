@@ -15,6 +15,14 @@ public:
 	//武器のコライダーを合わせた全コライダーを取得
 	std::vector<ColliderBase*> GetCollider(void)const override;
 
+
+public:
+
+	const float SIZE_X = GetParameter("UI", "SIZE_X");
+	const float SIZE_Y = GetParameter("UI", "SIZE_Y");
+
+	static constexpr float OFFSET = 20.0f;
+
 private:
 
 	//武器の位置
@@ -26,6 +34,10 @@ private:
 
 	//現在の装備を保存
 	std::string currentWeaponID_;
+
+	//所持トリガー表示UI
+	int triggerUI_;
+
 
 private:
 
@@ -44,6 +56,8 @@ private:
 	void Attack(void);
 	//武器の切り替え
 	void WeaponChange(void);
+
+
 	
 };
 

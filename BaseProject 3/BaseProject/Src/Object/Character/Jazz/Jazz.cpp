@@ -1,6 +1,8 @@
 #include "Jazz.h"
 #include <DxLib.h>
 
+#include "../../../Application/Application.h"
+
 #include "../../Common/Collider/SphereCollider.h"
 #include "../../Common/Collider/CapsuleCollider.h"
 
@@ -18,7 +20,8 @@
 Jazz::Jazz()
 	:
 	CharacterBase(100, 10, 5, 5, "Data/Parameter/Character/Player/Wo-Chamolenium/"),
-	weaponTrans_(prevPos)
+	weaponTrans_(prevPos),
+	triggerUI_(-1)
 {
 	isOwnOperator = true;
 }
@@ -44,6 +47,7 @@ std::vector<ColliderBase*> Jazz::GetCollider(void) const
 void Jazz::CharacterLoad(void)
 {
 	trans.Load("Character/Jazz/Wochamole");
+	triggerUI_ = LoadGraph("Data/Image/TriggerUI/TriggerUI.png");
 	
 
 	//ïêäÌÇÃê›íË
@@ -77,8 +81,8 @@ void Jazz::CharactorInit(void)
 {
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
-	
 	AnimePlay((int)animeType_);
+
 }
 
 void Jazz::CharactorUpdate(void)
@@ -164,6 +168,8 @@ void Jazz::CharactorAlphaDraw(void)
 
 void Jazz::CharacterUiDraw(void)
 {
+	DrawRotaGraph(SIZE_X / 2 + OFFSET,
+		Application::SCREEN_SIZE_Y - SIZE_Y / 2 - OFFSET, 1.0f, 0.0f, triggerUI_, TRUE);
 }
 
 void Jazz::CharactorRelease(void)
