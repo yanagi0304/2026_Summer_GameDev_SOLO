@@ -12,6 +12,7 @@
 #include "../../Weapon/WeaponBase.h"
 #include "../../Weapon/Kogetsu/Kogetsu.h"
 #include "../../Weapon/Asteroid/Asteroid.h"
+#include "../../Weapon/Manager/ShooterManager.h"
 #include <iostream>
 
 
@@ -52,7 +53,7 @@ void Jazz::CharacterLoad(void)
 
 	//ïêäÌÇÃê›íË
 	weaponSet_.emplace("Kogetsu", std::make_unique<Kogetsu>(trans));
-	weaponSet_.emplace("Asteroid", std::make_unique<Asteroid>(trans));
+	weaponSet_.emplace("Asteroid", std::make_unique<ShooterManager>(trans));
 
 
 	SetJudge(true);
@@ -123,7 +124,7 @@ void Jazz::CharactorUpdate(void)
 
 	Vector3 localAngle = Vector3();
 
-	static constexpr float MOVE_POWER = 3.2f;
+	static constexpr float MOVE_POWER = 4.0f;
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_FRONT).now) { localAngle.z += MOVE_POWER; }
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_BACK).now) { localAngle.z -= MOVE_POWER; }
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_LEFT).now) { localAngle.x -= MOVE_POWER; }

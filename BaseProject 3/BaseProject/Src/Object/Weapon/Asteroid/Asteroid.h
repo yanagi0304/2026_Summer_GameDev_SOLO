@@ -14,6 +14,7 @@ public:
 
     int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::AsteroidIdle; }
     int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
+    void SetTrans(const Vector3 pos, const Vector3 scale) { trans.pos = pos; trans.scale = scale; }
 
 private:
 
@@ -24,5 +25,8 @@ private:
     void WeaponAlphaDraw(void) override;
     void WeaponUiDraw(void) override;
     void WeaponRelease(void) override;
+
+private:
+
 };
 

@@ -27,7 +27,7 @@ void Asteroid::WeaponLoad(void)
 void Asteroid::WeaponInit(void)
 {
 	trans.scale = Vector3(GetParameter("Init", "scale"));
-	trans.pos += GetParameter("Init", "modelOffset");
+	//trans.pos += GetParameter("Init", "modelOffset");
 }
 
 void Asteroid::WeaponUpdate(void)
@@ -38,7 +38,7 @@ void Asteroid::WeaponUpdate(void)
 
 void Asteroid::WeaponDraw(void)
 {
-	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
+	/*auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
 	auto framePos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
 	auto handMatrix = MV1GetFrameLocalWorldMatrix(ownerTrans_->get().model, frameIndex);
 	auto vec = VScale({ 0.0f,0.1f,0.0f }, 1.0 / 0.025);
@@ -78,7 +78,7 @@ void Asteroid::WeaponDraw(void)
 	DrawLine3D(
 		swordStartPos,
 		VAdd(swordStartPos, VScale(zAxis, 20.0f)),
-		GetColor(0, 0, 255));
+		GetColor(0, 0, 255));*/
 
 }
 
