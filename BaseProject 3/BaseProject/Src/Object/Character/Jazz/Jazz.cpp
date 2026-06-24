@@ -22,7 +22,7 @@ Jazz::Jazz()
 	:
 	CharacterBase(100, 10, 5, 5, "Data/Parameter/Character/Player/Wo-Chamolenium/"),
 	weaponTrans_(prevPos),
-	triggerUI_(-1)
+	currentIndex_(0)
 {
 	isOwnOperator = true;
 }
@@ -48,12 +48,11 @@ std::vector<ColliderBase*> Jazz::GetCollider(void) const
 void Jazz::CharacterLoad(void)
 {
 	trans.Load("Character/Jazz/Wochamole");
-	triggerUI_ = LoadGraph("Data/Image/TriggerUI/TriggerUI.png");
 	
 
 	//武器の設定
-	weaponSet_.emplace("Kogetsu", std::make_unique<Kogetsu>(trans));
-	weaponSet_.emplace("Asteroid", std::make_unique<ShooterManager>(trans));
+	weaponSet_.emplace(TriggerUI::TriggerType::KOGETSU, std::make_unique<Kogetsu>(trans));
+	weaponSet_.emplace(TriggerUI::TriggerType::ASTEROID, std::make_unique<ShooterManager>(trans));
 
 
 	SetJudge(true);
@@ -70,11 +69,16 @@ void Jazz::CharacterLoad(void)
 
 	for (auto& w : weaponSet_) {
 		w.second->Load();
+		trigger_.AddMain(w.first);
 	}
 
 	animeType_ = AnimationController::CHARACTER_ANIME::SWORD_IDLE;
 
-	currentWeaponID_ = "Kogetsu";
+	currentWeaponID_ = TriggerUI::TriggerType::KOGETSU;
+
+	trigger_.Load();
+
+
 
 }
 
@@ -148,6 +152,8 @@ void Jazz::CharactorUpdate(void)
 	Attack();
 
 	WeaponChange();
+
+	trigger_.Update();
 }
 void Jazz::CharactorDraw(void)
 {
@@ -169,8 +175,7 @@ void Jazz::CharactorAlphaDraw(void)
 
 void Jazz::CharacterUiDraw(void)
 {
-	DrawRotaGraph(SIZE_X / 2 + OFFSET,
-		Application::SCREEN_SIZE_Y - SIZE_Y / 2 - OFFSET, 1.0f, 0.0f, triggerUI_, TRUE);
+	trigger_.Draw(currentIndex_);
 }
 
 void Jazz::CharactorRelease(void)
@@ -204,17 +209,15 @@ void Jazz::WeaponChange(void)
 {
 	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MAIN_SWITCH).down)
 	{
-		// 交互に切り替えるシンプルな仕組み
-		if (currentWeaponID_ == "Kogetsu")
+		currentIndex_++;
+		if (currentIndex_ >= trigger_.GetMainTrigger().size())
 		{
-			currentWeaponID_ = "Asteroid";
-		}
-		else
-		{
-			currentWeaponID_ = "Kogetsu";
+			currentIndex_ = 0;
 		}
 
-		std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
+		currentWeaponID_ = trigger_.GetMainTrigger()[currentIndex_];
+
+		//std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
 	}
 }
 

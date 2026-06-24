@@ -19,7 +19,7 @@ public:
 	ShooterManager(const Transform& ownerTrans);
 	~ShooterManager() = default;
 	int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::AsteroidIdle; }
-	int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::AsteroidIdle; }
+	int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
 
 private:
 

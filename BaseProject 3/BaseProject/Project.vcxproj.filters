@@ -48,6 +48,7 @@
     <ClCompile Include="Src\Object\Common\LockOn\LockOn.cpp" />
     <ClCompile Include="Src\Object\Weapon\Asteroid\Asteroid.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterManager.cpp" />
+    <ClCompile Include="Src\Object\Common\TriggerUI\TriggerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="Src\Object\Common\LockOn\LockOn.h" />
     <ClInclude Include="Src\Object\Weapon\Asteroid\Asteroid.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
+    <ClInclude Include="Src\Object\Common\TriggerUI\TriggerUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">

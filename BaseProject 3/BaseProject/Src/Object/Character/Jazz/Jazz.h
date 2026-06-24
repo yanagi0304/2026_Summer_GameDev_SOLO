@@ -2,6 +2,8 @@
 #include "../CharacterBase.h"
 #include <map>
 #include <memory>
+#include "../../Common/TriggerUI/TriggerUI.h"
+
 
 class WeaponBase;
 
@@ -15,14 +17,6 @@ public:
 	//武器のコライダーを合わせた全コライダーを取得
 	std::vector<ColliderBase*> GetCollider(void)const override;
 
-
-public:
-
-	const float SIZE_X = GetParameter("UI", "SIZE_X");
-	const float SIZE_Y = GetParameter("UI", "SIZE_Y");
-
-	static constexpr float OFFSET = 20.0f;
-
 private:
 
 	//武器の位置
@@ -30,13 +24,12 @@ private:
 	Vector3 prevPos;
 
 	//所持武器
-	std::map<std::string,std::unique_ptr<WeaponBase>> weaponSet_;
+	std::map<TriggerUI::TriggerType,std::unique_ptr<WeaponBase>> weaponSet_;
 
 	//現在の装備を保存
-	std::string currentWeaponID_;
+	TriggerUI::TriggerType currentWeaponID_;
 
-	//所持トリガー表示UI
-	int triggerUI_;
+	int currentIndex_;
 
 
 private:
@@ -56,6 +49,11 @@ private:
 	void Attack(void);
 	//武器の切り替え
 	void WeaponChange(void);
+
+private:
+
+	//所持トリガーの表示
+	TriggerUI trigger_;
 
 
 	

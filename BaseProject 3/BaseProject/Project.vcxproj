@@ -184,6 +184,7 @@ winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Src\Object\Stage\Stage.cpp" />
     <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
     <ClCompile Include="Src\Object\Weapon\WeaponBase.cpp" />
+    <ClCompile Include="Src\Object\Common\TriggerUI\TriggerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
@@ -243,6 +244,7 @@ winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Src\Object\Stage\Stage.h" />
     <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
     <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
+    <ClInclude Include="Src\Object\Common\TriggerUI\TriggerUI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
