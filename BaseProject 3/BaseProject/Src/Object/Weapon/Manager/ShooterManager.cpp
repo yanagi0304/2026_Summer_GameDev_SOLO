@@ -40,7 +40,7 @@ void ShooterManager::WeaponUpdate(void)
 		break;
 
 	case STATE::FIRE:
-
+		FireUpdate();
 		break;
 	}
 	ChangeState();
@@ -60,7 +60,7 @@ void ShooterManager::WeaponDraw(void)
 		break;
 
 	case STATE::FIRE:
-		
+		FireDraw();
 		break;
 	}
 
@@ -119,20 +119,77 @@ void ShooterManager::SpritUpdate()
 	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
 	Vector3 handPos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
 
-	Vector3 sclae = 0.3f;
+	Vector3 scale = 0.3f;
 
-	for (int i = 0; i < 8; ++i)
+	float angle = ownerTrans_->get().angle.y;
+
+	Vector3 forward(
+		sinf(angle),
+		0.0f,
+		cosf(angle));
+
+	Vector3 right(
+		cosf(angle),
+		0.0f,
+		-sinf(angle));
+
+	Vector3 centerPos =
+		handPos -
+		right * 80.0f +
+		Vector3(0.0f, 60.0f, 0.0f);
+
+
+	//アステロイド分割の形
+	std::vector<Vector3> offsets =
+	{
+		{-1,  1, 0},
+		{ 0,  1, 0},
+		{ 1,  1, 0},
+
+		{-1,  0, 0},
+		{ 1,  0, 0},
+
+		{-1, -1, 0},
+		{ 0, -1, 0},
+		{ 1, -1, 0},
+	};
+
+	for (int i = 0; i < offsets.size(); ++i)
 	{
 		if (shot[i] == nullptr) { continue; }
 
 		Asteroid* asteroid = static_cast<Asteroid*>(shot[i].get());
-		Vector3 targetPos;
-		targetPos.x = handPos.x - 80.0f - (sinf(i * 2.3f) * 30.0f);
-		targetPos.y = handPos.y + 60.0f + (cosf(i * 1.7f) * 25.0f);
-		targetPos.z = handPos.z + (sinf(i * 3.1f) * 30.0f);
+		Vector3 offset =
+			right * (offsets[i].x * 25.0f) +
+			Vector3(0.0f, offsets[i].y * 25.0f, 0.0f);
 
-		
-		asteroid->SetTrans(targetPos, sclae);
+		asteroid->SetTrans(centerPos + offset, scale);
+		asteroid->SetDir(forward);
+	}
+
+
+
+}
+
+void ShooterManager::FireUpdate()
+{
+
+	const float speed = 30.0f;
+
+	Vector3 scale = 0.3f;
+
+	for (const auto& s : shot)
+	{
+		Asteroid* asteroid = static_cast<Asteroid*>(s.get());
+
+		auto sp = GetRand(speed);
+		if (sp < 20) { sp = 20; }
+
+		Vector3 centerPos =
+			asteroid->GetTrans().pos -
+			asteroid->GetDir() * sp;
+
+		asteroid->SetTrans(centerPos, scale);
 	}
 }
 
@@ -142,6 +199,14 @@ void ShooterManager::CubeDraw()
 }
 
 void ShooterManager::SpritDraw()
+{
+	for (const auto& s : shot)
+	{
+		s->Draw();
+	}
+}
+
+void ShooterManager::FireDraw()
 {
 	for (const auto& s : shot)
 	{

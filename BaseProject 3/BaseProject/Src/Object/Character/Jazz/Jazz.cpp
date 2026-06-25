@@ -216,6 +216,12 @@ void Jazz::WeaponChange(void)
 		}
 
 		currentWeaponID_ = trigger_.GetMainTrigger()[currentIndex_];
+		if (trigger_.GetMainTrigger()[currentIndex_] == TriggerUI::TriggerType::ASTEROID)
+		{
+			auto it = dynamic_cast<ShooterManager*>(weaponSet_.find(currentWeaponID_)->second.get());
+			it->SetState(STATE::CUBE);
+		}
+
 
 		//std::cout << "•Ší‚ðØ‚è‘Ö‚¦‚Ü‚µ‚½: " << currentWeaponID_ << std::endl;
 	}

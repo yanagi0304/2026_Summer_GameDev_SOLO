@@ -13,7 +13,7 @@ TriggerUI::TriggerUI()
 void TriggerUI::Load()
 {
 	triggerUI_ = LoadGraph("Data/Image/TriggerUI/TriggerUI.png");
-	select_=LoadGraph("Data/Image/TriggerUI/SelectUI.png");
+	select_ = LoadGraph("Data/Image/TriggerUI/SelectUI.png");
 }
 
 void TriggerUI::Update()

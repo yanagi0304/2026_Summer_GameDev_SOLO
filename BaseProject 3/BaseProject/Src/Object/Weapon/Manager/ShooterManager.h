@@ -21,6 +21,9 @@ public:
 	int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::AsteroidIdle; }
 	int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
 
+	//ステートのセッター
+	void SetState(const STATE state) { state_ = state; }
+
 private:
 
 	void WeaponLoad(void) override;
@@ -37,9 +40,11 @@ private:
 	//各状態の更新
 	void CubeUpdate();
 	void SpritUpdate();
+	void FireUpdate();
 	//各状態の描画
 	void CubeDraw();
 	void SpritDraw();
+	void FireDraw();
 
 private:
 
