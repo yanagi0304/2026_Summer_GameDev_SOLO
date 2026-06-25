@@ -72,7 +72,7 @@ void GameScene::Load(void)
 	//ObjAdd(new Stage("../../../Data/Parameter/Stage/BattleStage"));
 	ObjAdd(new StageTutrial());
 	ObjAdd(new Jazz());
-	//ObjAdd(new Mannequin());
+	ObjAdd(new Mannequin());
 
 	lockOn_.Load();
 }

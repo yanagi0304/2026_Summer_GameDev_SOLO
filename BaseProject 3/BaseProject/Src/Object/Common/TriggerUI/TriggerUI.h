@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 class TriggerUI
 {
@@ -42,6 +43,7 @@ private:
 
 	std::vector<TriggerType> mainTrig_;
 	std::vector<TriggerType> subTrig_;
+	std::map< TriggerType, int> icon_;	//武器アイコン
 	TriggerType currentTrig_;
 
 	//画像ハンドル

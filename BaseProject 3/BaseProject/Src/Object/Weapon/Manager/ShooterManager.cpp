@@ -9,7 +9,7 @@ ShooterManager::ShooterManager()
 
 ShooterManager::ShooterManager(const Transform& ownerTrans)
 {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 27; i++)
 	{
 		shot[i] = std::make_unique<Asteroid>(ownerTrans);
 		shot[i]->Load();
@@ -68,11 +68,15 @@ void ShooterManager::WeaponDraw(void)
 
 void ShooterManager::WeaponAlphaDraw(void)
 {
-
+	for (const auto& s : shot)
+	{
+		s->AlphaDraw();
+	}
 }
 
 void ShooterManager::WeaponUiDraw(void)
 {
+	
 }
 
 void ShooterManager::WeaponRelease(void)
@@ -81,7 +85,7 @@ void ShooterManager::WeaponRelease(void)
 
 void ShooterManager::ChangeState(void)
 {
-	if (KeyManager::GetIns().GetInfo(KEY_TYPE::PLAYER_MAIN).down)
+	if (KeyManager::GetIns().GetInfo(KEY_TYPE::PLAYER_SKILL_2).down)
 	{
 		switch (state_)
 		{
@@ -103,14 +107,14 @@ void ShooterManager::ChangeState(void)
 void ShooterManager::CubeUpdate()
 {
 	shot[0]->Update();
-	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
-	Vector3 handPos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
+	//auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
+	//Vector3 handPos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
 
-	for (const auto& s : shot)
-	{
-		Asteroid* asteroid = static_cast<Asteroid*>(s.get());
-		asteroid->SetTrans(handPos, Vector3(0.6f));
-	}
+	//for (const auto& s : shot)
+	//{
+	//	Asteroid* asteroid = static_cast<Asteroid*>(s.get());
+	//	asteroid->SetTrans(handPos, Vector3(asteroid->GetSize()));
+	//}
 }
 
 void ShooterManager::SpritUpdate()
@@ -140,19 +144,26 @@ void ShooterManager::SpritUpdate()
 
 
 	//アステロイド分割の形
-	std::vector<Vector3> offsets =
+	std::vector<Vector3> offsets;
+
+	static constexpr int SIZE = 3;
+	static constexpr float SPACE = 50.0f;
+
+	for (int z = 0; z < SIZE; z++)
 	{
-		{-1,  1, 0},
-		{ 0,  1, 0},
-		{ 1,  1, 0},
+		for (int y = 0; y < SIZE; y++)
+		{
+			for (int x = 0; x < SIZE; x++)
+			{
+				Vector3 offset(
+					(x - (SIZE - 1) * 0.5f),
+					((SIZE - 1) * 0.5f - y),
+					(z - (SIZE - 1) * 0.5f));
 
-		{-1,  0, 0},
-		{ 1,  0, 0},
-
-		{-1, -1, 0},
-		{ 0, -1, 0},
-		{ 1, -1, 0},
-	};
+				offsets.emplace_back(offset);
+			}
+		}
+	}
 
 	for (int i = 0; i < offsets.size(); ++i)
 	{
@@ -161,7 +172,8 @@ void ShooterManager::SpritUpdate()
 		Asteroid* asteroid = static_cast<Asteroid*>(shot[i].get());
 		Vector3 offset =
 			right * (offsets[i].x * 25.0f) +
-			Vector3(0.0f, offsets[i].y * 25.0f, 0.0f);
+			Vector3(0.0f, offsets[i].y * 25.0f, 0.0f) +
+			forward * (offsets[i].z * 25.0f);
 
 		asteroid->SetTrans(centerPos + offset, scale);
 		asteroid->SetDir(forward);
@@ -174,7 +186,7 @@ void ShooterManager::SpritUpdate()
 void ShooterManager::FireUpdate()
 {
 
-	const float speed = 30.0f;
+	const float speed = 100.0f;
 
 	Vector3 scale = 0.3f;
 
@@ -183,7 +195,7 @@ void ShooterManager::FireUpdate()
 		Asteroid* asteroid = static_cast<Asteroid*>(s.get());
 
 		auto sp = GetRand(speed);
-		if (sp < 20) { sp = 20; }
+		if (sp < 50) { sp = 70; }
 
 		Vector3 centerPos =
 			asteroid->GetTrans().pos -

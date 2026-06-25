@@ -35,7 +35,7 @@ std::vector<ColliderBase*> Jazz::GetCollider(void) const
 	for (ColliderBase*& c : ActorBase::GetCollider()) { ret.emplace_back(c); }
 
 	//‘•”õ‚µ‚Ä‚¢‚é•Ší‚ð‘—‚é
-	auto it = weaponSet_.find(currentWeaponID_);
+	auto it = weaponSet_.find(TriggerUI::TriggerType::ASTEROID);
 	if (it != weaponSet_.end() && it->second != nullptr)
 	{
 		for (ColliderBase*& c : it->second->GetCollider()) { ret.emplace_back(c); }

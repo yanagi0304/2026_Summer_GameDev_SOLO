@@ -19,7 +19,7 @@ void CollisionManager::Add(ColliderBase* collider)
 		break;
 
 		//武器
-	case COLLIDER_TAG::KOGETSU:
+	case COLLIDER_TAG::ASTEROID:
 		weaponColliders.emplace_back(collider);
 
 		// ステージ系

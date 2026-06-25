@@ -32,13 +32,12 @@ void Kogetsu::WeaponLoad(void)
 	SetDynamicFlg(true);
 	SetPushFlg(true);
 
-	ColliderCreate(new CapsuleCollider(COLLIDER_TAG::KOGETSU, GetParameter("Collider", "ColliderStartPos")
-	,GetParameterToVector3("Collider", "ColliderEndPos"), GetParameter("Collider", "Radius")));
+	//ColliderCreate(new CapsuleCollider(COLLIDER_TAG::KOGETSU, GetParameter("Collider", "ColliderStartPos")
+	//,GetParameterToVector3("Collider", "ColliderEndPos"), GetParameter("Collider", "Radius")));
 }
 
 void Kogetsu::WeaponInit(void)
 {
-	trans.pos = GetParameterToVector3("Init", "modelOffset");
 	trans.scale = Vector3(GetParameter("Init", "scale"));
 
 }
@@ -54,7 +53,7 @@ void Kogetsu::WeaponUpdate(void)
 
 	MATRIX scaleMat = MGetScale(trans.scale.ToVECTOR());
 	MATRIX offsetRotMat = MGetRotY(DX_PI_F / 2.0f);
-	MATRIX offsetPosMat = MGetTranslate(trans.pos.ToVECTOR());
+	MATRIX offsetPosMat = MGetTranslate((trans.pos + OFFSET).ToVECTOR());
 
 	// 回転行列の合成
 	// スケールの行列を剣と合成

@@ -14,15 +14,16 @@ void TriggerUI::Load()
 {
 	triggerUI_ = LoadGraph("Data/Image/TriggerUI/TriggerUI.png");
 	select_ = LoadGraph("Data/Image/TriggerUI/SelectUI.png");
+	icon_.emplace(TriggerType::KOGETSU, LoadGraph("Data/Image/TriggerUI/Kogetsu.png"));
 }
 
 void TriggerUI::Update()
 {
-	//static constexpr float MOVE_POWER = 2.0f;
-	//if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_FRONT).now) { y -= MOVE_POWER; }
-	//if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_BACK).now) { y += MOVE_POWER; }
-	//if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_LEFT).now) { x -= MOVE_POWER; }
-	//if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_RIGHT).now) { x += MOVE_POWER; }
+	static constexpr float MOVE_POWER = 2.0f;
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_FRONT).now) { y -= MOVE_POWER; }
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_BACK).now) { y += MOVE_POWER; }
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_LEFT).now) { x -= MOVE_POWER; }
+	if (KeyManager::GetIns().GetInfo(KeyManager::KEY_TYPE::PLAYER_MOVE_RIGHT).now) { x += MOVE_POWER; }
 }
 
 void TriggerUI::Draw(int index)
@@ -52,7 +53,19 @@ void TriggerUI::Draw(int index)
 	for (int i = 0; i < mainTrig_.size(); i++)
 	{
 		DrawFormatString(363, 600 + (i*50), 0xffffff, TriggerToString(mainTrig_[i]));
+		//アイコンを表示
+		auto it = icon_.find(mainTrig_[i]);
+		if (it != icon_.end() && it->second != -1)
+		{
+			DrawRotaGraph(479, 606 + (i * 50), 1.0f, 0.0f, it->second, false);
+		}
+
+
+
 	}
+
+	DrawFormatString(0, 100, 0xffffff, "%d,%d", x, y);
+
 }
 
 const char* TriggerUI::TriggerToString(TriggerType trigger)

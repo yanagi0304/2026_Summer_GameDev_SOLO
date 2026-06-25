@@ -15,6 +15,9 @@ public:
     int GetIdleAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SWORD_IDLE; }
     int GetAttackAnimeID(void) const { return AnimationController::CHARACTER_ANIME::SLASH_A1; }
 
+    const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");
+
+
 private:
 
     void WeaponLoad(void) override;

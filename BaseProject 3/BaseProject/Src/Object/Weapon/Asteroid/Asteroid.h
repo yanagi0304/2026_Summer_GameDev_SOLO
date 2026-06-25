@@ -7,6 +7,7 @@ class Asteroid :
 {
 public:
 
+    const float SIZE = GetParameter("Init", "scale");
 
     Asteroid();
     Asteroid(const Transform& ownerTrans);
@@ -17,6 +18,7 @@ public:
     void SetTrans(const Vector3 pos, const Vector3 scale) { trans.pos = pos; trans.scale = scale; }
     void SetDir(const Vector3 dir) { direction_ = dir; }
     Vector3 GetDir(void) const { return direction_; }
+    float GetSize(void) const { return SIZE; }
 
 private:
 

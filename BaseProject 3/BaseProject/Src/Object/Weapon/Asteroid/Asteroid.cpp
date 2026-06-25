@@ -19,21 +19,31 @@ void Asteroid::WeaponLoad(void)
 
 	SetJudge(true);
 	SetDynamicFlg(true);
-	SetPushFlg(true);
 
-	//ColliderCreate(new BoxCollider(COLLIDER_TAG::ASTEROID, GetParameterToVector3("Collider", "Size"),-1,Vector3(0.0f,30.0f,0.0f)));
+	ColliderCreate(new BoxCollider(COLLIDER_TAG::ASTEROID, GetParameterToVector3("Collider", "Size"),-1,Vector3(0.0f,30.0f,0.0f)));
 }
 
 void Asteroid::WeaponInit(void)
 {
-	trans.scale = Vector3(GetParameter("Init", "scale"));
+	trans.scale = (SIZE);
 	//trans.pos += GetParameter("Init", "modelOffset");
 }
 
 void Asteroid::WeaponUpdate(void)
 {
 	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
-	trans.pos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
+	Vector3 hand = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
+	float angle = ownerTrans_->get().angle.y;
+	trans.scale = (SIZE);
+	Vector3 right(
+		cosf(angle),
+		0.0f,
+		-sinf(angle));
+
+	trans.pos =
+		hand -
+		right * 80.0f +
+		Vector3(0.0f, 60.0f, 0.0f);
 }
 
 void Asteroid::WeaponDraw(void)

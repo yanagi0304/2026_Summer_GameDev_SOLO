@@ -24,6 +24,8 @@ public:
 	//ステートのセッター
 	void SetState(const STATE state) { state_ = state; }
 
+	static constexpr int div = 27;
+
 private:
 
 	void WeaponLoad(void) override;
@@ -47,9 +49,10 @@ private:
 	void FireDraw();
 
 private:
+	int divideNum_;
 
 	STATE state_;
-   std::unique_ptr<WeaponBase> shot[8];
+   std::unique_ptr<WeaponBase> shot[27];
 	
 };
 
