@@ -26,6 +26,8 @@ public:
 
 	static constexpr int div = 27;
 
+	static constexpr int FIRE_INTERVAL = 3;
+
 private:
 
 	void WeaponLoad(void) override;
@@ -53,6 +55,9 @@ private:
 
 	STATE state_;
    std::unique_ptr<WeaponBase> shot[27];
+
+   int fireIndex_ = 0;
+   int fireTimer_ = 0;
 	
 };
 

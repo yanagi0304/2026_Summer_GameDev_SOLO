@@ -13,6 +13,8 @@
 #include "../../Weapon/Kogetsu/Kogetsu.h"
 #include "../../Weapon/Asteroid/Asteroid.h"
 #include "../../Weapon/Manager/ShooterManager.h"
+#include "../../Weapon/Shield/Shield.h"
+#include "../../Weapon/Grasshopper/Grasshopper.h"
 #include <iostream>
 
 
@@ -53,6 +55,8 @@ void Jazz::CharacterLoad(void)
 	//ïêäÌÇÃê›íË
 	weaponSet_.emplace(TriggerUI::TriggerType::KOGETSU, std::make_unique<Kogetsu>(trans));
 	weaponSet_.emplace(TriggerUI::TriggerType::ASTEROID, std::make_unique<ShooterManager>(trans));
+	weaponSet_.emplace(TriggerUI::TriggerType::SHIELD, std::make_unique<Shield>(trans));
+	weaponSet_.emplace(TriggerUI::TriggerType::GRASS_HOPPER, std::make_unique<Grasshopper>(trans));
 
 
 	SetJudge(true);
@@ -122,6 +126,8 @@ void Jazz::CharactorUpdate(void)
 		}
 	}
 
+
+	//à⁄ìÆä÷òA
 	Vector3 angle = Camera::GetIns().GetAngle();
 	float sinY = sinf(angle.y);
 	float cosY = cosf(angle.y);
@@ -157,11 +163,7 @@ void Jazz::CharactorUpdate(void)
 }
 void Jazz::CharactorDraw(void)
 {
-	auto it = weaponSet_.find(currentWeaponID_);
-	if (it != weaponSet_.end() && it->second != nullptr)
-	{
-		it->second->Draw();
-	}
+
 }
 
 void Jazz::CharactorAlphaDraw(void)
@@ -194,6 +196,15 @@ void Jazz::SubObjectUpdate(void)
 	if (it != weaponSet_.end() && it->second != nullptr)
 	{
 		it->second->Update();
+	}
+}
+
+void Jazz::SubObjectDraw(void)
+{
+	auto it = weaponSet_.find(currentWeaponID_);
+	if (it != weaponSet_.end() && it->second != nullptr)
+	{
+		it->second->Draw();
 	}
 }
 

@@ -8,7 +8,7 @@ StageTutrial::StageTutrial():
 
 void StageTutrial::Load(void)
 {
-	trans.Load("Stage/Doujou");
+	trans.Load("Stage/komakiDoujo");
 	SetJudge(true);
 	SetDynamicFlg(false);
 	ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "1")));

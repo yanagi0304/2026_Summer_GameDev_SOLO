@@ -202,6 +202,7 @@ void ShooterManager::FireUpdate()
 			asteroid->GetDir() * sp;
 
 		asteroid->SetTrans(centerPos, scale);
+
 	}
 }
 

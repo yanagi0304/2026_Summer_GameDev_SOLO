@@ -285,6 +285,8 @@ protected:
 	virtual void SubObjectUpdate(void) {}
 	// 派生先追加描画
 	virtual void SubDraw(void) {}
+	// 派生先追加オブジェクト描画
+	virtual void SubObjectDraw(void) {}
 	// 派生先追加アルファ描画
 	virtual void SubAlphaDraw(void) {}
 	// 派生先追加解放

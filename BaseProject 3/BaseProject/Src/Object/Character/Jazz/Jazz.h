@@ -44,6 +44,8 @@ private:
 
 	//サブオブジェクト更新
 	void SubObjectUpdate(void)override;
+	//サブオブジェクト描画
+	void SubObjectDraw(void)override;
 
 	//攻撃
 	void Attack(void);

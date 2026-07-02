@@ -94,6 +94,8 @@ void ActorBase::Draw(void)
 
 	// ƒ‚ƒfƒ‹‚Ì•`‰æ
 	if (!isAlphaDraw) { trans.Draw(); }
+
+	SubObjectDraw();
 }
 
 void ActorBase::AlphaDraw(void)

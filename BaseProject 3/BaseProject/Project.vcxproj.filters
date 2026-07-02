@@ -49,6 +49,8 @@
     <ClCompile Include="Src\Object\Weapon\Asteroid\Asteroid.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterManager.cpp" />
     <ClCompile Include="Src\Object\Common\TriggerUI\TriggerUI.cpp" />
+    <ClCompile Include="Src\Object\Weapon\Shield\Shield.cpp" />
+    <ClCompile Include="Src\Object\Weapon\Grasshopper\Grasshopper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h" />
@@ -178,6 +180,9 @@
     <ClInclude Include="Src\Object\Weapon\Asteroid\Asteroid.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
     <ClInclude Include="Src\Object\Common\TriggerUI\TriggerUI.h" />
+    <ClInclude Include="Src\Manager\Collision\ChunkStDefine.h" />
+    <ClInclude Include="Src\Object\Weapon\Shield\Shield.h" />
+    <ClInclude Include="Src\Object\Weapon\Grasshopper\Grasshopper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\Application.h">

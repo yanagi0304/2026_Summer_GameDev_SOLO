@@ -20,6 +20,9 @@ public:
     Vector3 GetDir(void) const { return direction_; }
     float GetSize(void) const { return SIZE; }
 
+    void SetFire(bool fire) { isFire_ = fire; }
+    bool IsFire(void) const { return isFire_; }
+
 private:
 
     void WeaponLoad(void) override;
@@ -32,5 +35,6 @@ private:
 
 private:
     Vector3 direction_;
+    bool isFire_ = false;
 };
 
