@@ -1,0 +1,29 @@
+#pragma once
+#include "../WeaponBase.h"
+
+#include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
+
+class Shield :
+    public WeaponBase
+{
+public:
+    Shield();
+    Shield(const Transform& ownerTrans);
+    ~Shield() override = default;
+
+    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
+    int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
+
+private:
+
+    void SubLoad(void) override;
+    void SubInit(void) override;
+    void SubUpdate(void) override;
+
+private:
+
+    const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");
+
+    MATRIX weaponMatrix_;
+};
+
