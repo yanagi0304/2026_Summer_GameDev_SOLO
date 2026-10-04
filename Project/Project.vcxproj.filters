@@ -67,6 +67,7 @@
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterManager.cpp" />
     <ClCompile Include="Src\Object\Weapon\Shield\Shield.cpp" />
     <ClCompile Include="Src\Object\Weapon\WeaponBase.cpp" />
+    <ClCompile Include="Src\Common\Quaternion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -162,6 +163,8 @@
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
     <ClInclude Include="Src\Object\Weapon\Shield\Shield.h" />
     <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
+    <ClInclude Include="Src\Object\Weapon\TriggerTypeDefine.h" />
+    <ClInclude Include="Src\Common\Quaternion.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

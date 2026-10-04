@@ -11,12 +11,13 @@ public:
     Shield(const Transform& ownerTrans);
     ~Shield() override = default;
 
+    void Load(void) override;
+
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
 private:
 
-    void SubLoad(void) override;
     void SubInit(void) override;
     void SubUpdate(void) override;
 

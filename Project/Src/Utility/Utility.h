@@ -487,13 +487,68 @@ static void LoadArrayImg(std::string path, int AllNum, int XNum, int YNum, int X
     }
 #pragma endregion
 
+static Vector3 MatrixToPosition(const MATRIX& mat)
+{
+    return Vector3(
+        mat.m[3][0],
+        mat.m[3][1],
+        mat.m[3][2]
+    );
+}
+
+static Vector3 MatrixToEulerXZY(const MATRIX& mat)
+{
+    Vector3 angle;
+
+    // Z回転
+    angle.z = asinf(-mat.m[0][1]);
+
+    const float cosZ = cosf(angle.z);
+
+    // ジンバルロックしていない場合
+    if (fabsf(cosZ) > 0.00001f) {
+        angle.x = atan2f(mat.m[2][1], mat.m[1][1]);
+        angle.y = atan2f(mat.m[0][2], mat.m[0][0]);
+    }
+    // ジンバルロック付近
+    else {
+        angle.x = atan2f(-mat.m[1][2], mat.m[2][2]);
+        angle.y = 0.0f;
+    }
+
+    return angle;
+}
+
+static Vector3 MatrixToScale(const MATRIX& mat)
+{
+    return Vector3(
+        sqrtf(
+            mat.m[0][0] * mat.m[0][0] +
+            mat.m[0][1] * mat.m[0][1] +
+            mat.m[0][2] * mat.m[0][2]
+        ),
+
+        sqrtf(
+            mat.m[1][0] * mat.m[1][0] +
+            mat.m[1][1] * mat.m[1][1] +
+            mat.m[1][2] * mat.m[1][2]
+        ),
+
+        sqrtf(
+            mat.m[2][0] * mat.m[2][0] +
+            mat.m[2][1] * mat.m[2][1] +
+            mat.m[2][2] * mat.m[2][2]
+        )
+    );
+}
+
 // 行列をつかったモデルの座標と向きのセット
 static void MV1ModelMatrix(int& model, const VECTOR& pos, const std::initializer_list<VECTOR>& angle) {
     MATRIX m = MGetIdent();
     // 角度セットを順に合成
     for (const auto& a : angle) {
-        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotZ(a.z));
     }
 
@@ -504,8 +559,8 @@ static void MV1ModelMatrix(int& model, const Vector3& pos, const std::initialize
     MATRIX m = MGetIdent();
     // 角度セットを順に合成
     for (const auto& a : angle) {
-        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotZ(a.z));
     }
 
@@ -522,8 +577,8 @@ static void MV1ModelMatrix(int& model, const VECTOR& scale, const VECTOR& pos, c
 
     // 角度セットを順に合成
     for (const auto& a : angle) {
-        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotZ(a.z));
     }
 
@@ -542,8 +597,8 @@ static void MV1ModelMatrix(int& model, const Vector3& scale, const Vector3& pos,
 
     // 角度セットを順に合成
     for (const auto& a : angle) {
-        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotY(a.y));
+        m = MMult(m, MGetRotX(a.x));
         m = MMult(m, MGetRotZ(a.z));
     }
 

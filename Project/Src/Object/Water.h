@@ -15,10 +15,14 @@ public:
 
 		trans.LoadModel("Water/WaterWaveCube");
 
-		CreateShader(new WaterShader());
-
 		trans.pos = Vector3(500, 100, 500);
 
 		trans.scale = Vector3(5.0f, 0.5f, 5.0f);
+	}
+
+private:
+
+	void SubInit(void)override {
+		CreateShader(new WaterShader());
 	}
 };

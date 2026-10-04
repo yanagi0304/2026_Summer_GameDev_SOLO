@@ -9,8 +9,13 @@
 class BoxCollider : public ColliderBase
 {
 public:
-	BoxCollider(COLLIDER_TAG type, const Vector3& size, const Vector3& pos = Vector3(), const Vector3& angle = Vector3()) :
-		ColliderBase(type, pos, angle),
+	BoxCollider(
+		COLLIDER_TAG tag,
+		const Vector3& size,
+		const Vector3& pos = Vector3(),
+		const Quaternion& rotation = Quaternion()
+	) :
+		ColliderBase(tag, pos, rotation),
 		size(size)
 	{
 		SetShape(COLLIDER_SHAPE::Box);
@@ -24,7 +29,7 @@ public:
 
 	// 回転後のボックスの各軸を取得（0:X 1:Y 2:Z）
 	std::array<Vector3, 3> GetAxes(void) const{
-		const MATRIX rotationMat = GetAngleMat();
+		const MATRIX rotationMat = GetRotationMat();
 
 		return{
 			Vector3::Xonly(1.0f).TransMat(rotationMat).Normalized(),

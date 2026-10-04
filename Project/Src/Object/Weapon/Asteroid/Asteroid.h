@@ -14,6 +14,8 @@ public:
     Asteroid(const Transform& ownerTrans);
     ~Asteroid() override = default;
 
+    void Load(void) override;
+
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
@@ -30,13 +32,10 @@ public:
 
 private:
 
-    void WeaponLoad(void) override;
-    void WeaponInit(void) override;
-    void WeaponUpdate(void) override;
-    void WeaponDraw(void) override;
-    void WeaponAlphaDraw(void) override;
-    void WeaponUiDraw(void) override;
-    void WeaponRelease(void) override;
+    void SubInit(void) override;
+    void SubUpdate(void) override;
+    void SubDraw(void) override;
+    void SubRelease(void) override;
 
 private:
     Vector3 direction_;

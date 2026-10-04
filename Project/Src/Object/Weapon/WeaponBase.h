@@ -6,20 +6,36 @@
 #include <memory>
 #include <optional>
 
+class AnimationController;
+
 class WeaponBase : public ActorBase
 {
 public:
 
 	// デフォルトコンストラクタ
-	WeaponBase();
+	WeaponBase(const Transform& ownerTrans);
 	// パラメーターを外部から読み込む場合に使うコンストラクタ
-	WeaponBase(const std::string& parameterPath);
+	WeaponBase(const Transform& ownerTrans, const std::string& parameterPath);
 
 	~WeaponBase() override = default;
 
 	//所持武器専用アニメーション
 	virtual int GetIdleAnimeID(void) const = 0;
 	virtual int GetAttackAnimeID(void) const = 0;
+
+	void Update(void)override {
+		if (!isActive_) { return; }
+		ActorBase::Update();
+	}
+	void Draw(void)override {
+		if (!isActive_) { return; }
+		ActorBase::Draw();
+	}
+
+	void SetIsActive(bool isActive) { 
+		isActive_ = isActive;
+		SetJudgeFlg(isActive);
+	}
 
 private:
 
@@ -30,6 +46,9 @@ private:
 
 	//アニメーションコントローラーのインスタンス
 	AnimationController* anime;
+
+	// 武器がアクティブかどうかのフラグ（true = アクティブ、false = 非アクティブ）
+	bool isActive_;
 
 protected:
 
@@ -105,6 +124,6 @@ protected:
 
 #pragma endregion
 
-	std::optional<std::reference_wrapper<const Transform>> ownerTrans_;
+	const Transform& ownerTrans_;
 };
 

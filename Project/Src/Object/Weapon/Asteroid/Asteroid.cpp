@@ -1,52 +1,52 @@
 #include "Asteroid.h"
+
 #include "../../Common/Collider/BoxCollider.h"
 
 Asteroid::Asteroid()
-	:WeaponBase("Data/Parameter/Weapon/Asteroid/")
+	:WeaponBase(Transform(), "Data/Parameter/Weapon/Asteroid/")
 {
 }
 
 Asteroid::Asteroid(const Transform& ownerTrans)
-	:WeaponBase("Data/Parameter/Weapon/Asteroid/")
+	:WeaponBase(ownerTrans, "Data/Parameter/Weapon/Asteroid/")
 {
-	ownerTrans_ = ownerTrans;
 }
 
-void Asteroid::WeaponLoad(void)
+void Asteroid::Load(void)
 {
 	trans.LoadModel("Weapon/Asteroid");
-	WeaponInit();
 
-	SetJudgeFlg(true);
+	SetJudgeFlg(false);
 	SetDynamicFlg(true);
+	SetPushFlg(false);
 
-	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), -1, Vector3(0.0f, 30.0f, 0.0f)));
+	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 30.0f, 0.0f)));
 }
 
-void Asteroid::WeaponInit(void)
+void Asteroid::SubInit(void)
 {
 	trans.scale = (SIZE);
 	//trans.pos += GetParameter("Init", "modelOffset");
 }
 
-void Asteroid::WeaponUpdate(void)
+void Asteroid::SubUpdate(void)
 {
-	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
-	Vector3 hand = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
-	float angle = ownerTrans_->get().angle.y;
-	trans.scale = (SIZE);
-	Vector3 right(
-		cosf(angle),
-		0.0f,
-		-sinf(angle));
+	//auto frameIndex = MV1SearchFrame(ownerTrans_.model, "mixamorig:RightHandIndex2");
+	//Vector3 hand = MV1GetFramePosition(ownerTrans_.model, frameIndex);
+	//float angle = ownerTrans_.angle.y;
+	//trans.scale = (SIZE);
+	//Vector3 right(
+	//	cosf(angle),
+	//	0.0f,
+	//	-sinf(angle));
 
-	trans.pos =
-		hand -
-		right * 80.0f +
-		Vector3(0.0f, 60.0f, 0.0f);
+	//trans.pos =
+	//	hand -
+	//	right * 80.0f +
+	//	Vector3(0.0f, 60.0f, 0.0f);
 }
 
-void Asteroid::WeaponDraw(void)
+void Asteroid::SubDraw(void)
 {
 	/*auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
 	auto framePos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
@@ -92,14 +92,6 @@ void Asteroid::WeaponDraw(void)
 
 }
 
-void Asteroid::WeaponAlphaDraw(void)
-{
-}
-
-void Asteroid::WeaponUiDraw(void)
-{
-}
-
-void Asteroid::WeaponRelease(void)
+void Asteroid::SubRelease(void)
 {
 }

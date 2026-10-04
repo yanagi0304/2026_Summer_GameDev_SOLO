@@ -2,15 +2,17 @@
 
 #include "../Common/AnimationController/AnimationController.h"
 
-WeaponBase::WeaponBase()
+WeaponBase::WeaponBase(const Transform& ownerTrans)
 	:
+	ownerTrans_(ownerTrans),
 	anime(nullptr)
 {
 }
 
-WeaponBase::WeaponBase(const std::string& parameterPath)
+WeaponBase::WeaponBase(const Transform& ownerTrans, const std::string& parameterPath)
 	:
 	ActorBase(parameterPath),
+	ownerTrans_(ownerTrans),
 	anime(nullptr)
 {
 }

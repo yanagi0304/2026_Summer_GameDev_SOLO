@@ -50,12 +50,12 @@ public:
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	MeshCollider(COLLIDER_TAG type, const Vector3& pos = Vector3(), const Vector3& angle = Vector3());
+	MeshCollider(COLLIDER_TAG type, const Vector3& pos = Vector3(), const Quaternion& rotation = Quaternion());
 
 	/// <summary>
 	/// モデルハンドルから三角形情報を構築するコンストラクタ
 	/// </summary>
-	MeshCollider(COLLIDER_TAG type, int modelHandle, int frameIndex = -1, const Vector3& pos = Vector3(), const Vector3& angle = Vector3());
+	MeshCollider(COLLIDER_TAG type, int modelHandle, int frameIndex = -1, const Vector3& pos = Vector3(), const Quaternion& rotation = Quaternion());
 
 	~MeshCollider()override = default;
 

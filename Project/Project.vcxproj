@@ -149,6 +149,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Application\Application.cpp" />
+    <ClCompile Include="Src\Common\Quaternion.cpp" />
     <ClCompile Include="Src\Common\Vector2.cpp" />
     <ClCompile Include="Src\Common\Vector2I.cpp" />
     <ClCompile Include="Src\Common\Vector3.cpp" />
@@ -218,6 +219,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
     <ClInclude Include="Src\Application\Application.h" />
+    <ClInclude Include="Src\Common\Quaternion.h" />
     <ClInclude Include="Src\Common\Vector2.h" />
     <ClInclude Include="Src\Common\Vector2I.h" />
     <ClInclude Include="Src\Common\Vector3.h" />
@@ -290,6 +292,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Weapon\Kogetsu\Kogetsu.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
     <ClInclude Include="Src\Object\Weapon\Shield\Shield.h" />
+    <ClInclude Include="Src\Object\Weapon\TriggerTypeDefine.h" />
     <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
     <ClInclude Include="Src\pch.h" />
     <ClInclude Include="Src\Scene\Common\PostEffect\CRTPostEffect\CRTPostEffect.h" />

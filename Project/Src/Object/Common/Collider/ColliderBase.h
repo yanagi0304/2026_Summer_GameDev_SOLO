@@ -6,9 +6,12 @@
 #include <functional>
 #include <vector>
 
+#include "../../../Common/Quaternion.h"
+
 #include "../Transform/Transform.h"
 
 #include "ColliderTagDefine.h"
+
 
 // 衝突結果構造体
 struct CollisionResult
@@ -37,29 +40,36 @@ public:
 		Vector3 max;
 
 		AABB(void) = default;
-		AABB(const Vector3& min, const Vector3& max) {
+
+		AABB(const Vector3& min, const Vector3& max)
+		{
 			this->min = min;
 			this->max = max;
 		}
 	};
+
 
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	/// <param name="type">当たり判定タイプ</param>
 	/// <param name="pos">相対座標</param>
-	/// <param name="angle">相対角度</param>
+	/// <param name="rotation">相対回転</param>
 	ColliderBase(
 		COLLIDER_TAG type,
 		const Vector3& pos = Vector3(),
-		const Vector3& angle = Vector3()
+		const Quaternion& rotation = Quaternion()
 	);
+
 	virtual ~ColliderBase() = default;
+
 
 	// デバッグ描画
 	virtual void DrawDebug(unsigned int color = 0xffffff) = 0;
 
+
 #pragma region 初期設定
+
 	// モデル制御情報セット
 	void SetTransformPtr(Transform* ptr);
 
@@ -77,44 +87,47 @@ public:
 
 	// 接地判定通知用関数セット
 	void SetOnGroundedFunc(std::function<void(COLLIDER_TAG, const ColliderBase&)> OnGroundedFunc);
+
 #pragma endregion
 
-#pragma region 各ゲット関数
+
+#pragma region ゲット関数
+
 	// コライダー座標
-	Vector3 GetPos(void)const;
+	Vector3 GetPos(void) const;
 
 	// 1フレーム前のコライダー座標
-	Vector3 GetPrevPos(void)const;
+	Vector3 GetPrevPos(void) const;
 
-	// コライダー角度
-	Vector3 GetAngle(void)const;
+	// コライダー回転
+	Quaternion GetRotation(void) const;
 
-	// コライダー角度行列
-	MATRIX GetAngleMat(void)const;
+	// コライダー回転行列
+	MATRIX GetRotationMat(void) const;
 
-	// コライダー角度を適用したベクトルを取得
-	Vector3 VTrans(const Vector3& v)const;
+	// コライダー回転を適用したベクトルを取得
+	Vector3 VTrans(const Vector3& v) const;
 
 	// モデル制御情報を直接取得
-	const Transform& GetTransform(void)const;
+	const Transform& GetTransform(void) const;
 
 	// 動的オブジェクトか否か
-	bool GetDynamicFlg(void)const;
+	bool GetDynamicFlg(void) const;
 
 	// 当たり判定フラグ
-	bool GetJudgeFlg(void)const;
+	bool GetJudgeFlg(void) const;
 
 	// 押し出しのフラグ
-	bool GetPushFlg(void)const;
+	bool GetPushFlg(void) const;
 
 	// 押し出し時の重さ
-	unsigned char GetPushWeight(void)const;
+	unsigned char GetPushWeight(void) const;
 
 	// 当たり判定のタイプ
-	COLLIDER_TAG GetTag(void)const;
+	COLLIDER_TAG GetTag(void) const;
 
 	// 当たり判定の形状
-	COLLIDER_SHAPE GetShape(void)const;
+	COLLIDER_SHAPE GetShape(void) const;
 
 	// 判定通知の呼び出し
 	void CallOnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result);
@@ -123,19 +136,25 @@ public:
 	void CallOnGrounded(COLLIDER_TAG ownTag, const ColliderBase& other);
 
 	// 自分が占有している範囲
-	virtual AABB GetAABB(void)const = 0;
+	virtual AABB GetAABB(void) const = 0;
+
 #pragma endregion
 
-#pragma region 各セット関数
+
+#pragma region セット関数
+
 	// モデル制御情報の座標情報を書き換える
 	void SetTransformPos(const Vector3& pos);
 	void SetTransformPosAdd(const Vector3& vec);
 
 	// 当たり判定フラグセット
 	void SetJudgeFlg(bool flg);
+
 #pragma endregion
 
+
 private:
+
 	// モデル制御情報
 	Transform* trans;
 
@@ -144,9 +163,11 @@ private:
 	const bool* pushFlg;
 	const unsigned char* pushWeight;
 
-	// 相対座標 / 相対角度
+	// 相対座標
 	Vector3 pos;
-	Vector3 angle;
+
+	// 相対回転
+	Quaternion rotation;
 
 	// 当たり判定フラグ
 	bool judgeFlg;
@@ -164,8 +185,10 @@ private:
 	std::function<void(COLLIDER_TAG, const ColliderBase&)> OnGrounded;
 
 protected:
+
 	void SetShape(COLLIDER_SHAPE s);
 };
+
 
 /// <summary>
 /// 特定のコライダーを探す
@@ -174,15 +197,20 @@ protected:
 /// <param name="tag">タグ種類</param>
 /// <returns></returns>
 template<typename T = ColliderBase>
-std::vector<T*> ColliderSerch(std::vector<ColliderBase*> collider, COLLIDER_TAG tag = COLLIDER_TAG::None) {
+std::vector<T*> ColliderSerch(std::vector<ColliderBase*> collider, COLLIDER_TAG tag = COLLIDER_TAG::None)
+{
 	std::vector<T*> out;
+
 	out.reserve(collider.size());
 
 	for (auto c : collider) {
-		if (!c) continue;
+
+		if (!c) { continue; }
+
 		if (auto* ptr = dynamic_cast<T*>(c)) {
 			if (c->GetTag() == tag || tag == COLLIDER_TAG::None) { out.push_back(ptr); }
 		}
 	}
+
 	return out;
 }

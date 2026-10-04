@@ -1,10 +1,12 @@
 #pragma once
 #include "../WeaponBase.h"
 
-#include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
-
 #include <vector>
 #include <memory>
+
+#include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
+
+class Asteroid;
 
 enum class STATE
 {
@@ -23,6 +25,8 @@ public:
 
 	~ShooterManager() = default;
 
+	void Load(void)override;
+
 	int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
 	int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
@@ -36,7 +40,6 @@ public:
 private:
 
 	void SubUpdate(void) override;
-	void SubDraw(void) override;
 
 	//ステート切り替え
 	void ChangeState(void);
@@ -45,16 +48,12 @@ private:
 	void CubeUpdate();
 	void SpritUpdate();
 	void FireUpdate();
-	//各状態の描画
-	void CubeDraw();
-	void SpritDraw();
-	void FireDraw();
 
 private:
 	int divideNum_;
 
 	STATE state_;
-   std::unique_ptr<WeaponBase> shot[27];
+	Asteroid* shot[div];
 
    int fireIndex_ = 0;
    int fireTimer_ = 0;

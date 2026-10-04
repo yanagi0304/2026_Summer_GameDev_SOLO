@@ -1,16 +1,16 @@
 #include "Shield.h"
 
 Shield::Shield()
+	: WeaponBase(Transform(), "Data/Parameter/Weapon/Shield/")
 {
 }
 
 Shield::Shield(const Transform& ownerTrans)
-	: WeaponBase("Data/Parameter/Weapon/Shield/")
+	: WeaponBase(ownerTrans, "Data/Parameter/Weapon/Shield/")
 {
-	ownerTrans_ = ownerTrans;
 }
 
-void Shield::SubLoad(void)
+void Shield::Load(void)
 {
 	trans.LoadModel("Weapon/Shield");
 
@@ -26,21 +26,32 @@ void Shield::SubInit(void)
 
 void Shield::SubUpdate(void)
 {
-
 	MV1SetOpacityRate(trans.model, 0.4f);
-	auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:Spine2");
-	auto framePos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
-	float angle = ownerTrans_->get().angle.y;
 
-	Vector3 forward(
-		sinf(angle),
-		0.0f,
-		cosf(angle));
+	const auto frameIndex =
+		MV1SearchFrame(
+			ownerTrans_.model,
+			"mixamorig:Spine2"
+		);
 
+	const Vector3 framePos =
+		MV1GetFramePosition(
+			ownerTrans_.model,
+			frameIndex
+		);
+
+	// オーナーの前方向
+	const Vector3 forward =
+		ownerTrans_.VTrans(
+			Vector3(0.0f, 0.0f, 1.0f)
+		);
+
+	// 座標
 	trans.pos =
-		Vector3(framePos) + OFFSET -
-		forward * 80;
+		framePos +
+		OFFSET +
+		forward * 80.0f;
 
-	trans.angle = ownerTrans_->get().angle;
-
+	// オーナーと同じ姿勢にする
+	trans.SetRotation(ownerTrans_.rotation);
 }

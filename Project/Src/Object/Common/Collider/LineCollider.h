@@ -11,10 +11,16 @@ public:
 	/// <param name="localStartPos">線分の開始点</param>
 	/// <param name="localEndPos">線分の終了点</param>
 	/// <param name="pos">相対座標（引数省略で{0.0f,0.0f,0.0f}）</param>
-	LineCollider(COLLIDER_TAG type, const Vector3& localStartPos, const Vector3& localEndPos, const Vector3& pos = Vector3(), const Vector3& angle = Vector3()) :
-		ColliderBase(type, pos, angle),
-		startPos(localStartPos),
-		endPos(localEndPos)
+	LineCollider(
+		COLLIDER_TAG tag,
+		const Vector3& startPos,
+		const Vector3& endPos,
+		const Vector3& pos = Vector3(),
+		const Quaternion& rotation = Quaternion()
+	) :
+		ColliderBase(tag, pos, rotation),
+		startPos(startPos),
+		endPos(endPos)
 	{
 		SetShape(COLLIDER_SHAPE::Line);
 	}

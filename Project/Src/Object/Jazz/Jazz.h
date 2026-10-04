@@ -7,7 +7,9 @@
 
 #include "../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
-#include "../TriggerUI/TriggerUI.h"
+#include "../Weapon/TriggerTypeDefine.h"
+
+class TriggerUI;
 
 class WeaponBase;
 
@@ -27,10 +29,10 @@ private:
 	Vector3 prevPos;
 
 	//所持武器
-	std::map<TriggerUI::TriggerType, WeaponBase*> weaponSet_;
+	std::map<TriggerType, WeaponBase*> weaponSet_;
 
 	//現在の装備を保存
-	TriggerUI::TriggerType currentWeaponID_;
+	TriggerType currentWeaponID_;
 
 	int mainCurrentIndex_;
 	int subCurrentIndex_;
@@ -39,17 +41,17 @@ private:
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
-
+	
 	//攻撃
 	void Attack(void);
-	//武器の切り替え
-	void WeaponChange(void);
+	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
+	void WeaponChange(TriggerType type = TriggerType::NONE);
 
 	Vector3 InputVec(void) const;
 
 private:
 
 	//所持トリガーの表示
-	TriggerUI trigger_;
+	TriggerUI* trigger_;
 };
 

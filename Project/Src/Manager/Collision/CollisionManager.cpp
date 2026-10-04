@@ -464,6 +464,8 @@ void CollisionManager::BuildChunks(void)
 			// 静的コライダーは変更なし
 			if (!collider->GetDynamicFlg()) { continue; }
 
+			if (!collider->GetJudgeFlg()) { continue; }
+
 			// 動的コライダーチャンク分け配列に割り当てなおす
 			RegisterToChunks(group.dynamicChunks, collider);
 		}

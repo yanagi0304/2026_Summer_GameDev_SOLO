@@ -1,48 +1,66 @@
 #include "Grasshopper.h"
 
+#include "../../../Utility/Utility.h"
+
 Grasshopper::Grasshopper()
+	:
+	WeaponBase(Transform(), "Data/Parameter/Weapon/Grasshopper/")
 {
 }
 
 Grasshopper::Grasshopper(const Transform& ownerTrans)
 	:
-	WeaponBase("Data/Parameter/Weapon/Grasshopper/")
+	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Grasshopper/")
 {
-	ownerTrans_ = ownerTrans;
 }
 
-void Grasshopper::WeaponLoad(void)
+void Grasshopper::Load(void)
 {
-	trans.Load("Weapon/Grasshopper");
-	WeaponInit();
+	trans.LoadModel("Weapon/Grasshopper");
 
-	SetJudge(true);
+	SetJudgeFlg(true);
 	SetDynamicFlg(true);
 	SetPushFlg(true);
 }
 
-void Grasshopper::WeaponInit(void)
+void Grasshopper::SubInit(void)
 {
 	trans.scale = Vector3(GetParameter("Init", "scale"));
 }
 
-void Grasshopper::WeaponUpdate(void)
+void Grasshopper::SubUpdate(void)
 {
 	MV1SetOpacityRate(trans.model, 0.4f);
+
+	// オーナーの回転に合わせてローカル位置を回転
+	trans.pos =
+		ownerTrans_.pos +
+		ownerTrans_.VTrans(
+			Vector3::YZonly(50.0f, 150.0f)
+		);
+
+	// オーナーの姿勢を基準に、ローカルX軸へ-40度回転
+	const Quaternion localRotation =
+		Quaternion::FromRotationX(
+			Deg2Rad(-40.0f)
+		);
+
+	// オーナーの回転 + Grasshopper固有の回転
+	const MATRIX rotationMat =
+		MMult(
+			localRotation.ToMatrix(),
+			ownerTrans_.RotationMat()
+		);
+
+	trans.SetRotation(
+		Quaternion::FromMatrix(rotationMat)
+	);
 }
 
-void Grasshopper::WeaponDraw(void)
+void Grasshopper::SubDraw(void)
 {
 }
 
-void Grasshopper::WeaponAlphaDraw(void)
-{
-}
-
-void Grasshopper::WeaponUiDraw(void)
-{
-}
-
-void Grasshopper::WeaponRelease(void)
+void Grasshopper::SubRelease(void)
 {
 }

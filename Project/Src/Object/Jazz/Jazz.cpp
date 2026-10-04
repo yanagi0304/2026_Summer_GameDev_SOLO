@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "../../Utility/Utility.h"
+
 #include "../../Application/Application.h"
 
 #include "../../Manager/Input/InputManager.h"
@@ -12,6 +14,8 @@
 
 #include "../Common/Collider/SphereCollider.h"
 #include "../Common/Collider/CapsuleCollider.h"
+
+#include "../TriggerUI/TriggerUI.h"
 
 #include "../Weapon/WeaponBase.h"
 #include "../Weapon/Kogetsu/Kogetsu.h"
@@ -26,8 +30,9 @@ Jazz::Jazz() :
 	weaponTrans_(),
 
 	mainCurrentIndex_(0),
+	subCurrentIndex_(0),
 
-	trigger_(mainCurrentIndex_, subCurrentIndex_)
+	trigger_(nullptr)
 {
 }
 
@@ -39,12 +44,14 @@ void Jazz::Load(void)
 	SetGravityFlg(true);
 
 	// 通常描画に設定
-	SetDrawType(ACTOR_DRAW_TYPE::Default);
+	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
 	
 #pragma region モデル
 
 	// モデルの読み込み
 	trans.LoadModel("Character/Jazz/Wochamole");
+
+	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
 	// アニメーションコントローラー生成
 	CreateAnimationController();
@@ -63,38 +70,41 @@ void Jazz::Load(void)
 		)
 	);
 
+	// トリガーUIの生成
+	trigger_ = new TriggerUI(mainCurrentIndex_, subCurrentIndex_);
+
 	// トリガーUI管理クラスをJazzクラスの下位クラスとして登録
-	AddChildActor(&trigger_);
+	AddChildActor(trigger_);
 
 #pragma region 武器の生成
 
 	// 「弧月」生成
-	weaponSet_.emplace(TriggerUI::TriggerType::KOGETSU, new Kogetsu(trans));
+	weaponSet_.emplace(TriggerType::KOGETSU, new Kogetsu(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet_.at(TriggerUI::TriggerType::KOGETSU));
+	AddChildActor(weaponSet_.at(TriggerType::KOGETSU));
 
 	// 「アステロイド」生成
-	weaponSet_.emplace(TriggerUI::TriggerType::ASTEROID, new ShooterManager(trans));
+	weaponSet_.emplace(TriggerType::ASTEROID, new ShooterManager(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet_.at(TriggerUI::TriggerType::ASTEROID));
+	AddChildActor(weaponSet_.at(TriggerType::ASTEROID));
 
 	// 「シールド」生成
-	weaponSet_.emplace(TriggerUI::TriggerType::SHIELD, new Shield(trans));
+	weaponSet_.emplace(TriggerType::SHIELD, new Shield(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet_.at(TriggerUI::TriggerType::SHIELD));
+	AddChildActor(weaponSet_.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	weaponSet_.emplace(TriggerUI::TriggerType::GRASS_HOPPER, new Grasshopper(trans));
+	weaponSet_.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet_.at(TriggerUI::TriggerType::GRASS_HOPPER));
+	AddChildActor(weaponSet_.at(TriggerType::GRASS_HOPPER));
 
 	// トリガーUIの登録
-	for (auto& w : weaponSet_) { trigger_.AddMain(w.first); }
+	for (auto& w : weaponSet_) { trigger_->AddMain(w.first); }
 
 #pragma endregion
 
 	// 現在選択中の武器を「弧月」に設定
-	currentWeaponID_ = TriggerUI::TriggerType::KOGETSU;
+	WeaponChange(TriggerType::KOGETSU);
 }
 
 void Jazz::SubInit(void)
@@ -127,12 +137,6 @@ void Jazz::SubUpdate(void)
 		}
 	}
 
-	if (!isAttacking) {
-		// デフォルトは現在の武器の待機状態
-		if (currentWeapon != nullptr) {
-			AnimePlay(currentWeapon->GetIdleAnimeID());
-		}
-	}
 
 	// 移動方向入力を取得
 	Vector3 inputVec = InputVec();
@@ -147,15 +151,21 @@ void Jazz::SubUpdate(void)
 		MoveAccel(inputVec);
 
 		// 攻撃中でない場合のみ、移動アニメーションにする
-		if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK); }
+		if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK, true); }
+	}
+	else {
+		if (!isAttacking) {
+			// デフォルトは現在の武器の待機状態
+			if (currentWeapon != nullptr) {
+				AnimePlay(currentWeapon->GetIdleAnimeID());
+			}
+		}
 	}
 
 	// 攻撃ボタンの入力をチェック
 	Attack();
 
-	WeaponChange();
-
-	trigger_.Update();
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down) { WeaponChange(); }
 }
 
 void Jazz::Attack(void)
@@ -165,39 +175,29 @@ void Jazz::Attack(void)
 	}
 }
 
-void Jazz::WeaponChange(void)
+void Jazz::WeaponChange(TriggerType type)
 {
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down)
-	{
-		mainCurrentIndex_++;
-		if (mainCurrentIndex_ >= trigger_.GetMainTrigger().size())
-		{
-			mainCurrentIndex_ = 0;
-		}
-
-		currentWeaponID_ = trigger_.GetMainTrigger()[mainCurrentIndex_];
-
-		// もし変更先が「アステロイド」だった場合
-		if (trigger_.GetMainTrigger()[mainCurrentIndex_] == TriggerUI::TriggerType::ASTEROID)
-		{
-			// 下位クラスを参照
-			for (ActorBase* actor : GetChildActors()) {
-
-				// 配列の中からアステロイドを探す
-				if (auto asteroid = dynamic_cast<ShooterManager*>(actor)) {
-
-					// アステロイドの準備
-					asteroid->SetState(STATE::CUBE);
-
-					// 終了
-					break;
-				}
-			}
-		}
-
-
-		//std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
+	if (type != TriggerType::NONE &&
+		TriggerType::NONE < type && type < TriggerType::MAX) {
+		mainCurrentIndex_ = (int)type;
 	}
+	else {
+		mainCurrentIndex_++;
+		if (mainCurrentIndex_ >= trigger_->GetMainTrigger().size()) { mainCurrentIndex_ = 0; }
+	}
+
+	currentWeaponID_ = trigger_->GetMainTrigger()[mainCurrentIndex_];
+
+	// もし変更先が「アステロイド」だった場合
+	if (currentWeaponID_ == TriggerType::ASTEROID)
+	{
+		dynamic_cast<ShooterManager*>(weaponSet_.at(currentWeaponID_))->SetState(STATE::CUBE);
+	}
+
+	// 選択中の武器を有効にし、それ以外の武器を無効にする
+	for (auto& w : weaponSet_) { w.second->SetIsActive(w.first == currentWeaponID_); }
+
+	//std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
 }
 
 Vector3 Jazz::InputVec(void) const

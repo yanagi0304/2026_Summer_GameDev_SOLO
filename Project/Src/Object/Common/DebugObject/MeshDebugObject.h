@@ -12,7 +12,7 @@ public:
 	MeshDebugObject(
 		std::string modelPath,
 		const Vector3& pos = Vector3(),
-		const Vector3& angle = Vector3(),
+		const Quaternion& rotation = Quaternion(),
 		const Vector3& scale = Vector3(1),
 
 		bool dynamicFlg = true,
@@ -30,7 +30,7 @@ public:
 			isOperator
 		)
 	{
-		trans.angle = angle;
+		trans.rotation = rotation;
 		trans.scale = scale;
 		trans.LoadModel(modelPath);
 	}

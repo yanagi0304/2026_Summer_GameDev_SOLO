@@ -20,3 +20,5 @@ BaseProject 3/BaseProject/x64
 BaseProject 3/BaseProject/Project
 
 *.vs
+
+*Log.txt

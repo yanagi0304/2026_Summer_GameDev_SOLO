@@ -62,6 +62,12 @@ void InputManager::Init(void)
 
 	SET_MOUSE_BUTTON(KEY_TYPE::PlayerKickDownAttack, MOUSE_INPUT_LEFT);
 
+	SET_MOUSE_BUTTON(KEY_TYPE::PlayerMain, MOUSE_INPUT_LEFT);
+
+	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_R);
+
+	SET_KEYBOARD(KEY_TYPE::PlayerDebug, KEY_INPUT_T);
+
 #pragma endregion
 
 #pragma region カメラ操作

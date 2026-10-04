@@ -2,19 +2,10 @@
 
 #include "../Common/ActorBase/ActorBase.h"
 
+#include "../Weapon/TriggerTypeDefine.h"
+
 class TriggerUI : public ActorBase
 {
-public:
-	enum class TriggerType
-	{
-		KOGETSU,
-		ASTEROID,
-		GRASS_HOPPER,
-		HOUND,
-		VIPER,
-		SHIELD,
-	};
-
 public:
 
 	const float SIZE_X = 499;

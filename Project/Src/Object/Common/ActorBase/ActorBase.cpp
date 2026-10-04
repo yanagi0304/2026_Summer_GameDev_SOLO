@@ -351,19 +351,21 @@ void ActorBase::MoveAccel(const Vector3& vec)
 {
 	if (vec == 0.0f) { return; }
 
-	// ‰Á‘¬
+	// “ü—Í—Ê‚É‰ž‚¶‚Ä‰Á‘¬
 	velocity += (vec * ACCEL_RATE) * TimeScale::Get();
 
-	// –Ú•WŠp“x
-	float targetAngle = atan2f(vec.x, vec.z);
+	// ˆÚ“®•ûŒü‚©‚ç–Ú•W‚ÌYŽ²‰ñ“]‚ðŽæ“¾
+	const float targetAngle = atan2f(vec.x, vec.z);
 
-	// Œ»ÝŠp“x‚©‚ç–Ú•WŠp“x‚Ü‚Å‚ÌŠp“x·
-	float diffAngle = targetAngle - trans.angle.y;
+	// –Ú•W‰ñ“]
+	const Quaternion targetRotation = Quaternion::FromRotationY(targetAngle);
 
-	// -ƒÎ ` +ƒÎ ‚É³‹K‰»‚µ‚ÄÅ’Z•ûŒü‚ð‹‚ß‚é
-	while (diffAngle > DX_PI_F) { diffAngle -= DX_TWO_PI_F; }
-	while (diffAngle < -DX_PI_F) { diffAngle += DX_TWO_PI_F; }
-
-	// Å’Z•ûŒü‚É•âŠÔ
-	trans.angle.y += (diffAngle * 0.25f) * TimeScale::Get();
+	// Œ»Ý‚Ì‰ñ“]‚©‚ç–Ú•W‰ñ“]‚Ö•âŠÔ
+	trans.SetRotation(
+		Quaternion::Slerp(
+			trans.rotation,
+			targetRotation,
+			0.25f * TimeScale::Get()
+		)
+	);
 }

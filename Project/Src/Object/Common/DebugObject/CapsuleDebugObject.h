@@ -47,10 +47,10 @@ private:
 
 	void SubDraw(void)override {
 
-		MATRIX angleMat = MatrixAllMultXZY({ trans.angle });
+		MATRIX rotationMat = trans.RotationMat();
 		DrawCapsule3D(
-			(trans.pos + startPos.TransMat(angleMat)).ToVECTOR(),
-			(trans.pos + endPos.TransMat(angleMat)).ToVECTOR(),
+			(trans.pos + startPos.TransMat(rotationMat)).ToVECTOR(),
+			(trans.pos + endPos.TransMat(rotationMat)).ToVECTOR(),
 			radius,
 			16,
 			0xffffff,

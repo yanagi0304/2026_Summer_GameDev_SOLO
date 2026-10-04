@@ -43,7 +43,7 @@ void PlayerKickDownAttackCollOperator::SubUpdate(void)
 	if (!attackColl->GetJudgeFlg()) { return; }
 
 	// 追従し続ける
-	trans.pos = playerTrans.pos + COLL_LOCAL_POS.TransMat(MGetRotY(playerTrans.angle.y));
+	trans.pos = playerTrans.pos + playerTrans.VTrans(COLL_LOCAL_POS);
 }
 
 void PlayerKickDownAttackCollOperator::On(void)
@@ -52,7 +52,7 @@ void PlayerKickDownAttackCollOperator::On(void)
 
 	// プレイヤーの座標、プレイヤーの角度、攻撃判定の相対座標をつかい
 	// 判定の座標を割り出す
-	trans.pos = playerTrans.pos + COLL_LOCAL_POS.TransMat(MGetRotY(playerTrans.angle.y));
+	trans.pos = playerTrans.pos + playerTrans.VTrans(COLL_LOCAL_POS);
 }
 
 void PlayerKickDownAttackCollOperator::Off(void)

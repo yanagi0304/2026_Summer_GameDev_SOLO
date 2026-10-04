@@ -64,8 +64,8 @@ bool MeshCollider::BVHNode::IsLeaf(void)const
 	return left < 0 && right < 0;
 }
 
-MeshCollider::MeshCollider(COLLIDER_TAG type, const Vector3& pos, const Vector3& angle) :
-	ColliderBase(type, pos, angle),
+MeshCollider::MeshCollider(COLLIDER_TAG type, const Vector3& pos, const Quaternion& rotation) :
+	ColliderBase(type, pos, rotation),
 	triangles(),
 	triangleIndices(),
 	bvhNodes(),
@@ -74,8 +74,8 @@ MeshCollider::MeshCollider(COLLIDER_TAG type, const Vector3& pos, const Vector3&
 	SetShape(COLLIDER_SHAPE::Mesh);
 }
 
-MeshCollider::MeshCollider(COLLIDER_TAG type, int modelHandle, int frameIndex, const Vector3& pos, const Vector3& angle) :
-	MeshCollider(type, pos, angle)
+MeshCollider::MeshCollider(COLLIDER_TAG type, int modelHandle, int frameIndex, const Vector3& pos, const Quaternion& rotation) :
+	MeshCollider(type, pos, rotation)
 {
 	SetupFromModel(modelHandle, frameIndex);
 }
@@ -300,7 +300,7 @@ Vector3 MeshCollider::ToWorldPoint(
 	const Transform& transform = GetTransform();
 
 	Vector3 scaled = localPoint * transform.scale;
-	Vector3 rotated = scaled.TransMat(GetAngleMat());
+	Vector3 rotated = scaled.TransMat(GetRotationMat());
 
 	return GetPos() + rotated;
 }
@@ -312,7 +312,7 @@ Vector3 MeshCollider::ToLocalPoint(
 	const Transform& transform = GetTransform();
 
 	const MATRIX inverseAngle =
-		MInverse(GetAngleMat());
+		MInverse(GetRotationMat());
 
 	Vector3 local =
 		(worldPoint - GetPos()).TransMat(
@@ -344,7 +344,7 @@ Vector3 MeshCollider::ToWorldDirection(
 )const
 {
 	Vector3 direction =
-		localDirection.TransMat(GetAngleMat());
+		localDirection.TransMat(GetRotationMat());
 
 	if (direction.LengthSq() > 0.000001f)
 	{
@@ -360,7 +360,7 @@ Vector3 MeshCollider::ToLocalDirection(
 {
 	Vector3 direction =
 		worldDirection.TransMat(
-			MInverse(GetAngleMat())
+			MInverse(GetRotationMat())
 		);
 
 	if (direction.LengthSq() > 0.000001f)
