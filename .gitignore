@@ -22,3 +22,5 @@ BaseProject 3/BaseProject/Project
 *.vs
 
 *Log.txt
+
+/Project/Data/Shader/*.cso
