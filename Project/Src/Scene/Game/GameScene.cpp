@@ -73,5 +73,5 @@ void GameScene::SubUiDraw(void)
 
 void GameScene::CreateCamera(void)
 {
-	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3::Zonly(-500));
+	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3(0,500, -400));
 }

@@ -15,7 +15,7 @@ public:
 
     void Load(void) override;
 
-    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::IDLE; }
+    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
     const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");

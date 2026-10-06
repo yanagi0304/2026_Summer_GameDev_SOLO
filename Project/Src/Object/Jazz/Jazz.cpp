@@ -23,6 +23,7 @@
 #include "../Weapon/Manager/ShooterManager.h"
 #include "../Weapon/Shield/Shield.h"
 #include "../Weapon/Grasshopper/Grasshopper.h"
+#include "../../Manager/TimeScale/TimeScale.h"
 
 Jazz::Jazz() :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
@@ -116,6 +117,20 @@ void Jazz::SubInit(void)
 
 void Jazz::SubUpdate(void)
 {
+
+	// カメラのY角度
+	const float camY = CurrentCamera::Get().GetAngle().y;
+
+	// 体は常にカメラの正面を向く(ストレイフ移動)
+	trans.SetRotation(
+		Quaternion::Slerp(
+			trans.rotation,
+			Quaternion::FromRotationY(camY),
+			0.25f * TimeScale::Get()
+		)
+	);
+
+
 	// 現在装備中の武器のポインタ
 	WeaponBase* currentWeapon = nullptr;
 	auto it = weaponSet_.find(currentWeaponID_);
@@ -141,16 +156,13 @@ void Jazz::SubUpdate(void)
 	// 移動方向入力を取得
 	Vector3 inputVec = InputVec();
 
-	// 最終的に入力があれば加速度に加算する
 	if (inputVec != 0.0f) {
 
-		// 移動方向をカメラで回転させる
-		inputVec.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));
+		inputVec.TransMatOwn(MGetRotY(camY));
 
-		// 移動
-		MoveAccel(inputVec);
+		// 移動のみ行い、向きは変えない
+		MoveAccel(inputVec, false);
 
-		// 攻撃中でない場合のみ、移動アニメーションにする
 		if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK, true); }
 	}
 	else {

@@ -102,31 +102,31 @@ void Player::Load(void)
 		new PlayerIdleState([&]() { AnimePlay(ANIME_TYPE::Idle); })
 	);
 
-	// 移動状態
-	AddState(
-		STATE::Move,
-		new PlayerMoveState(
-			10.0f, 1.5f, 300,
-			std::bind(&Player::MoveAccel, this, std::placeholders::_1),
-			ACCEL_MAX,
-			[&]() { AnimePlay(ANIME_TYPE::Walk); },
-			[&]() { AnimePlay(ANIME_TYPE::Run); }
-		)
-	);
+	//// 移動状態
+	//AddState(
+	//	STATE::Move,
+	//	new PlayerMoveState(
+	//		10.0f, 1.5f, 300,
+	//		std::bind(&Player::MoveAccel, this, std::placeholders::_1),
+	//		ACCEL_MAX,
+	//		[&]() { AnimePlay(ANIME_TYPE::Walk); },
+	//		[&]() { AnimePlay(ANIME_TYPE::Run); }
+	//	)
+	//);
 
-	// ジャンプ状態
-	AddState(
-		STATE::Jump,
-		new PlayerJumpState(
-			20.0f, velocity.y, isGround,
-			std::bind(&Player::MoveAccel, this, std::placeholders::_1),
-			[&]() { AnimePlay(ANIME_TYPE::JumpStart); },
-			[&]() { AnimePlay(ANIME_TYPE::JumpLoop); },
-			[&]() { AnimePlay(ANIME_TYPE::Stamp); },
-			std::bind(&Player::IsAnimeEnd, this),
-			[&]() { ChangeState(STATE::Idle); }
-		)
-	);
+	//// ジャンプ状態
+	//AddState(
+	//	STATE::Jump,
+	//	new PlayerJumpState(
+	//		20.0f, velocity.y, isGround,
+	//		std::bind(&Player::MoveAccel, this, std::placeholders::_1),
+	//		[&]() { AnimePlay(ANIME_TYPE::JumpStart); },
+	//		[&]() { AnimePlay(ANIME_TYPE::JumpLoop); },
+	//		[&]() { AnimePlay(ANIME_TYPE::Stamp); },
+	//		std::bind(&Player::IsAnimeEnd, this),
+	//		[&]() { ChangeState(STATE::Idle); }
+	//	)
+	//);
 
 	// 攻撃（踏みつけ）状態
 	AddState(

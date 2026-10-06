@@ -268,7 +268,7 @@ protected:
 	void SetDrawType(const ACTOR_DRAW_TYPE& type) { drawType = type; }
 
 	// w’è‚Ì•ûŒü‚ÉŒü‚©‚Á‚Ä‰Á‘¬“x‚ğ—p‚¢‚ÄˆÚ“®‚·‚é
-	void MoveAccel(const Vector3& vec);
+	void MoveAccel(const Vector3& vec, bool isRotate = true);
 
 	// ”h¶æ’Ç‰Á‰Šú‰»
 	virtual void SubInit(void) {}

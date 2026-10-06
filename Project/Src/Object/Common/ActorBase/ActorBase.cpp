@@ -110,6 +110,9 @@ void ActorBase::Update(void)
 		// 加速度更新
 		VelocityUpdate(velocity == prevVelocity);
 
+		//モデル情報の適用
+		trans.Attach();
+
 		// 接地判定のリセット
 		isGroundMaster = false;
 	}
@@ -347,20 +350,21 @@ void ActorBase::SetJudgeFlg(bool flg)
 	}
 }
 
-void ActorBase::MoveAccel(const Vector3& vec)
+void ActorBase::MoveAccel(const Vector3& vec, bool isRotate)
 {
 	if (vec == 0.0f) { return; }
 
 	// 入力量に応じて加速
 	velocity += (vec * ACCEL_RATE) * TimeScale::Get();
 
+	// 向きを変えない場合はここで終了
+	if (!isRotate) { return; }
+
 	// 移動方向から目標のY軸回転を取得
 	const float targetAngle = atan2f(vec.x, vec.z);
 
-	// 目標回転
 	const Quaternion targetRotation = Quaternion::FromRotationY(targetAngle);
 
-	// 現在の回転から目標回転へ補間
 	trans.SetRotation(
 		Quaternion::Slerp(
 			trans.rotation,

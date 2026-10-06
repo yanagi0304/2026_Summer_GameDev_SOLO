@@ -13,7 +13,7 @@ public:
 
     void Load(void) override;
 
-    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
+    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::IDLE_TO_SWORD_L; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
 private:
