@@ -49,7 +49,7 @@ void Jazz::Load(void)
 #pragma region ÉÇÉfÉã
 
 	// ÉÇÉfÉãÇÃì«Ç›çûÇ›
-	trans.LoadModel("Character/Jazz/Wochamole");
+	trans.LoadModel("Character/Jazz/wocamore");
 
 	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
@@ -111,7 +111,7 @@ void Jazz::SubInit(void)
 {
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
-	AnimePlay(CHARACTER_ANIME::SWORD_IDLE);
+	AnimePlay(CHARACTER_ANIME::IDLE);
 }
 
 void Jazz::SubUpdate(void)
