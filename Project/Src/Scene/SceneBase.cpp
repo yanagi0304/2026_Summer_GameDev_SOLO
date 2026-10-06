@@ -233,6 +233,13 @@ void SceneBase::Release(void)
 		mainScreen = -1;
 	}
 
+	for (int& screen : tempScreen) {
+		if (screen >= 0) {
+			DeleteGraph(screen);
+			screen = -1;
+		}
+	}
+
 	// ”h¶æ‚Ì‰ğ•úiŒãj
 	SubPostRelease();
 
