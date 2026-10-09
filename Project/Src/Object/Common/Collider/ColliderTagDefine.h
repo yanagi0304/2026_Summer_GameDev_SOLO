@@ -23,6 +23,8 @@ enum class COLLIDER_TAG
 
 	Asteroid,
 
+	Grasshopper,
+
 	Enemy,
 
 	Stage,

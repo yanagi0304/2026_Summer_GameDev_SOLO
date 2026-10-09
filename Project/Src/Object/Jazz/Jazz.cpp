@@ -95,7 +95,7 @@ void Jazz::Load(void)
 	AddChildActor(weaponSet_.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	weaponSet_.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
+	weaponSet_.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans, velocity));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(weaponSet_.at(TriggerType::GRASS_HOPPER));
 
@@ -106,6 +106,10 @@ void Jazz::Load(void)
 
 	// 現在選択中の武器を「弧月」に設定
 	WeaponChange(TriggerType::KOGETSU);
+}
+
+void Jazz::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
+{
 }
 
 void Jazz::SubInit(void)
@@ -120,15 +124,6 @@ void Jazz::SubUpdate(void)
 
 	// カメラのY角度
 	const float camY = CurrentCamera::Get().GetAngle().y;
-
-	// 体は常にカメラの正面を向く(ストレイフ移動)
-	trans.SetRotation(
-		Quaternion::Slerp(
-			trans.rotation,
-			Quaternion::FromRotationY(camY),
-			0.25f * TimeScale::Get()
-		)
-	);
 
 
 	// 現在装備中の武器のポインタ
@@ -158,11 +153,20 @@ void Jazz::SubUpdate(void)
 
 	if (inputVec != 0.0f) {
 
+		// 移動方向をカメラ基準にする
 		inputVec.TransMatOwn(MGetRotY(camY));
 
 		// 移動のみ行い、向きは変えない
 		MoveAccel(inputVec, false);
 
+		// 移動中だけカメラの正面を向く
+		trans.SetRotation(
+			Quaternion::Slerp(
+				trans.rotation,
+				Quaternion::FromRotationY(camY),
+				0.25f * TimeScale::Get()
+			)
+		);
 		if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK, true); }
 	}
 	else {
@@ -177,14 +181,16 @@ void Jazz::SubUpdate(void)
 	// 攻撃ボタンの入力をチェック
 	Attack();
 
+	IsJump();
+
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down) { WeaponChange(); }
 }
 
 void Jazz::Attack(void)
 {
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) {
+	/*if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) {
 		AnimePlay(CHARACTER_ANIME::SLASH_A1, false);
-	}
+	}*/
 }
 
 void Jazz::WeaponChange(TriggerType type)
@@ -230,4 +236,11 @@ Vector3 Jazz::InputVec(void) const
 	}
 
 	return vec;
+}
+
+void Jazz::IsJump(void)
+{
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down && isGround) {
+		velocity.y = 20.0f;
+	}
 }

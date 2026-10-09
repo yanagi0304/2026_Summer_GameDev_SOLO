@@ -22,6 +22,8 @@ public:
 
 	void Load(void)override;
 
+	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
+
 private:
 
 	//武器の位置
@@ -47,7 +49,10 @@ private:
 	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
 	void WeaponChange(TriggerType type = TriggerType::NONE);
 
+	//移動
 	Vector3 InputVec(void) const;
+
+	void IsJump(void);
 
 private:
 
