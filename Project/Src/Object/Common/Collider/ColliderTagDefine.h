@@ -25,6 +25,8 @@ enum class COLLIDER_TAG
 
 	Grasshopper,
 
+	Kogetsu,
+
 	Enemy,
 
 	Stage,

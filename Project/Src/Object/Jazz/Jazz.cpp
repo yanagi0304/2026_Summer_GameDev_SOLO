@@ -25,6 +25,10 @@
 #include "../Weapon/Grasshopper/Grasshopper.h"
 #include "../../Manager/TimeScale/TimeScale.h"
 
+#include "State/PlayerIdleState.h"
+#include "State/PlayerJumpState.h"
+#include "State/PlayerMoveState.h"
+
 Jazz::Jazz() :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
 
@@ -39,10 +43,17 @@ Jazz::Jazz() :
 
 void Jazz::Load(void)
 {
-	// アクターの挙動設定
-	SetJudgeFlg(true);
+
+#pragma region オブジェクト設定
+
+	// 動的オブジェクトとしての処理を有効にする
 	SetDynamicFlg(true);
+
+	// 重力を有効にする
 	SetGravityFlg(true);
+
+	// 当たり判定による押し出しを有効にする
+	SetPushFlg(true);
 
 	// 通常描画に設定
 	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
@@ -54,12 +65,18 @@ void Jazz::Load(void)
 
 	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
+#pragma endregion
+
+#pragma region アニメーション読み込み
+
 	// アニメーションコントローラー生成
 	CreateAnimationController();
 	// アニメーション登録
 	AddInFbxAnimation(CHARACTER_ANIME::MAX, 0.5f);
 	
 #pragma endregion
+
+#pragma region コライダー生成
 
 	// モデルのコライダー生成
 	AddCollider(
@@ -70,6 +87,9 @@ void Jazz::Load(void)
 			GetParameter("Collider", "Radius")
 		)
 	);
+#pragma endregion
+
+#pragma region 下位アクター生成
 
 	// トリガーUIの生成
 	trigger_ = new TriggerUI(mainCurrentIndex_, subCurrentIndex_);
@@ -95,7 +115,7 @@ void Jazz::Load(void)
 	AddChildActor(weaponSet_.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	weaponSet_.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans, velocity));
+	weaponSet_.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(weaponSet_.at(TriggerType::GRASS_HOPPER));
 
@@ -104,12 +124,60 @@ void Jazz::Load(void)
 
 #pragma endregion
 
-	// 現在選択中の武器を「弧月」に設定
-	WeaponChange(TriggerType::KOGETSU);
+#pragma endregion
+
+#pragma region 状態設定
+
+	// 待機状態
+	AddState(
+		STATE::Idle,
+		new PlayerIdleState([&]() { AnimePlay(weaponSet_.at(currentWeaponID_)->GetIdleAnimeID()); })
+	);
+
+	// 移動状態
+	AddState(
+		STATE::Move,
+		new PlayerMoveState(
+			10.0f, 1.5f, 300,
+			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
+			ACCEL_MAX,
+			[&]() { AnimePlay(ANIME_TYPE::Walk); },
+			[&]() { AnimePlay(ANIME_TYPE::Run); }
+		)
+	);
+
+	//// ジャンプ状態
+	//AddState(
+	//	STATE::Jump,
+	//	new PlayerJumpState(
+	//		20.0f, velocity.y, isGround,
+	//		std::bind(&Player::MoveAccel, this, std::placeholders::_1),
+	//		[&]() { AnimePlay(ANIME_TYPE::JumpStart); },
+	//		[&]() { AnimePlay(ANIME_TYPE::JumpLoop); },
+	//		[&]() { AnimePlay(ANIME_TYPE::Stamp); },
+	//		std::bind(&Player::IsAnimeEnd, this),
+	//		[&]() { ChangeState(STATE::Idle); }
+	//	)
+	//);
+
+	// 「待機状態」->「移動状態」の自動遷移登録
+	RegisterStateTransition(STATE::Idle, STATE::Move);
+	// 「移動状態」->「待機状態」の自動遷移登録
+	RegisterStateTransition(STATE::Move, STATE::Idle);
+
+#pragma endregion
 }
 
 void Jazz::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
+	switch (other.GetTag())
+	{
+	case COLLIDER_TAG::Grasshopper:
+		velocity.y = 40;
+		break;
+	default:
+		break;
+	}
 }
 
 void Jazz::SubInit(void)
@@ -117,71 +185,72 @@ void Jazz::SubInit(void)
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
 	AnimePlay(CHARACTER_ANIME::IDLE);
+	WeaponChange(TriggerType::KOGETSU);
 }
 
 void Jazz::SubUpdate(void)
 {
 
-	// カメラのY角度
-	const float camY = CurrentCamera::Get().GetAngle().y;
+	//// カメラのY角度
+	//const float camY = CurrentCamera::Get().GetAngle().y;
 
 
-	// 現在装備中の武器のポインタ
-	WeaponBase* currentWeapon = nullptr;
-	auto it = weaponSet_.find(currentWeaponID_);
-	if (it != weaponSet_.end()) { currentWeapon = it->second; }
+	//// 現在装備中の武器のポインタ
+	//WeaponBase* currentWeapon = nullptr;
+	//auto it = weaponSet_.find(currentWeaponID_);
+	//if (it != weaponSet_.end()) { currentWeapon = it->second; }
 
-	// 現在の武器の攻撃アニメーションIDと比較する
-	bool isAttacking = (currentWeapon != nullptr && (int)GetAnimePlayType() == currentWeapon->GetAttackAnimeID());
+	//// 現在の武器の攻撃アニメーションIDと比較する
+	//bool isAttacking = (currentWeapon != nullptr && (int)GetAnimePlayType() == currentWeapon->GetAttackAnimeID());
 
-	if (isAttacking && !IsAnimeEnd())
-	{
-		Attack();
-		return;
-	}
-	else if (isAttacking && IsAnimeEnd())
-	{
-		// 攻撃が終わったら、その武器の待機モーションに戻す
-		if (currentWeapon != nullptr) {
-			AnimePlay(currentWeapon->GetIdleAnimeID());
-		}
-	}
+	//if (isAttacking && !IsAnimeEnd())
+	//{
+	//	Attack();
+	//	return;
+	//}
+	//else if (isAttacking && IsAnimeEnd())
+	//{
+	//	// 攻撃が終わったら、その武器の待機モーションに戻す
+	//	if (currentWeapon != nullptr) {
+	//		AnimePlay(currentWeapon->GetIdleAnimeID());
+	//	}
+	//}
 
 
-	// 移動方向入力を取得
-	Vector3 inputVec = InputVec();
+	//// 移動方向入力を取得
+	//Vector3 inputVec = InputVec();
 
-	if (inputVec != 0.0f) {
+	//if (inputVec != 0.0f) {
 
-		// 移動方向をカメラ基準にする
-		inputVec.TransMatOwn(MGetRotY(camY));
+	//	// 移動方向をカメラ基準にする
+	//	inputVec.TransMatOwn(MGetRotY(camY));
 
-		// 移動のみ行い、向きは変えない
-		MoveAccel(inputVec, false);
+	//	// 移動のみ行い、向きは変えない
+	//	MoveAccel(inputVec, false);
 
-		// 移動中だけカメラの正面を向く
-		trans.SetRotation(
-			Quaternion::Slerp(
-				trans.rotation,
-				Quaternion::FromRotationY(camY),
-				0.25f * TimeScale::Get()
-			)
-		);
-		if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK, true); }
-	}
-	else {
-		if (!isAttacking) {
-			// デフォルトは現在の武器の待機状態
-			if (currentWeapon != nullptr) {
-				AnimePlay(currentWeapon->GetIdleAnimeID());
-			}
-		}
-	}
+	//	// 移動中だけカメラの正面を向く
+	//	trans.SetRotation(
+	//		Quaternion::Slerp(
+	//			trans.rotation,
+	//			Quaternion::FromRotationY(camY),
+	//			0.25f * TimeScale::Get()
+	//		)
+	//	);
+	//	if (!isAttacking) { AnimePlay(CHARACTER_ANIME::WALK, true); }
+	//}
+	//else {
+	//	if (!isAttacking && isGround) {
+	//		// デフォルトは現在の武器の待機状態
+	//		if (currentWeapon != nullptr) {
+	//			AnimePlay(currentWeapon->GetIdleAnimeID());
+	//		}
+	//	}
+	//}
 
-	// 攻撃ボタンの入力をチェック
-	Attack();
+	//// 攻撃ボタンの入力をチェック
+	//Attack();
 
-	IsJump();
+	//IsJump();
 
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down) { WeaponChange(); }
 }
@@ -209,11 +278,14 @@ void Jazz::WeaponChange(TriggerType type)
 	// もし変更先が「アステロイド」だった場合
 	if (currentWeaponID_ == TriggerType::ASTEROID)
 	{
-		dynamic_cast<ShooterManager*>(weaponSet_.at(currentWeaponID_))->SetState(STATE::CUBE);
+		dynamic_cast<ShooterManager*>(weaponSet_.at(currentWeaponID_))->SetState(CUBE_STATE::CUBE);
 	}
 
 	// 選択中の武器を有効にし、それ以外の武器を無効にする
 	for (auto& w : weaponSet_) { w.second->SetIsActive(w.first == currentWeaponID_); }
+
+	//武器にあった待機アニメーションを更新する
+	AnimePlay(weaponSet_.at(currentWeaponID_)->GetIdleAnimeID());
 
 	//std::cout << "武器を切り替えました: " << currentWeaponID_ << std::endl;
 }
@@ -241,6 +313,9 @@ Vector3 Jazz::InputVec(void) const
 void Jazz::IsJump(void)
 {
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down && isGround) {
+		AnimePlay(CHARACTER_ANIME::JUMP, false);
+
 		velocity.y = 20.0f;
+
 	}
 }

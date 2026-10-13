@@ -26,18 +26,92 @@ public:
 
 private:
 
-	//武器の位置
-	Transform weaponTrans_;
-	Vector3 prevPos;
 
-	//所持武器
-	std::map<TriggerType, WeaponBase*> weaponSet_;
+	// 状態定義
+	enum class STATE
+	{
+		None = -1,
 
-	//現在の装備を保存
-	TriggerType currentWeaponID_;
+		Idle,
+		Move,
+		Jump,
 
-	int mainCurrentIndex_;
-	int subCurrentIndex_;
+		Max
+	};
+
+#pragma region アニメーション関係定義
+
+	// アニメーションタイプ定義
+	enum class ANIME_TYPE
+	{
+		None = -1,
+
+		Idle,
+
+		Walk,
+		Run,
+
+		Damage,
+		Down,
+		Death,
+
+		KickDown,
+
+		ForwardThrow,
+		Toss,
+
+		JumpStart,
+		JumpLoop,
+		Stamp,
+
+		Max
+	};
+
+	// アニメーション再生速度テーブル
+	float ANIME_SPEED_TABLE[(int)ANIME_TYPE::Max] =
+	{
+		1.0f,	// Idle
+
+		1.0f,	// Walk
+		1.5f,	// Run
+
+		1.0f,	// Damage
+		1.0f,	// Down
+		1.0f,	// Death
+
+		1.0f,	// KickDown
+
+		1.0f,	// ForwardThrow
+		1.0f,	// Toss
+
+		3.0f,	// JumpStart
+		1.0f,	// JumpLoop
+		3.0f,	// Stamp
+	};
+
+	// アニメーションループ再生フラグテーブル
+	const bool ANIME_LOOP_TABLE[(int)ANIME_TYPE::Max] =
+	{
+		true,	// Idle
+
+		true,	// Walk
+		true,	// Run
+
+		false,	// Damage
+		false,	// Down
+		false,	// Death
+
+		false,	// KickDown
+
+		false,	// ForwardThrow
+		false,	// Toss
+
+		false,	// JumpStart
+		true,	// JumpLoop
+		false,	// Stamp
+	};
+
+#pragma endregion
 
 private:
 
@@ -58,5 +132,19 @@ private:
 
 	//所持トリガーの表示
 	TriggerUI* trigger_;
+
+	//武器の位置
+	Transform weaponTrans_;
+	Vector3 prevPos;
+
+	//所持武器
+	std::map<TriggerType, WeaponBase*> weaponSet_;
+
+	//現在の装備を保存
+	TriggerType currentWeaponID_;
+
+	int mainCurrentIndex_;
+	int subCurrentIndex_;
+
 };
 

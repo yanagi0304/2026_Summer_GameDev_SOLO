@@ -46,12 +46,6 @@
     <ClCompile Include="Src\Manager\Shader\ShaderResourceManager.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\TestShader.cpp" />
-    <ClCompile Include="Src\Object\Player\State\PlayerIdleState.cpp" />
-    <ClCompile Include="Src\Object\Player\State\PlayerJumpState.cpp" />
-    <ClCompile Include="Src\Object\Player\State\PlayerKickDownAttackState.cpp" />
-    <ClCompile Include="Src\Object\Player\State\PlayerMoveState.cpp" />
-    <ClCompile Include="Src\Object\Player\Wepon\PlayerKickDownAttackCollOperator.cpp" />
-    <ClCompile Include="Src\Object\Player\Player.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\DefaultShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\RimLightShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\WaterShader.cpp" />
@@ -68,6 +62,10 @@
     <ClCompile Include="Src\Object\Weapon\Shield\Shield.cpp" />
     <ClCompile Include="Src\Object\Weapon\WeaponBase.cpp" />
     <ClCompile Include="Src\Common\Quaternion.cpp" />
+    <ClCompile Include="Src\Object\Jazz\State\PlayerIdleState.cpp" />
+    <ClCompile Include="Src\Object\Jazz\State\PlayerJumpState.cpp" />
+    <ClCompile Include="Src\Object\Jazz\State\PlayerMoveState.cpp" />
+    <ClCompile Include="Src\Object\Jazz\State\PlayerKogetsuState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -140,12 +138,6 @@
     <ClInclude Include="Src\Manager\Shader\ShaderTypeDefine.h" />
     <ClInclude Include="Src\Object\Common\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Common\Shader\TestShader.h" />
-    <ClInclude Include="Src\Object\Player\State\PlayerIdleState.h" />
-    <ClInclude Include="Src\Object\Player\State\PlayerJumpState.h" />
-    <ClInclude Include="Src\Object\Player\State\PlayerKickDownAttackState.h" />
-    <ClInclude Include="Src\Object\Player\State\PlayerMoveState.h" />
-    <ClInclude Include="Src\Object\Player\Wepon\PlayerKickDownAttackCollOperator.h" />
-    <ClInclude Include="Src\Object\Player\Player.h" />
     <ClInclude Include="Src\Object\Common\Shader\DefaultShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\RimLightShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\WaterShader.h" />
@@ -165,6 +157,10 @@
     <ClInclude Include="Src\Object\Weapon\WeaponBase.h" />
     <ClInclude Include="Src\Object\Weapon\TriggerTypeDefine.h" />
     <ClInclude Include="Src\Common\Quaternion.h" />
+    <ClInclude Include="Src\Object\Jazz\State\PlayerMoveState.h" />
+    <ClInclude Include="Src\Object\Jazz\State\PlayerIdleState.h" />
+    <ClInclude Include="Src\Object\Jazz\State\PlayerJumpState.h" />
+    <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

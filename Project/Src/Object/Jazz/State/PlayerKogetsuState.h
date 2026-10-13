@@ -6,34 +6,28 @@
 
 struct Transform;
 
-class PlayerKickDownAttackCollOperator;
+class Kogetsu;
 
-class PlayerKickDownAttackState : public CharacterStateBase
+class PlayerKogetsuState : public CharacterStateBase
 {
 public:
 
-	/// <summary>
-	/// コンストラクタ
-	/// </summary>
-	/// <param name="COLL_START_TIME"></param>
-	/// <param name="COLL_END_TIME"></param>
-	/// <param name="collOperator"></param>
-	/// <param name="playAnimeAttack"></param>
-	/// <param name="getAnimeRatio"></param>
-	/// <param name="changeStateIdle"></param>
-	PlayerKickDownAttackState(
+	PlayerKogetsuState(
 		float COLL_START_TIME,
 		float COLL_END_TIME,
 
-		PlayerKickDownAttackCollOperator& collOperator,
+		Kogetsu& collOperator,
 
-		std::function<void(void)> playAnimeAttack,
+		std::function<bool(void)> playAnimeSlashA1,
+		std::function<void(void)> playAnimeSlashA2,
+		std::function<void(void)> playAnimeSlashA3,
+
 		std::function<float(void)> getAnimeRatio,
 
 		std::function<void(void)> changeStateIdle
 	);
 
-	~PlayerKickDownAttackState()override = default;
+	~PlayerKogetsuState()override = default;
 
 	// 自分の状態に遷移する条件関数
 	void OwnStateConditionUpdate(void);
@@ -72,7 +66,10 @@ private:
 #pragma region 受け取る参照変数・関数
 
 	// 攻撃の当たり判定管理クラスの参照
-	PlayerKickDownAttackCollOperator& collOperator;
+	Kogetsu& collOperator;
+
+	//プレイヤーの所持能力を確認する関数のポインタ
+	const std::function<bool(void)> playerAbility;
 
 	// 攻撃アニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeAttack;
@@ -88,3 +85,4 @@ private:
 	// 攻撃ステップ
 	STEP step;
 };
+

@@ -3,6 +3,8 @@
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
+class SphereCollider;
+
 class Kogetsu :
     public WeaponBase
 {
@@ -16,9 +18,7 @@ public:
     void Load(void) override;
 
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
-    int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
-    const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");
 
 
 private:
@@ -28,7 +28,16 @@ private:
     void SubDraw(void) override;
 	void SubRelease(void) override;
 
+private:
+
+    static constexpr float COLL_RADIUS = 10.0f;
+
+    const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");
+
     MATRIX weaponMatrix_;
+
+    // 生成するコライダー
+    SphereCollider* attackColl;
 
 };
 

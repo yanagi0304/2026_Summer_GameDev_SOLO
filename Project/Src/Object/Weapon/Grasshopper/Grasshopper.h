@@ -8,7 +8,7 @@ class Grasshopper :
 {
 
 public:
-    Grasshopper(const Transform& ownerTrans, Vector3& velocity);
+    Grasshopper(const Transform& ownerTrans);
     ~Grasshopper() override = default;
 
     void Load(void) override;
@@ -37,8 +37,6 @@ private:
 
     float tiltPitch_;   // 現在のピッチ角(ラジアン)
     float tiltRoll_;   // 現在のロール角(ラジアン)
-
-    Vector3& playerVelocity_;
 
 };
 

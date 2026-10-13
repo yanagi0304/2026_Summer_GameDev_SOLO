@@ -16,7 +16,7 @@ public:
 
     void Load(void) override;
 
-    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
+    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
     void SetTrans(const Vector3 pos, const Vector3 scale) { trans.pos = pos; trans.scale = scale; }

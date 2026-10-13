@@ -6,10 +6,9 @@
 
 #include "../../Common/Collider/BoxCollider.h"
 
-Grasshopper::Grasshopper(const Transform& ownerTrans,Vector3& velocity)
+Grasshopper::Grasshopper(const Transform& ownerTrans)
 	:
 	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Grasshopper/"),
-	playerVelocity_(velocity),
 	tiltPitch_(0),
 	tiltRoll_(0)
 {
@@ -28,8 +27,8 @@ void Grasshopper::Load(void)
 
 void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
-	playerVelocity_ = 40.0f;
 	SetJudgeFlg(false);
+
 }
 
 void Grasshopper::Create(void)

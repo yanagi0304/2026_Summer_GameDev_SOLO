@@ -8,7 +8,7 @@
 
 class Asteroid;
 
-enum class STATE
+enum class CUBE_STATE
 {
 	CUBE,
 	SPLIT,
@@ -31,7 +31,7 @@ public:
 	int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
 	//ステートのセッター
-	void SetState(const STATE state) { state_ = state; }
+	void SetState(const CUBE_STATE state) { state_ = state; }
 
 	static constexpr int div = 27;
 
@@ -52,7 +52,7 @@ private:
 private:
 	int divideNum_;
 
-	STATE state_;
+	CUBE_STATE state_;
 	Asteroid* shot[div];
 
    int fireIndex_ = 0;

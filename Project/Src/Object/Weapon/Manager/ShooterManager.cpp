@@ -24,22 +24,22 @@ void ShooterManager::Load(void)
 		AddChildActor(shot[i]);
 		shot[i]->SetIsActive(false);
 	}
-	state_ = STATE::CUBE;
+	state_ = CUBE_STATE::CUBE;
 }
 
 void ShooterManager::SubUpdate(void)
 {
 	switch (state_)
 	{
-	case STATE::CUBE:
+	case CUBE_STATE::CUBE:
 		CubeUpdate();
 		break;
 
-	case STATE::SPLIT:
+	case CUBE_STATE::SPLIT:
 		SpritUpdate();
 		break;
 
-	case STATE::FIRE:
+	case CUBE_STATE::FIRE:
 		FireUpdate();
 		break;
 	}
@@ -50,24 +50,24 @@ void ShooterManager::ChangeState(void)
 {
 	switch (state_)
 	{
-	case STATE::CUBE:
+	case CUBE_STATE::CUBE:
 
 		// 状態をSPLITに変更する
-		state_ = STATE::SPLIT;
+		state_ = CUBE_STATE::SPLIT;
 
 		break;
 
-	case STATE::SPLIT:
+	case CUBE_STATE::SPLIT:
 
 		// 状態をFIREに変更する
-		state_ = STATE::FIRE;
+		state_ = CUBE_STATE::FIRE;
 
 		break;
 
-	case STATE::FIRE:
+	case CUBE_STATE::FIRE:
 
 		// 状態をCUBEに戻す
-		state_ = STATE::CUBE;
+		state_ = CUBE_STATE::CUBE;
 
 		// 1つ目のアステロイドだけ有効にする
 		shot[0]->SetIsActive(true);
