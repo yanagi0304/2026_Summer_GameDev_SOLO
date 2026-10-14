@@ -26,5 +26,7 @@ private:
 
 #pragma endregion
 
+	bool UseSkyBox(void)const override { return true; }
+
 	void CreateCamera(void)override;
 };

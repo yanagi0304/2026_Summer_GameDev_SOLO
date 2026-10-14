@@ -84,6 +84,9 @@ void ActorBase::Init(void)
 
 	// モデル制御情報の適用
 	trans.Attach();
+
+	// コライダーの初期化
+	for (ColliderBase* collider : colliders) { collider->Init(); }
 	
 	// パラメータの解放
 	if (parameter != nullptr) {
@@ -258,10 +261,7 @@ void ActorBase::VelocityUpdate(bool	deceleration)
 
 void ActorBase::AddCollider(ColliderBase* newCollider)
 {
-	newCollider->SetTransformPtr(&trans);
-	newCollider->SetDynamicFlgPtr(&dynamicFlg);
-	newCollider->SetPushFlgPtr(&pushFlg);
-	newCollider->SetPushWeightPtr(&pushWeight);
+	newCollider->SetActorPtr(this);
 	newCollider->SetOnCollisionFunc([this](COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result) { this->OnCollision(ownTag, other, result); });
 	newCollider->SetOnGroundedFunc([this](COLLIDER_TAG ownTag, const ColliderBase& other) { this->OnGrounded(ownTag, other); });
 	colliders.emplace_back(newCollider);
@@ -363,8 +363,10 @@ void ActorBase::MoveAccel(const Vector3& vec, bool isRotate)
 	// 移動方向から目標のY軸回転を取得
 	const float targetAngle = atan2f(vec.x, vec.z);
 
+	// 目標回転
 	const Quaternion targetRotation = Quaternion::FromRotationY(targetAngle);
 
+	// 現在の回転から目標回転へ補間
 	trans.SetRotation(
 		Quaternion::Slerp(
 			trans.rotation,

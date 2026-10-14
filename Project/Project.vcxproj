@@ -167,6 +167,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Manager\Camera\Free\FreeCamera.cpp" />
     <ClCompile Include="Src\Manager\Camera\DisplayRemote\DisplayRemoteCamera.cpp" />
     <ClCompile Include="Src\Manager\Camera\MultifuncCamera\MultifuncCamera.cpp" />
+    <ClCompile Include="Src\Manager\Collision\CurrentCollisionManager.cpp" />
     <ClCompile Include="Src\Manager\Font\FontManager.cpp" />
     <ClCompile Include="Src\Manager\Net\HostAddressProvider\HostAddressProvider.cpp" />
     <ClCompile Include="Src\Manager\Net\NetWorkManager.cpp" />
@@ -188,6 +189,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Common\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\TestShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\WaterShader.cpp" />
+    <ClCompile Include="Src\Object\Common\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Src\Object\Common\Transform\Transform.cpp" />
     <ClCompile Include="Src\Object\Jazz\Jazz.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerIdleState.cpp" />
@@ -237,6 +239,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Manager\Camera\DisplayRemote\DisplayRemoteCamera.h" />
     <ClInclude Include="Src\Manager\Camera\MultifuncCamera\MultifuncCamera.h" />
     <ClInclude Include="Src\Manager\Collision\ChunkStDefine.h" />
+    <ClInclude Include="Src\Manager\Collision\CurrentCollisionManager.h" />
     <ClInclude Include="Src\Manager\Font\FontManager.h" />
     <ClInclude Include="Src\Manager\Net\HostAddressProvider\HostAddressProvider.h" />
     <ClInclude Include="Src\Manager\Net\NetWorkDefine.h" />
@@ -274,6 +277,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Common\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Common\Shader\TestShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\WaterShader.h" />
+    <ClInclude Include="Src\Object\Common\SkyBox\SkyBox.h" />
     <ClInclude Include="Src\Object\Common\Transform\Transform.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\MeshDebugObject.h" />
     <ClInclude Include="Src\Object\Jazz\Jazz.h" />
@@ -509,6 +513,14 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Src\Shader\Shadow\ShadowVS_NMap8Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\SkyBox\SkyBoxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\SkyBox\SkyBoxVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

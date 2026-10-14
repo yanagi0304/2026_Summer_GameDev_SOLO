@@ -16,15 +16,22 @@
 
 #include "Common/PostEffect/PostEffectBase.h"
 
+#include "../Object/Common/SkyBox/SkyBox.h"
+
 SceneBase::SceneBase(void) :
 
 	state(STATE::Created),
 
+	collision(nullptr),
+
+	postEffects(),
+
 	mainScreen(-1),
 	tempScreen(),
 
+	skyBox(nullptr),
+
 	camera(nullptr),
-	collision(nullptr),
 
 	actors()
 {
@@ -54,8 +61,9 @@ void SceneBase::Load(void)
 	// シーンごとに独立したカメラを生成する
 	CreateCamera();
 
-	// 全Actorが追加された後、巨大な静的オブジェクト等のチャンクを一度構築する
-	if (collision != nullptr) { collision->InitBuildChunks(); }
+
+	// スカイボックスを生成
+	if (UseSkyBox()) { skyBox = new SkyBox(); }
 
 	state = STATE::Loaded;
 }
@@ -70,8 +78,14 @@ void SceneBase::Init(void)
 	// カメラ初期化
 	if (camera != nullptr) { camera->Init(); }
 
+	// スカイボックス初期化
+	if (skyBox != nullptr) { skyBox->Init(); }
+
 	// シーンが所有するActorをすべて初期化する
 	for (ActorBase* actor : actors) { actor->Init(); }
+
+	// 全Actorが追加された後、巨大な静的オブジェクト等のチャンクを一度構築する
+	if (collision != nullptr) { collision->InitBuildChunks(); }
 
 	// 派生先の初期化（後）
 	SubPostInit();
@@ -107,6 +121,9 @@ void SceneBase::Update(void)
 	// カメラ更新
 	if (camera != nullptr) { camera->Update(); }
 
+	// スカイボックス更新
+	if (skyBox != nullptr) { skyBox->Update(); }
+
 	// ポストエフェクト更新
 	for (PostEffectBase* postEffect : postEffects) { postEffect->Update(); }
 }
@@ -115,7 +132,7 @@ void SceneBase::Draw(void)
 {
 	if (state != STATE::Initialized || mainScreen < 0) { return; }
 
-#pragma region メインスクリーンへ描画
+#pragma region 画面揺れ用スクリーンへ描画
 
 	SetDrawScreen(mainScreen);
 	ClearDrawScreen();
@@ -127,6 +144,9 @@ void SceneBase::Draw(void)
 #pragma endregion
 
 #pragma region メイン描画
+
+	// スカイボックス描画
+	if (skyBox != nullptr) { skyBox->Draw(); }
 
 	// 通常描画
 	SubPreDraw();
@@ -141,7 +161,7 @@ void SceneBase::Draw(void)
 	ActorsColliderDebugDraw(actors);
 
 	// デバッグ用チャンク描画
-	if (collision != nullptr && camera != nullptr) { collision->DrawChunkGrid(camera->GetPos()); }
+	//if (collision != nullptr && camera != nullptr) { collision->DrawChunkGrid(camera->GetPos()); }
 
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
@@ -213,6 +233,13 @@ void SceneBase::Release(void)
 	}
 	actors.clear();
 
+	// スカイボックス解放
+	if (skyBox != nullptr) {
+		skyBox->Release();
+		delete skyBox;
+		skyBox = nullptr;
+	}
+
 	// 当たり判定管理解放
 	if (collision != nullptr) {
 		collision->Clear();
@@ -232,12 +259,10 @@ void SceneBase::Release(void)
 		DeleteGraph(mainScreen);
 		mainScreen = -1;
 	}
-
 	for (int& screen : tempScreen) {
-		if (screen >= 0) {
-			DeleteGraph(screen);
-			screen = -1;
-		}
+		if (screen == 0) { continue; }
+		DeleteGraph(screen);
+		screen = -1;
 	}
 
 	// 派生先の解放（後）

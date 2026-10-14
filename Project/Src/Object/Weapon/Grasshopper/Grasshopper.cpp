@@ -29,6 +29,13 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 {
 	SetJudgeFlg(false);
 
+	switch (other.GetTag())
+	{
+	case COLLIDER_TAG::Player: {
+
+		break;
+	}
+	}
 }
 
 void Grasshopper::Create(void)

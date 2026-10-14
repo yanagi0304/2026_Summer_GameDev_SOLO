@@ -15,6 +15,8 @@ struct Vector2I;
 
 class PostEffectBase;
 
+class SkyBox;
+
 class SceneBase
 {
 public:
@@ -55,6 +57,9 @@ public:
 	// Update / Draw可能な状態か
 	bool IsInitialized(void)const { return state == STATE::Initialized; }
 
+	// 当たり判定管理クラスを取得する。使用しない場合はnullptrを返す
+	CollisionManager* GetCollisionManager(void)const { return collision; }
+
 	// カメラを取得する。カメラを使用しない場合はnullptrを返す。
 	CameraBase* GetCamera(void)const { return camera; }
 
@@ -62,7 +67,7 @@ public:
 	void AddPostEffect(PostEffectBase* postEffect);
 
 	// 指定した種類のポストエフェクトを削除
-	template<class T>
+	template<class T = PostEffectBase>
 	void RemovePostEffect() {
 		for (auto it = postEffects.begin(); it != postEffects.end(); ++it) {
 			T* effect = dynamic_cast<T*>(*it);
@@ -140,6 +145,9 @@ protected:
 	// 当たり判定管理クラスを使用するかどうか
 	virtual bool UseCollisionManager(void)const { return true; }
 
+	// スカイボックスを使用するかどうか
+	virtual bool UseSkyBox(void)const { return false; }
+
 private:
 
 	// 二重Load / 二重Releaseを防止する「状態」
@@ -154,6 +162,9 @@ private:
 	// ポストエフェクト用のスクリーンハンドル
 	int mainScreen;
 	int tempScreen[2];
+
+	// スカイボックス
+	SkyBox* skyBox;
 
 	// アクター描画関数
 	void ActorsDraw(const std::vector<ActorBase*>& actors, ACTOR_DRAW_TYPE drawType);

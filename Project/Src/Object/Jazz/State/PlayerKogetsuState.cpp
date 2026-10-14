@@ -11,11 +11,14 @@ PlayerKogetsuState::PlayerKogetsuState(
 	float COLL_START_TIME,
 	float COLL_END_TIME,
 
-	Kogetsu& collOperator,
+	const TriggerType triggerType,
 
-	std::function<bool(void)> playerAbility,
+	WeaponBase& kogetsu,
 
-	std::function<void(void)> playAnimeAttack,
+	std::function<void(void)> playAnimeSlashA1,
+	std::function<void(void)> playAnimeSlashA2,
+	std::function<void(void)> playAnimeSlashA3,
+
 	std::function<float(void)> getAnimeRatio,
 
 	std::function<void(void)> changeStateIdle
@@ -23,11 +26,14 @@ PlayerKogetsuState::PlayerKogetsuState(
 	COLL_START_TIME(COLL_START_TIME),
 	COLL_END_TIME(COLL_END_TIME),
 
-	collOperator(collOperator),
+	triggerType(triggerType),
 
-	playerAbility(playerAbility),
+	kogetsu(kogetsu),
 
-	playAnimeAttack(playAnimeAttack),
+	playAnimeSlashA1(playAnimeSlashA1),
+	playAnimeSlashA2(playAnimeSlashA2),
+	playAnimeSlashA3(playAnimeSlashA3),
+
 	getAnimeRatio(getAnimeRatio),
 
 	changeStateIdle(changeStateIdle),
@@ -40,10 +46,7 @@ PlayerKogetsuState::PlayerKogetsuState(
 void PlayerKogetsuState::OwnStateConditionUpdate(void)
 {
 
-	// パンチ能力を持っていなければ遷移しない
-	if (!playerAbility()) { return; }
-
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerAttack).down) {
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) {
 		OwnChangeState();
 	}
 }
@@ -54,10 +57,13 @@ void PlayerKogetsuState::Enter(void)
 	step = STEP::Startup;
 
 	// 当たり判定を消去
-	collOperator.Off();
+	//collOperator.Off();
 
 	// 攻撃アニメーション再生
-	playAnimeAttack();
+	playAnimeSlashA1();
+
+	//コンボを一段階へ
+	combo = COMBO_STEP::A1;
 }
 
 void PlayerKogetsuState::Update(void)
@@ -78,7 +84,7 @@ void PlayerKogetsuState::Update(void)
 			step = STEP::Active;
 
 			// 当たり判定を発生
-			collOperator.On();
+			//collOperator.On();
 		}
 
 		break;
@@ -86,8 +92,10 @@ void PlayerKogetsuState::Update(void)
 
 	case PlayerKogetsuState::STEP::Active: {
 		// 攻撃判定発生中
-
 		// 当たり判定を追従
+
+		//次コンボ猶予受付
+		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { NextCombo(); }
 
 		// 攻撃判定発生終了
 		if (COLL_END_TIME <= animeRatio) {
@@ -96,7 +104,7 @@ void PlayerKogetsuState::Update(void)
 			step = STEP::Recovery;
 
 			// 当たり判定を消去
-			collOperator.Off();
+			//collOperator.Off();
 		}
 
 		break;
@@ -121,5 +129,25 @@ void PlayerKogetsuState::Update(void)
 void PlayerKogetsuState::Exit(void)
 {
 	// 当たり判定を消去
-	collOperator.Off();
+	//collOperator.Off();
+}
+
+void PlayerKogetsuState::NextCombo(void)
+{
+	switch (combo)
+	{
+	case PlayerKogetsuState::COMBO_STEP::A1:
+		playAnimeSlashA2();
+		//次コンボに切り替え
+		combo = COMBO_STEP::A2;
+		break;
+	case PlayerKogetsuState::COMBO_STEP::A2:
+		playAnimeSlashA3();
+		combo = COMBO_STEP::A3;
+		break;
+	case PlayerKogetsuState::COMBO_STEP::A3:
+		break;
+	default:
+		break;
+	}
 }

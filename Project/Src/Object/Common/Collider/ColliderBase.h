@@ -6,12 +6,13 @@
 #include <functional>
 #include <vector>
 
+class ActorBase;
+struct Transform;
+
+#include "../../../Common/Vector3.h"
 #include "../../../Common/Quaternion.h"
 
-#include "../Transform/Transform.h"
-
 #include "ColliderTagDefine.h"
-
 
 // 衝突結果構造体
 struct CollisionResult
@@ -63,6 +64,8 @@ public:
 
 	virtual ~ColliderBase() = default;
 
+	// 初期化
+	virtual void Init(void) {}
 
 	// デバッグ描画
 	virtual void DrawDebug(unsigned int color = 0xffffff) = 0;
@@ -70,17 +73,8 @@ public:
 
 #pragma region 初期設定
 
-	// モデル制御情報セット
-	void SetTransformPtr(Transform* ptr);
-
-	// 動的フラグの参照先をセット
-	void SetDynamicFlgPtr(const bool* ptr);
-
-	// 押し出しフラグの参照先をセット
-	void SetPushFlgPtr(const bool* ptr);
-
-	// 押し出し時の重さの参照先をセット
-	void SetPushWeightPtr(const unsigned char* ptr);
+	// 参照アクターをセット
+	void SetActorPtr(ActorBase* ptr);
 
 	// 当たり判定通知用関数セット
 	void SetOnCollisionFunc(std::function<void(COLLIDER_TAG, const ColliderBase&, const CollisionResult&)> OnCollisionFunc);
@@ -92,6 +86,8 @@ public:
 
 
 #pragma region ゲット関数
+
+	ActorBase* GetActor(void)const { return owner; }
 
 	// コライダー座標
 	Vector3 GetPos(void) const;
@@ -155,13 +151,8 @@ public:
 
 private:
 
-	// モデル制御情報
-	Transform* trans;
-
-	// オブジェクト側から直接参照する情報
-	const bool* dynamicFlg;
-	const bool* pushFlg;
-	const unsigned char* pushWeight;
+	// 参照アクター
+	ActorBase* owner;
 
 	// 相対座標
 	Vector3 pos;

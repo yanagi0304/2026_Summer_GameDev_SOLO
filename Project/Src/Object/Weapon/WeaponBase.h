@@ -37,6 +37,10 @@ public:
 		SetJudgeFlg(isActive);
 	}
 
+	//当たり判定のオンオフ
+	virtual void On(void) {};
+	virtual void Off(void) {};
+
 private:
 
 	//更新

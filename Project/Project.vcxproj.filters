@@ -66,6 +66,8 @@
     <ClCompile Include="Src\Object\Jazz\State\PlayerJumpState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerMoveState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerKogetsuState.cpp" />
+    <ClCompile Include="Src\Object\Common\SkyBox\SkyBox.cpp" />
+    <ClCompile Include="Src\Manager\Collision\CurrentCollisionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -161,6 +163,8 @@
     <ClInclude Include="Src\Object\Jazz\State\PlayerIdleState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerJumpState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
+    <ClInclude Include="Src\Object\Common\SkyBox\SkyBox.h" />
+    <ClInclude Include="Src\Manager\Collision\CurrentCollisionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />
@@ -229,5 +233,7 @@
     <FxCompile Include="Src\Shader\Default\DefaultVS_NMap1Frame.hlsl" />
     <FxCompile Include="Src\Shader\Default\DefaultVS_NMap4Frame.hlsl" />
     <FxCompile Include="Src\Shader\Default\DefaultVS_NMap8Frame.hlsl" />
+    <FxCompile Include="Src\Shader\SkyBox\SkyBoxPS.hlsl" />
+    <FxCompile Include="Src\Shader\SkyBox\SkyBoxVS.hlsl" />
   </ItemGroup>
 </Project>

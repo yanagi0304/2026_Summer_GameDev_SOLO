@@ -11,7 +11,6 @@
 #include "ActorDrawTypeDefine.h"
 
 #include "../../../Manager/Net/SenderID_Define.h"
-
 class ColliderBase;
 struct CollisionResult;
 
@@ -25,7 +24,7 @@ struct Vector2I;
 class ActorBase
 {
 public:
-	
+
 	// デフォルトコンストラクタ
 	ActorBase();
 	// パラメーターを外部から読み込む場合に使うコンストラクタ
@@ -51,6 +50,9 @@ public:
 	// モデル制御情報構造体のゲット関数
 	const Transform& GetTrans(void)const { return trans; }
 
+	// 座標セット
+	void SetPos(const Vector3& pos) { trans.pos = pos; }
+
 	// 当たり判定の通知
 	virtual void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result) {}
 
@@ -75,6 +77,15 @@ public:
 
 	// 子クラスを取得する
 	const std::vector<ActorBase*>& GetChildActors(void)const { return childActors; }
+
+	// 動的オブジェクトかどうか（true = 動的、false = 静的）
+	bool GetDynamicFlg(void)const { return dynamicFlg; }
+
+	// 衝突時押し出しを行うかどうか（true = 押し出す、false = 押し出さず通り抜ける）
+	bool GetPushFlg(void)const { return pushFlg; }
+
+	// 押し出しを行う際の重さ（0 ～ 100 で設定）
+	unsigned char GetPushWeight(void)const { return pushWeight; }
 
 	// 自分が更新権限を持っているかどうか
 	bool IsOwnControl(void)const;
@@ -142,11 +153,11 @@ protected:
 	Vector3 velocity;
 
 	// 横軸加速度の1フレームごとの加速量
-	float ACCEL_RATE = 2.0f;
+	float ACCEL_RATE = 3.0f;
 	// 横軸加速度の1フレームごとの減速量
-	float DECEL_RATE = 2.0f;
+	float DECEL_RATE = 3.0f;
 	// 横軸加速度の最大値
-	float ACCEL_MAX =10.0f;
+	float ACCEL_MAX = 30.0f;
 
 	// 接地判定(派生先で参照用)
 	const bool& isGround = isGroundMaster;
@@ -252,8 +263,6 @@ protected:
 	// 当たり判定の設定（true = 「判定する」、false = 「判定しない」）
 	void SetJudgeFlg(bool flg);
 
-	// 移動するオブジェクトかの設定を取得
-	bool GetDynamicFlg(void)const { return dynamicFlg; }
 	// 重力の設定の状態を取得
 	bool GetGravityFlg(void)const { return gravityFlg; }
 

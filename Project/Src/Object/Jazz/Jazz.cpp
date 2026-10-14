@@ -28,6 +28,7 @@
 #include "State/PlayerIdleState.h"
 #include "State/PlayerJumpState.h"
 #include "State/PlayerMoveState.h"
+#include "State/PlayerKogetsuState.h"
 
 Jazz::Jazz() :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
@@ -141,8 +142,8 @@ void Jazz::Load(void)
 			10.0f, 1.5f, 300,
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
 			ACCEL_MAX,
-			[&]() { AnimePlay(ANIME_TYPE::Walk); },
-			[&]() { AnimePlay(ANIME_TYPE::Run); }
+			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
+			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
 		)
 	);
 
@@ -165,6 +166,11 @@ void Jazz::Load(void)
 	// 「移動状態」->「待機状態」の自動遷移登録
 	RegisterStateTransition(STATE::Move, STATE::Idle);
 
+	// 「待機状態」->「弧月」の自動遷移登録
+	//RegisterStateTransition(STATE::Idle, STATE::Kogetsu);
+	//// 「移動状態」->「弧月」の自動遷移登録
+	//RegisterStateTransition(STATE::Move, STATE::Kogetsu);
+
 #pragma endregion
 }
 
@@ -173,7 +179,7 @@ void Jazz::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const Col
 	switch (other.GetTag())
 	{
 	case COLLIDER_TAG::Grasshopper:
-		velocity.y = 40;
+		velocity.y = 40.0f;
 		break;
 	default:
 		break;

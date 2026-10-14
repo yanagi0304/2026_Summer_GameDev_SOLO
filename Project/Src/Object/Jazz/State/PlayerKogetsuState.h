@@ -4,9 +4,11 @@
 
 #include "../../../Common/Vector3.h"
 
+#include "../../Weapon/TriggerTypeDefine.h"
+
 struct Transform;
 
-class Kogetsu;
+class WeaponBase;
 
 class PlayerKogetsuState : public CharacterStateBase
 {
@@ -16,9 +18,11 @@ public:
 		float COLL_START_TIME,
 		float COLL_END_TIME,
 
-		Kogetsu& collOperator,
+		const TriggerType triggerType,
 
-		std::function<bool(void)> playAnimeSlashA1,
+		WeaponBase& kogetsu,
+
+		std::function<void(void)> playAnimeSlashA1,
 		std::function<void(void)> playAnimeSlashA2,
 		std::function<void(void)> playAnimeSlashA3,
 
@@ -41,6 +45,11 @@ public:
 
 private:
 
+	//コンボ用切り替え
+	void NextCombo(void);
+
+private:
+
 #pragma region 定数
 
 	// 攻撃ステップ
@@ -56,6 +65,19 @@ private:
 		Recovery
 	};
 
+	//コンボ
+	enum class COMBO_STEP
+	{
+		//通常
+		A1,
+
+		//通常派生
+		A2,
+
+		//通常派生締め
+		A3
+	};
+
 	// 攻撃の判定を発生させ始めるアニメーション再生割合
 	const float COLL_START_TIME;
 	// 攻撃の判定を発生させ終わるアニメーション再生割合
@@ -66,13 +88,18 @@ private:
 #pragma region 受け取る参照変数・関数
 
 	// 攻撃の当たり判定管理クラスの参照
-	Kogetsu& collOperator;
+	WeaponBase& kogetsu;
+
+	//現在の所持トリガー
+	const TriggerType triggerType;
 
 	//プレイヤーの所持能力を確認する関数のポインタ
 	const std::function<bool(void)> playerAbility;
 
 	// 攻撃アニメーションの再生関数のポインタ
-	const std::function<void(void)> playAnimeAttack;
+	const std::function<void(void)> playAnimeSlashA1;
+	const std::function<void(void)> playAnimeSlashA2;
+	const std::function<void(void)> playAnimeSlashA3;
 
 	// アニメーションの再生割合を取得する関数のポインタ
 	const std::function<float(void)> getAnimeRatio;
@@ -84,5 +111,9 @@ private:
 
 	// 攻撃ステップ
 	STEP step;
+
+	//攻撃コンボ
+	COMBO_STEP combo;
+
 };
 

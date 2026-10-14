@@ -27,7 +27,7 @@ void Kogetsu::Load(void)
 
 	SetJudgeFlg(true);
 	SetDynamicFlg(true);
-	SetPushFlg(true);
+	SetPushFlg(false);
 
 	attackColl->SetJudgeFlg(false);
 
