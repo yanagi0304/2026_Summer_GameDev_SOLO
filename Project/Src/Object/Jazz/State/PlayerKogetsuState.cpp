@@ -4,16 +4,13 @@
 
 #include "../../Common/Transform/Transform.h"
 
-
-
-
 PlayerKogetsuState::PlayerKogetsuState(
 	float COLL_START_TIME,
 	float COLL_END_TIME,
 
-	const TriggerType triggerType,
-
 	WeaponBase& kogetsu,
+
+	std::function<bool(void)> isTrigger,
 
 	std::function<void(void)> playAnimeSlashA1,
 	std::function<void(void)> playAnimeSlashA2,
@@ -26,7 +23,7 @@ PlayerKogetsuState::PlayerKogetsuState(
 	COLL_START_TIME(COLL_START_TIME),
 	COLL_END_TIME(COLL_END_TIME),
 
-	triggerType(triggerType),
+	isTrigger(isTrigger),
 
 	kogetsu(kogetsu),
 
@@ -45,6 +42,9 @@ PlayerKogetsuState::PlayerKogetsuState(
 
 void PlayerKogetsuState::OwnStateConditionUpdate(void)
 {
+
+	//所持トリガーが弧月じゃなければ戻す
+	if (!isTrigger()) { return; }
 
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) {
 		OwnChangeState();
@@ -94,14 +94,15 @@ void PlayerKogetsuState::Update(void)
 		// 攻撃判定発生中
 		// 当たり判定を追従
 
-		//次コンボ猶予受付
-		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { NextCombo(); }
+			//次コンボ猶予受付
+		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { isInputBuffered = true; }
 
 		// 攻撃判定発生終了
 		if (COLL_END_TIME <= animeRatio) {
 
-			// ステップを「後隙」へ
-			step = STEP::Recovery;
+			// 入力がなかったらステップを「後隙」へ
+			if (!isInputBuffered) { step = STEP::Recovery; }
+			else { NextCombo(); }
 
 			// 当たり判定を消去
 			//collOperator.Off();
@@ -140,10 +141,13 @@ void PlayerKogetsuState::NextCombo(void)
 		playAnimeSlashA2();
 		//次コンボに切り替え
 		combo = COMBO_STEP::A2;
+		isInputBuffered = false;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A2:
 		playAnimeSlashA3();
 		combo = COMBO_STEP::A3;
+		isInputBuffered = false;
+		step = STEP::Recovery;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A3:
 		break;

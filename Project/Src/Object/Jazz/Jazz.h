@@ -24,7 +24,6 @@ public:
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
-
 private:
 
 
@@ -46,19 +45,22 @@ private:
 	// アニメーション再生速度テーブル
 	float ANIME_SPEED_TABLE[(int)CHARACTER_ANIME::MAX] =
 	{
-		1.0f,	// Idle
+		0.5,	// Idle
 
-		1.0f,	// Walk
-		1.5f,	// Run
+		0.5,	// Walk
 
-		1.0f,	// Damage
-		1.0f,	// Down
-		1.0f,	// Death
+		0.5,	// SwordIdle.R
+		0.5,	// ShildIdle.L
 
-		1.0f,	// KickDown
+		0.5,	// Jump
 
-		1.0f,	// ForwardThrow
-		1.0f,	// Toss
+		0.5,	// SlashA1
+		0.5,	// SlashA2
+		0.5,	// SlashA3
+
+		0.5,	// AsteroidIdle.R
+		0.5,	// AsteroidCreate.R
+		1.5f,	// AsteroidIdleShot.R
 
 	};
 
@@ -68,16 +70,19 @@ private:
 		true,	// Idle
 
 		true,	// Walk
-		true,	// Run
 
-		false,	// Damage
-		false,	// Down
-		false,	// Death
+		true,	// SwordIdle.R
+		true,	// ShildIdle.L
 
-		false,	// KickDown
+		false,	// Jump
 
-		false,	// ForwardThrow
-		false,	// Toss
+		false,	// SlashA1
+		false,	// SlashA2
+		false,	// SlashA3
+
+		true,	// AsteroidIdle.R
+		true,	// AsteroidCreate.R
+		false,	// AsteroidIdleShot.R
 
 	};
 
@@ -93,10 +98,12 @@ private:
 	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
 	void WeaponChange(TriggerType type = TriggerType::NONE);
 
-	//移動
 	Vector3 InputVec(void) const;
 
 	void IsJump(void);
+
+	//所持トリガーの確認
+	bool IsTrigger(TriggerType trigger);
 
 private:
 

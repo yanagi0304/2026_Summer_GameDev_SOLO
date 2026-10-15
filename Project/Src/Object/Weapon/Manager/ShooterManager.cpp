@@ -6,13 +6,15 @@
 
 #include "../Asteroid/Asteroid.h"
 
-ShooterManager::ShooterManager() :
-	WeaponBase(Transform())
-{
-}
+ShooterManager::ShooterManager(
+	const Transform& ownerTrans,
 
-ShooterManager::ShooterManager(const Transform& ownerTrans) :
-	WeaponBase(ownerTrans)
+	std::function<float(void)> animeRate,
+	std::function<void(void)> playAnime
+) :
+	WeaponBase(ownerTrans),
+	animeRatio(animeRate),
+	playAnime(playAnime)
 {
 }
 
@@ -24,7 +26,26 @@ void ShooterManager::Load(void)
 		AddChildActor(shot[i]);
 		shot[i]->SetIsActive(false);
 	}
-	state_ = CUBE_STATE::CUBE;
+	state_ = CUBE_STATE::NONE;
+}
+
+int ShooterManager::GetIdleAnimeID(void) const
+{
+	switch (state_)
+	{
+	case CUBE_STATE::NONE:
+		return CHARACTER_ANIME::ASTEROID_IDLE_R;
+		break;
+	case CUBE_STATE::CUBE:
+		return CHARACTER_ANIME::ASTEROID_CREATE_R;
+		break;
+	case CUBE_STATE::SPLIT:
+		return CHARACTER_ANIME::ASTEROID_CREATE_R;
+		break;
+	case CUBE_STATE::FIRE:
+		return CHARACTER_ANIME::ASTEROID_IDLE_SHOT_R;
+		break;
+	}
 }
 
 void ShooterManager::SubUpdate(void)
@@ -50,6 +71,13 @@ void ShooterManager::ChangeState(void)
 {
 	switch (state_)
 	{
+	case CUBE_STATE::NONE:
+
+		// 状態をSPLITに変更する
+		state_ = CUBE_STATE::CUBE;
+		// 1つ目のアステロイドだけ有効にする
+		shot[0]->SetIsActive(true);
+		break;
 	case CUBE_STATE::CUBE:
 
 		// 状態をSPLITに変更する
@@ -61,21 +89,22 @@ void ShooterManager::ChangeState(void)
 
 		// 状態をFIREに変更する
 		state_ = CUBE_STATE::FIRE;
-
+		for (auto* s : shot) { s->SetFire(true); }
 		break;
 
 	case CUBE_STATE::FIRE:
 
 		// 状態をCUBEに戻す
 		state_ = CUBE_STATE::CUBE;
-
+		for (auto* s : shot) { s->SetFire(false); s->ClearTrail(); }
 		// 1つ目のアステロイドだけ有効にする
 		shot[0]->SetIsActive(true);
 		// 残りのアステロイドを無効にする
 		for (int i = 1; i < div; ++i) { shot[i]->SetIsActive(false); }
-
 		break;
 	}
+
+	playAnime();
 }
 
 void ShooterManager::CubeUpdate()
@@ -213,6 +242,11 @@ void ShooterManager::SpritUpdate()
 
 void ShooterManager::FireUpdate()
 {
+
+	const float ratio = animeRatio();
+
+	if (ratio < 0.2f) { return; }
+
 	const float speed = 100.0f;
 
 	Vector3 scale = 0.3f;
@@ -230,4 +264,8 @@ void ShooterManager::FireUpdate()
 
 		asteroid->SetTrans(centerPos, scale);
 	}
+
+	if (ratio >= 1.0f) { // 状態をCUBEに戻す
+		state_ = CUBE_STATE::NONE;; }
+
 }

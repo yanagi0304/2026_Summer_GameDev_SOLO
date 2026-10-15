@@ -18,9 +18,9 @@ public:
 		float COLL_START_TIME,
 		float COLL_END_TIME,
 
-		const TriggerType triggerType,
-
 		WeaponBase& kogetsu,
+
+		std::function<bool(void)> isTrigger,
 
 		std::function<void(void)> playAnimeSlashA1,
 		std::function<void(void)> playAnimeSlashA2,
@@ -91,10 +91,7 @@ private:
 	WeaponBase& kogetsu;
 
 	//現在の所持トリガー
-	const TriggerType triggerType;
-
-	//プレイヤーの所持能力を確認する関数のポインタ
-	const std::function<bool(void)> playerAbility;
+	const std::function<bool(void)> isTrigger;
 
 	// 攻撃アニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeSlashA1;
@@ -114,6 +111,9 @@ private:
 
 	//攻撃コンボ
 	COMBO_STEP combo;
+
+	//コンボ用受付フラグ
+	bool isInputBuffered;
 
 };
 

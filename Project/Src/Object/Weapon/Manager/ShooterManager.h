@@ -10,6 +10,7 @@ class Asteroid;
 
 enum class CUBE_STATE
 {
+	NONE,
 	CUBE,
 	SPLIT,
 	FIRE,
@@ -20,15 +21,19 @@ class ShooterManager
 {
 public:
 
-	ShooterManager();
-	ShooterManager(const Transform& ownerTrans);
+	ShooterManager(
+		const Transform& ownerTrans,
+	
+		std::function<float(void)> animeRatio,
+		std::function<void(void)> playAnime
+	);
 
 	~ShooterManager() = default;
 
 	void Load(void)override;
 
-	int GetIdleAnimeID(void) const { return CHARACTER_ANIME::AsteroidIdle; }
-	int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
+	int GetIdleAnimeID(void) const override;
+	int GetAttackAnimeID(void) const override { return CHARACTER_ANIME::SLASH_A1; }
 
 	//ステートのセッター
 	void SetState(const CUBE_STATE state) { state_ = state; }
@@ -57,6 +62,17 @@ private:
 
    int fireIndex_ = 0;
    int fireTimer_ = 0;
+
+#pragma region 受け取る関数
+
+   // アニメーションの再生割合を取得する関数のポインタ
+   std::function<float(void)> animeRatio;
+
+   //状態切り替え時のアニメーションを取得する関数ポインタ
+   std::function<void(void)> playAnime;
+
+#pragma endregion
+
 	
 };
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <deque>
+
 #include "../WeaponBase.h"
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
@@ -27,8 +29,12 @@ public:
 
     float GetSize(void) const { return SIZE; }
 
-    void SetFire(bool fire) { isFire_ = fire; }
-    bool IsFire(void) const { return isFire_; }
+    //”­Ëó‹µ
+    void SetFire(bool fire) { isFire = fire; }
+    bool IsFire(void) const { return isFire; }
+
+    //‹OÕ‚ğ‰Šú‰»
+    void ClearTrail(void) { trail.clear(); }
 
 private:
 
@@ -38,7 +44,13 @@ private:
     void SubRelease(void) override;
 
 private:
+
     Vector3 direction_;
-    bool isFire_ = false;
+    bool isFire = false;
+
+    //‹OÕ•ÛŠÇ
+    static constexpr int TRAIL_MAX = 10;
+
+    std::deque<Vector3> trail;
 };
 

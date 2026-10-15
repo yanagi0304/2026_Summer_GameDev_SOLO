@@ -28,7 +28,6 @@ void Grasshopper::Load(void)
 void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
 	SetJudgeFlg(false);
-
 	switch (other.GetTag())
 	{
 	case COLLIDER_TAG::Player: {

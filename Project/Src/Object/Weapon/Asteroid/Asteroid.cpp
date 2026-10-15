@@ -20,75 +20,44 @@ void Asteroid::Load(void)
 	SetDynamicFlg(true);
 	SetPushFlg(false);
 
-	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 30.0f, 0.0f)));
+	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
 }
 
 void Asteroid::SubInit(void)
 {
 	trans.scale = (SIZE);
-	//trans.pos += GetParameter("Init", "modelOffset");
 }
 
 void Asteroid::SubUpdate(void)
 {
-	//auto frameIndex = MV1SearchFrame(ownerTrans_.model, "mixamorig:RightHandIndex2");
-	//Vector3 hand = MV1GetFramePosition(ownerTrans_.model, frameIndex);
-	//float angle = ownerTrans_.angle.y;
-	//trans.scale = (SIZE);
-	//Vector3 right(
-	//	cosf(angle),
-	//	0.0f,
-	//	-sinf(angle));
-
-	//trans.pos =
-	//	hand -
-	//	right * 80.0f +
-	//	Vector3(0.0f, 60.0f, 0.0f);
+	//”­ŽË’†‚¾‚¯‹OÕ‚ð‹L˜^‚·‚é
+	if (isFire)
+	{
+		trail.push_front(trans.pos);
+		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
+	}
+	else { trail.clear(); }
 }
 
 void Asteroid::SubDraw(void)
 {
-	/*auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
-	auto framePos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
-	auto handMatrix = MV1GetFrameLocalWorldMatrix(ownerTrans_->get().model, frameIndex);
-	auto vec = VScale({ 0.0f,0.1f,0.0f }, 1.0 / 0.025);
-	auto swordStartPos = VTransform(vec, handMatrix);
+	if (trail.size() < 2) { return; }
 
-	VECTOR xAxis =
+	//‰ÁŽZ‡¬
+	SetWriteZBufferFlag(false);
+
+	for (size_t i = 0; i + 1 < trail.size(); i++)
 	{
-		handMatrix.m[0][0],
-		handMatrix.m[0][1],
-		handMatrix.m[0][2]
-	};
+		const float rate = 1.0f - static_cast<float>(i) / TRAIL_MAX;
+		const int alpha = static_cast<int>(255 * rate);
 
-	VECTOR yAxis =
-	{
-		handMatrix.m[1][0],
-		handMatrix.m[1][1],
-		handMatrix.m[1][2]
-	};
+		SetDrawBlendMode(DX_BLENDMODE_ADD, alpha);
+		DrawLine3D(trail[i].ToVECTOR(), trail[i + 1].ToVECTOR(), GetColor(120, 255, 220));
+	}
 
-	VECTOR zAxis =
-	{
-		handMatrix.m[2][0],
-		handMatrix.m[2][1],
-		handMatrix.m[2][2]
-	};
-
-	DrawLine3D(
-		swordStartPos,
-		VAdd(swordStartPos, VScale(xAxis, 20.0f)),
-		GetColor(255, 0, 0));
-
-	DrawLine3D(
-		swordStartPos,
-		VAdd(swordStartPos, VScale(yAxis, 20.0f)),
-		GetColor(0, 255, 0));
-
-	DrawLine3D(
-		swordStartPos,
-		VAdd(swordStartPos, VScale(zAxis, 20.0f)),
-		GetColor(0, 0, 255));*/
+	//–ß‚·
+	SetWriteZBufferFlag(TRUE);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 }
 
