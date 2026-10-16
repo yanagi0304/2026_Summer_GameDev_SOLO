@@ -1,5 +1,5 @@
 #pragma once
-#include "../../ActorBase.h"
+#include "../../Common/ActorBase/ActorBase.h"
 class StageTutrial :
     public ActorBase
 {

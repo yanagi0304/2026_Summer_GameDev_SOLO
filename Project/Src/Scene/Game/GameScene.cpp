@@ -24,6 +24,8 @@
 #include "../../Object/Common/DebugObject/MeshDebugObject.h"
 
 #include "../../Object/Jazz/Jazz.h"
+#include "../../Object/Mannequin/Mannequin.h"
+#include "../../Object/Stage/StageTutrial/StageTutrial.h"
 
 #include "../../Object/Water.h"
 
@@ -39,6 +41,7 @@ void GameScene::SubPostLoad(void)
 
 	//AddActor(new Water);
 	AddActor(new Jazz);
+	AddActor(new StageTutrial);
 
 	//int debugObjNum = 50;
 	//float debugObjSpace = 10.0f;
@@ -73,6 +76,6 @@ void GameScene::SubUiDraw(void)
 
 void GameScene::CreateCamera(void)
 {
-	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3(0,500, -400));
+	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3(0,1000, -300));
 }
 

@@ -5,6 +5,11 @@
 
 class SphereCollider;
 
+struct Slash
+{
+
+};
+
 class Kogetsu :
     public WeaponBase
 {
@@ -20,6 +25,7 @@ public:
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
+    void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
 private:
 

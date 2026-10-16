@@ -142,7 +142,7 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Move,
 		new PlayerMoveState(
-			10.0f, 1.5f, 300,
+			10.0f, 50.0f, 300,
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
 			ACCEL_MAX,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },

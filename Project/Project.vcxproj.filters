@@ -68,6 +68,8 @@
     <ClCompile Include="Src\Object\Jazz\State\PlayerKogetsuState.cpp" />
     <ClCompile Include="Src\Object\Common\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Src\Manager\Collision\CurrentCollisionManager.cpp" />
+    <ClCompile Include="Src\Object\Mannequin\Mannequin.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -165,6 +167,9 @@
     <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
     <ClInclude Include="Src\Object\Common\SkyBox\SkyBox.h" />
     <ClInclude Include="Src\Manager\Collision\CurrentCollisionManager.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshSlicer.h" />
+    <ClInclude Include="Src\Object\Mannequin\Mannequin.h" />
+    <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

@@ -35,6 +35,11 @@ void Kogetsu::Load(void)
 	
 }
 
+void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
+{
+
+}
+
 void Kogetsu::SubInit(void)
 {
 	trans.scale = Vector3(GetParameter("Init", "scale"));

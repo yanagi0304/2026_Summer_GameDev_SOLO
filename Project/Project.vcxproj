@@ -196,6 +196,8 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Jazz\State\PlayerJumpState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerKogetsuState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerMoveState.cpp" />
+    <ClCompile Include="Src\Object\Mannequin\Mannequin.cpp" />
+    <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
     <ClCompile Include="Src\Object\TriggerUI\TriggerUI.cpp" />
     <ClCompile Include="Src\Object\Weapon\Asteroid\Asteroid.cpp" />
     <ClCompile Include="Src\Object\Weapon\Grasshopper\Grasshopper.cpp" />
@@ -272,6 +274,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Common\Collider\XZCircleCollider.h" />
     <ClInclude Include="Src\Object\Common\DataLoad\ParameterLoad.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\BoxDebugObject.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshSlicer.h" />
     <ClInclude Include="Src\Object\Common\Shader\DefaultShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\RimLightShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\ShaderBase.h" />
@@ -285,6 +288,8 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Jazz\State\PlayerJumpState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerMoveState.h" />
+    <ClInclude Include="Src\Object\Mannequin\Mannequin.h" />
+    <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
     <ClInclude Include="Src\Object\TriggerUI\TriggerUI.h" />
     <ClInclude Include="Src\Object\Water.h" />
     <ClInclude Include="Src\Object\Weapon\Asteroid\Asteroid.h" />
