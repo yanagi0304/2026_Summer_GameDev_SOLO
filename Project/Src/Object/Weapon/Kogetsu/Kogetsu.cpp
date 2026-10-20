@@ -4,7 +4,11 @@
 
 #include "../../../Utility/Utility.h"
 
-#include "../../Common/Collider/SphereCollider.h"
+#include "../../Common/Collider/CapsuleCollider.h"
+
+#include "../../Common/MeshSlicer/CutRequestQueue.h"
+
+#include "../../Common/CuttableActor/CuttableActor.h"
 
 Kogetsu::Kogetsu()
 	:
@@ -15,7 +19,8 @@ Kogetsu::Kogetsu()
 Kogetsu::Kogetsu(const Transform& ownerTrans)
 	:
 	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Kogetsu/"),
-	attackColl(new SphereCollider(COLLIDER_TAG::Kogetsu, COLL_RADIUS))
+	attackColl(new CapsuleCollider(COLLIDER_TAG::Kogetsu,
+		BladeDirHand()* BLADE_START, BladeDirHand()* (BLADE_START + BLADE_LENGTH), BLADE_RADIUS))
 {
 }
 
@@ -35,9 +40,27 @@ void Kogetsu::Load(void)
 	
 }
 
+void Kogetsu::On(void)
+{
+	attackColl->SetJudgeFlg(true);
+	slash_.Reset();
+	cutId_ = CutRequestQueue::IssueCutId();   // àÍêUÇËÇ≤Ç∆Ç…êVÇµÇ¢ID
+}
+
+void Kogetsu::Off(void)
+{
+	attackColl->SetJudgeFlg(false);
+}
+
 void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
+	CuttableActor* target = dynamic_cast<CuttableActor*>(other.GetActor());
+	if (target == nullptr) { return; }
+	if (target->GetLastCutId() == cutId_) { return; }   // Ç±ÇÃàÍêUÇËÇ≈êÿÇ¡ÇΩëäéËÅiífï–Ç‡ÅjÇÕèúÇ≠
 
+	CutPlane plane;
+	if (!slash_.GetPlane(plane)) { return; }            // ìÀÇ´ÅEí‚é~íÜÇÕå©ëóÇÈ
+	CutRequestQueue::Push(target, plane, cutId_);
 }
 
 void Kogetsu::SubInit(void)
@@ -122,52 +145,21 @@ void Kogetsu::SubUpdate(void)
 			handRotationMat
 		)
 	);
+
+	// SubUpdate ÇÃç≈å„Ç…í«â¡
+	const Vector3 bladeDir = trans.VTrans(BladeDirHand());
+	slash_.Update(trans.pos + bladeDir * BLADE_START, trans.pos + bladeDir * (BLADE_START + BLADE_LENGTH));
+
 }
 
 void Kogetsu::SubDraw(void)
 {
-	//auto frameIndex = MV1SearchFrame(ownerTrans_.model, "mixamorig:RightHand");
-	//auto framePos = MV1GetFramePosition(ownerTrans_.model, frameIndex);
-	//auto handMatrix = MV1GetFrameLocalWorldMatrix(ownerTrans_.model, frameIndex);
-	//auto vec = VScale({ 0.0f,0.1f,0.0f }, 1.0 / 0.025);
-	//auto swordStartPos = VTransform(vec, handMatrix);
-
-	//VECTOR xAxis =
-	//{
-	//	handMatrix.m[0][0],
-	//	handMatrix.m[0][1],
-	//	handMatrix.m[0][2]
-	//};
-
-	//VECTOR yAxis =
-	//{
-	//	handMatrix.m[1][0],
-	//	handMatrix.m[1][1],
-	//	handMatrix.m[1][2]
-	//};
-
-	//VECTOR zAxis =
-	//{
-	//	handMatrix.m[2][0],
-	//	handMatrix.m[2][1],
-	//	handMatrix.m[2][2]
-	//};
-
-	//DrawLine3D(
-	//	swordStartPos,
-	//	VAdd(swordStartPos, VScale(xAxis, 20.0f)),
-	//	GetColor(255, 0, 0));
-
-	//DrawLine3D(
-	//	swordStartPos,
-	//	VAdd(swordStartPos, VScale(yAxis, 20.0f)),
-	//	GetColor(0, 255, 0));
-
-	//DrawLine3D(
-	//	swordStartPos,
-	//	VAdd(swordStartPos, VScale(zAxis, 20.0f)),
-	//	GetColor(0, 0, 255));
-
+//#ifdef _DEBUG
+//	const Vector3 o = trans.pos;
+//	DrawLine3D(o.ToVECTOR(), (o + trans.VTrans(Vector3::Xonly(1.0f)) * 100.0f).ToVECTOR(), GetColor(255, 0, 0));     // X = ê‘
+//	DrawLine3D(o.ToVECTOR(), (o + trans.VTrans(Vector3::Yonly(1.0f)) * 100.0f).ToVECTOR(), GetColor(255, 255, 0));   // Y = â©
+//	DrawLine3D(o.ToVECTOR(), (o + trans.VTrans(Vector3::Zonly(1.0f)) * 100.0f).ToVECTOR(), GetColor(255, 255, 255)); // Z = îí
+//#endif
 }
 
 void Kogetsu::SubRelease(void)

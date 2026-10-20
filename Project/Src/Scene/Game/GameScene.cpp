@@ -29,6 +29,10 @@
 
 #include "../../Object/Water.h"
 
+#include "../../Object/Common/CuttableActor/CuttableActor.h"
+
+#include "../../Object/Common/MeshSlicer/CutRequestQueue.h"
+
 GameScene::GameScene() : SceneBase()
 {
 }
@@ -39,9 +43,10 @@ void GameScene::SubPostLoad(void)
 
 	AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
-	//AddActor(new Water);
-	AddActor(new Jazz);
-	AddActor(new StageTutrial);
+	AddActor(new Mannequin);
+	operatorObject = new Jazz();
+	AddActor(operatorObject);
+	//AddActor(new StageTutrial);
 
 	//int debugObjNum = 50;
 	//float debugObjSpace = 10.0f;
@@ -49,15 +54,31 @@ void GameScene::SubPostLoad(void)
 	//	AddActor(new SphereDebugObject(50.0f, Vector3::Xonly(debugObjSpace * (float)(debugObjNum / 2) - ((float)debugObjSpace * i))));
 	//	AddActor(new SphereDebugObject(50.0f, Vector3::Zonly(debugObjSpace * (float)(debugObjNum / 2) - ((float)debugObjSpace * i))));
 	//}
+
+	// GameScene::SubPostLoad
+	//CutRequestQueue::Clear();
+	//auto* box = new CuttableActor(COLLIDER_TAG::Stage, false);
+	//box->SetMesh(CutMesh::MakeBox(Vector3(200, 200, 200)));
+	//box->SetPos(Vector3(0, 100, 200));      // Jazz の前。位置は調整してください
+	//AddActor(box);
+
+
 }
 
 void GameScene::SubPostInit(void)
 {
 	//AddPostEffect(new FocusLinesPostEffect(1.5f, 18.0f, 100.0f));
+	
 }
 
 void GameScene::SubPostUpdate(void)
 {
+
+	for (const CutRequest& request : CutRequestQueue::Drain()) {
+		CuttableActor* fragment = request.target->Cut(request.plane, request.cutId);
+		if (fragment != nullptr) { AddActor(fragment); }
+	}
+
 	// ゲーム終了処理
 	if (Input::GetIns().GetInfo(KEY_TYPE::End).down) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
@@ -67,6 +88,7 @@ void GameScene::SubPostUpdate(void)
 	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
 	}
+
 }
 
 void GameScene::SubUiDraw(void)

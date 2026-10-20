@@ -183,7 +183,12 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Common\CharacterBase\CharacterBase.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\ColliderBase.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\MeshCollider.cpp" />
+    <ClCompile Include="Src\Object\Common\CuttableActor\CuttableActor.cpp" />
     <ClCompile Include="Src\Object\Common\DataLoad\ParameterLoad.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\CutMesh.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\MeshCutter.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\SlashTracker.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\DefaultShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\RimLightShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\ShaderBase.cpp" />
@@ -254,6 +259,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Common\AnimationController\CharacterAnimeTypeDefine.h" />
     <ClInclude Include="Src\Object\Common\CharacterBase\CharacterStateBase.h" />
     <ClInclude Include="Src\Object\Common\Collider\MeshCollider.h" />
+    <ClInclude Include="Src\Object\Common\CuttableActor\CuttableActor.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\CapsuleDebugObject.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\DebugObjectBase.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\SphereDebugObject.h" />
@@ -274,7 +280,11 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Common\Collider\XZCircleCollider.h" />
     <ClInclude Include="Src\Object\Common\DataLoad\ParameterLoad.h" />
     <ClInclude Include="Src\Object\Common\DebugObject\BoxDebugObject.h" />
-    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshSlicer.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutMesh.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutRequestQueue.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshCutter.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\SlashTracker.h" />
     <ClInclude Include="Src\Object\Common\Shader\DefaultShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\RimLightShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\ShaderBase.h" />

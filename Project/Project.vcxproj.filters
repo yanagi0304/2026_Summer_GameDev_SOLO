@@ -70,6 +70,11 @@
     <ClCompile Include="Src\Manager\Collision\CurrentCollisionManager.cpp" />
     <ClCompile Include="Src\Object\Mannequin\Mannequin.cpp" />
     <ClCompile Include="Src\Object\Stage\StageTutrial\StageTutrial.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\CutMesh.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\MeshCutter.cpp" />
+    <ClCompile Include="Src\Object\Common\CuttableActor\CuttableActor.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\SlashTracker.cpp" />
+    <ClCompile Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -167,9 +172,14 @@
     <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
     <ClInclude Include="Src\Object\Common\SkyBox\SkyBox.h" />
     <ClInclude Include="Src\Manager\Collision\CurrentCollisionManager.h" />
-    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshSlicer.h" />
     <ClInclude Include="Src\Object\Mannequin\Mannequin.h" />
     <ClInclude Include="Src\Object\Stage\StageTutrial\StageTutrial.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutMesh.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\MeshCutter.h" />
+    <ClInclude Include="Src\Object\Common\CuttableActor\CuttableActor.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutRequestQueue.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\SlashTracker.h" />
+    <ClInclude Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

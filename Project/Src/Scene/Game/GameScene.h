@@ -2,6 +2,11 @@
 
 #include"../SceneBase.h"
 
+#include "../../Object/Common/MeshSlicer/CutMesh.h"
+#include "../../Object/Common/CuttableActor/CuttableActor.h"
+
+
+
 class GameScene : public SceneBase
 {
 public:
@@ -29,4 +34,15 @@ private:
 	bool UseSkyBox(void)const override { return true; }
 
 	void CreateCamera(void)override;
+
+	ActorBase* operatorObject;
+
+	//debug
+	CutMesh front;
+	CutMesh back;
+
+	CuttableActor* box_; 
+	bool prevC_;
+
+
 };

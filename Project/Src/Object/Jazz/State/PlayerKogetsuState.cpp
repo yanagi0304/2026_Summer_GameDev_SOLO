@@ -4,6 +4,8 @@
 
 #include "../../Common/Transform/Transform.h"
 
+#include "../../Weapon/Kogetsu/Kogetsu.h"
+
 PlayerKogetsuState::PlayerKogetsuState(
 	float COLL_START_TIME,
 	float COLL_END_TIME,
@@ -57,7 +59,7 @@ void PlayerKogetsuState::Enter(void)
 	step = STEP::Startup;
 
 	// 当たり判定を消去
-	//collOperator.Off();
+	kogetsu.Off();
 
 	// 攻撃アニメーション再生
 	playAnimeSlashA1();
@@ -84,7 +86,7 @@ void PlayerKogetsuState::Update(void)
 			step = STEP::Active;
 
 			// 当たり判定を発生
-			//collOperator.On();
+			kogetsu.On();
 		}
 
 		break;
@@ -105,7 +107,7 @@ void PlayerKogetsuState::Update(void)
 			else { NextCombo(); }
 
 			// 当たり判定を消去
-			//collOperator.Off();
+			kogetsu.Off();
 		}
 
 		break;
@@ -130,7 +132,7 @@ void PlayerKogetsuState::Update(void)
 void PlayerKogetsuState::Exit(void)
 {
 	// 当たり判定を消去
-	//collOperator.Off();
+	kogetsu.Off();
 }
 
 void PlayerKogetsuState::NextCombo(void)
@@ -142,14 +144,16 @@ void PlayerKogetsuState::NextCombo(void)
 		//次コンボに切り替え
 		combo = COMBO_STEP::A2;
 		isInputBuffered = false;
+		STEP::Startup;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A2:
 		playAnimeSlashA3();
 		combo = COMBO_STEP::A3;
 		isInputBuffered = false;
-		step = STEP::Recovery;
+		step = STEP::Startup;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A3:
+		STEP::Recovery;
 		break;
 	default:
 		break;

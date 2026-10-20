@@ -1,24 +1,21 @@
 #pragma once
-#include "../Common/ActorBase/ActorBase.h"
+#include "../Common/CuttableActor/CuttableActor.h"
+
+// 弧月で切れるマネキン
+// ・見た目と切断は CuttableActor が担当する（MV1モデルの形をCutMeshに取り込んで描く）
+// ・床に立たせる・押し出す用のカプセルコライダーは今まで通り持つ
 class Mannequin :
-    public ActorBase
+    public CuttableActor
 {
 public:
     Mannequin();
     ~Mannequin() = default;
     void Load(void) override;
     void SubInit(void) override;
-    void SubUpdate(void)override;
-    void SubDraw(void) override;
 
     void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
 private:
 
-    bool sliced = false;
-    std::vector<MeshSlicer::Tri> tris;
-    std::vector<int> tex;
-    MeshSlicer::Piece pieces[2];
 
 };
-
