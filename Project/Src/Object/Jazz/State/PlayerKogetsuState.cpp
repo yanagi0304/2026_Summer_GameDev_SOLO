@@ -7,8 +7,8 @@
 #include "../../Weapon/Kogetsu/Kogetsu.h"
 
 PlayerKogetsuState::PlayerKogetsuState(
-	float COLL_START_TIME,
-	float COLL_END_TIME,
+	const std::array<float, (size_t)COMBO_STEP::Max>& COLL_START_TIME,
+	const std::array<float, (size_t)COMBO_STEP::Max>& COLL_END_TIME,
 
 	WeaponBase& kogetsu,
 
@@ -80,7 +80,7 @@ void PlayerKogetsuState::Update(void)
 		// 前隙
 
 		// 攻撃判定発生開始
-		if (COLL_START_TIME <= animeRatio) {
+		if (COLL_START_TIME[(size_t)combo] <= animeRatio) {
 
 			// ステップを「攻撃判定発生中」へ
 			step = STEP::Active;
@@ -100,7 +100,7 @@ void PlayerKogetsuState::Update(void)
 		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { isInputBuffered = true; }
 
 		// 攻撃判定発生終了
-		if (COLL_END_TIME <= animeRatio) {
+		if (COLL_END_TIME[(size_t)combo] <= animeRatio) {
 
 			// 入力がなかったらステップを「後隙」へ
 			if (!isInputBuffered) { step = STEP::Recovery; }

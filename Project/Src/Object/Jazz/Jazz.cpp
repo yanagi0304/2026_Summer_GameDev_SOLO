@@ -168,7 +168,16 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Kogetsu,
 		new PlayerKogetsuState(
-			0.1f, 0.7f,
+			{
+				0.1f,
+				0.1f,
+				0.5f
+			},
+			{
+				0.7f,
+				0.7f,
+				0.9f
+			},
 			*weaponSet_.at(TriggerType::KOGETSU),
 			[&]() { return IsTrigger(TriggerType::KOGETSU); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
@@ -176,7 +185,7 @@ void Jazz::Load(void)
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A3); },
 			[&]() {return GetAnimeRatio(); },
 			[&]() {ChangeState(STATE::Idle); }
-			)
+		)
 	);
 
 	// 「待機状態」->「移動状態」の自動遷移登録

@@ -13,3 +13,8 @@ enum class TriggerType
 
 	MAX,
 };
+
+enum class SubTriggerType
+{
+	NONE = -1,
+};

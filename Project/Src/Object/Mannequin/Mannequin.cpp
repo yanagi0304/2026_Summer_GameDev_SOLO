@@ -26,7 +26,7 @@ void Mannequin::Load(void)
 	MV1SetVisible(trans.model, FALSE);
 
 	// 動的オブジェクトとしての処理を有効にする
-	SetDynamicFlg(true);
+	SetDynamicFlg(false);
 
 	// 重力を有効にする
 	SetGravityFlg(true);

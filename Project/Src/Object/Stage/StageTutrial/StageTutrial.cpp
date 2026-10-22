@@ -8,7 +8,7 @@ StageTutrial::StageTutrial():
 
 void StageTutrial::Load(void)
 {
-	trans.LoadModel("Stage/komakiDoujo");
+	trans.LoadModel("Stage/demoStage");
 	// 動的オブジェクトとしての処理を有効にする
 	SetDynamicFlg(false);
 

@@ -41,12 +41,12 @@ void GameScene::SubPostLoad(void)
 {
 	Snd::GetIns().ChangeScene("Game");
 
-	AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
+	//AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
 	AddActor(new Mannequin);
 	operatorObject = new Jazz();
 	AddActor(operatorObject);
-	//AddActor(new StageTutrial);
+	AddActor(new StageTutrial);
 
 	//int debugObjNum = 50;
 	//float debugObjSpace = 10.0f;

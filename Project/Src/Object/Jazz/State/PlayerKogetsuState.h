@@ -2,6 +2,8 @@
 
 #include "../../Common/CharacterBase/CharacterStateBase.h"
 
+#include <array>
+
 #include "../../../Common/Vector3.h"
 
 #include "../../Weapon/TriggerTypeDefine.h"
@@ -14,9 +16,24 @@ class PlayerKogetsuState : public CharacterStateBase
 {
 public:
 
+	//コンボ
+	enum class COMBO_STEP
+	{
+		//通常
+		A1,
+
+		//通常派生
+		A2,
+
+		//通常派生締め
+		A3,
+
+		Max,
+	};
+
 	PlayerKogetsuState(
-		float COLL_START_TIME,
-		float COLL_END_TIME,
+		const std::array<float, (size_t)COMBO_STEP::Max>& COLL_START_TIME,
+		const std::array<float, (size_t)COMBO_STEP::Max>& COLL_END_TIME,
 
 		WeaponBase& kogetsu,
 
@@ -65,23 +82,10 @@ private:
 		Recovery
 	};
 
-	//コンボ
-	enum class COMBO_STEP
-	{
-		//通常
-		A1,
-
-		//通常派生
-		A2,
-
-		//通常派生締め
-		A3
-	};
-
 	// 攻撃の判定を発生させ始めるアニメーション再生割合
-	const float COLL_START_TIME;
+	const std::array<float,(size_t)COMBO_STEP::Max>COLL_START_TIME;
 	// 攻撃の判定を発生させ終わるアニメーション再生割合
-	const float COLL_END_TIME;
+	const std::array<float,(size_t)COMBO_STEP::Max>COLL_END_TIME;
 
 #pragma endregion
 
