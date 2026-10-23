@@ -139,6 +139,9 @@ public:
 		}
 	}
 
+	// 指定したコライダーを登録から外す（アクターを delete する前に必ず呼ぶ）
+	void Remove(const std::vector<ColliderBase*>& targets);
+
 private:
 
 	// グループ別の格納配列

@@ -67,6 +67,15 @@ struct CutMesh
 		subMeshes.clear();
 	}
 
+	/// <summary>
+	/// メッシュの表面積（三角形の面積の合計）を求める
+	/// ・損傷率の計算に使う（切る前と今の面積を比べる）
+	/// ・単位はローカル座標。スケールは比を取れば打ち消される
+	/// </summary>
+	/// <param name="excludeCap">true = 切断面のフタ（materialIndex = -1）を数えない</param>
+	/// <returns>表面積</returns>
+	float SurfaceArea(bool excludeCap = true) const;
+
 	// MeshCollider::Setup(vertices, indices) に渡せる形へ変換する
 	void ToPositionsAndIndices(std::vector<Vector3>& outPositions, std::vector<unsigned int>& outIndices) const;
 

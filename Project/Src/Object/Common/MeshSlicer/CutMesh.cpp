@@ -1,5 +1,29 @@
 #include "CutMesh.h"
 
+float CutMesh::SurfaceArea(bool excludeCap) const
+{
+	float total = 0.0f;
+
+	for (const CutSubMesh& sub : subMeshes) {
+
+		// フタは元のモデルに無かった面なので、損傷率には含めない
+		if (excludeCap && sub.materialIndex == -1) { continue; }
+
+		// 3つで1三角形。端数は無視する
+		for (size_t i = 0; i + 2 < sub.indices.size(); i += 3) {
+
+			const Vector3& a = vertices[sub.indices[i]].pos;
+			const Vector3& b = vertices[sub.indices[i + 1]].pos;
+			const Vector3& c = vertices[sub.indices[i + 2]].pos;
+
+			// 外積の長さは平行四辺形の面積なので、半分にすると三角形の面積
+			total += (b - a).Cross(c - a).Length() * 0.5f;
+		}
+	}
+
+	return total;
+}
+
 void CutMesh::ToPositionsAndIndices(std::vector<Vector3>& outPositions, std::vector<unsigned int>& outIndices) const
 {
 	outPositions.clear();

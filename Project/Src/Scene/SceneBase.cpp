@@ -304,6 +304,20 @@ void SceneBase::AddActor(ActorBase* newActor)
 	actors.emplace_back(newActor);
 }
 
+void SceneBase::RemoveActor(ActorBase* target)
+{
+	if (target == nullptr) { return; }
+
+	// 先に判定の登録から外す（Release でコライダーが解放されるため）
+	if (collision != nullptr) { collision->Remove(target->GetColliders()); }
+
+	auto it = std::find(actors.begin(), actors.end(), target);
+	if (it != actors.end()) { actors.erase(it); }
+
+	target->Release();
+	delete target;
+}
+
 void SceneBase::ActorsDraw(const std::vector<ActorBase*>& actors, ACTOR_DRAW_TYPE drawType)
 {
 	for (ActorBase* actor : actors) {

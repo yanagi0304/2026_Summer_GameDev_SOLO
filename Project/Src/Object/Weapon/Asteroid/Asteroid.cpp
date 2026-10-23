@@ -11,12 +11,13 @@ void Asteroid::Load(void)
 {
 	trans.LoadModel("Weapon/Asteroid");
 
-	AddCollider(new BoxCollider(COLLIDER_TAG::Stage, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
+	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
 
 	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
 
 	SetIsDraw(false);
 	SetJudgeFlg(false);
+	SetPushFlg(true);
 
 }
 

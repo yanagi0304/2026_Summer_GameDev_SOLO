@@ -35,6 +35,8 @@ private:
 
 	void CreateCamera(void)override;
 
+	int CountMannequins(void) const;
+
 	ActorBase* operatorObject;
 
 	//debug

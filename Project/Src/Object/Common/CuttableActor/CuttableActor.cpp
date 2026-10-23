@@ -42,7 +42,10 @@ CuttableActor::CuttableActor(COLLIDER_TAG colliderTag, bool dynamic) :
 	flyTime(0.0f),
 	launchScale(1.0f),
 	spinAxis(0.0f, 1.0f, 0.0f),
-	spinSpeed(0.0f)
+	spinSpeed(0.0f),
+
+	originalArea(0.0f),
+	vanished(false)
 {
 	SetDynamicFlg(dynamic);
 }
@@ -66,7 +69,10 @@ CuttableActor::CuttableActor(COLLIDER_TAG colliderTag, bool dynamic, const std::
 	flyTime(0.0f),
 	launchScale(1.0f),
 	spinAxis(0.0f, 1.0f, 0.0f),
-	spinSpeed(0.0f)
+	spinSpeed(0.0f),
+
+	originalArea(0.0f),
+	vanished(false)
 {
 	SetDynamicFlg(dynamic);
 }
@@ -111,6 +117,9 @@ bool CuttableActor::SetMeshFromModel(int modelHandle)
 	if (!CutMeshBuilder::FromModel(modelHandle, converted)) { return false; }
 
 	SetMesh(std::move(converted));
+
+	// 切る前の表面積を覚えておく（損傷率の基準になる）
+	originalArea = mesh.SurfaceArea();
 
 	// マテリアルごとに、モデルが持つ拡散色テクスチャを割り当てる
 	const int materialNum = MV1GetMaterialNum(modelHandle);
@@ -168,6 +177,9 @@ CuttableActor* CuttableActor::Cut(const CutPlane& worldPlane, int cutId)
 	// 位置・回転・スケールを引き継ぐ
 	fragment->trans = trans;
 
+	// 断片も元のモデルを基準にする（元に対する割合を出せるように）
+	fragment->originalArea = originalArea;
+
 	// 断片の中心が原点になるようメッシュをずらし、見た目が変わらないよう座標を補正する
 	const Vector3 localCenter = RecenterMesh(back);
 	{
@@ -208,6 +220,9 @@ CuttableActor* CuttableActor::Cut(const CutPlane& worldPlane, int cutId)
 	SetMesh(std::move(front));
 	lastCutId = cutId;
 
+	// 切った結果ほとんど残らなかったら、消え始める
+	if (GetRemainRate() < MIN_REMAIN_RATE) { StartVanish(); }
+
 	return fragment;
 }
 
@@ -224,6 +239,29 @@ void CuttableActor::Launch(const Vector3& launchVelocity, const Vector3& axis, f
 
 	launchScale = trans.scale;
 	flyTime = 0.0f;
+	flying = true;
+}
+
+float CuttableActor::GetRemainRate(void) const
+{
+	// 基準が無い（モデルから読み込んでいない）ときは、切られていない扱いにする
+	if (originalArea <= 0.0f) { return 1.0f; }
+
+	// 1.0を超えないようにしてから返す（計算誤差で少し超えることがあるため）
+	return (std::min)(1.0f, mesh.SurfaceArea() / originalArea);
+}
+
+void CuttableActor::StartVanish(void)
+{
+	// すでに消え始めているなら何もしない
+	if (flying) { return; }
+
+	launchScale = trans.scale;
+
+	// 縮み始めの時間から始める（その場でスッと縮む）
+	flyTime = SHRINK_START_TIME;
+
+	spinSpeed = 0.0f;
 	flying = true;
 }
 
@@ -254,6 +292,7 @@ void CuttableActor::SubUpdate(void)
 	if (flyTime >= VANISH_TIME) {
 
 		flying = false;
+		vanished = true;
 
 		velocity = Vector3();
 		SetGravityFlg(false);

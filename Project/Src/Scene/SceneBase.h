@@ -140,6 +140,9 @@ protected:
 	// 解放（メイン処理の後）
 	virtual void SubPostRelease(void) {}
 
+	// アクターをシーンから外して解放する（Update中に呼ばない。SubPostUpdate で使う）
+	void RemoveActor(ActorBase* target);
+
 #pragma endregion
 
 	// 当たり判定管理クラスを使用するかどうか

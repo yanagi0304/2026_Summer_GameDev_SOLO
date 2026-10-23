@@ -62,9 +62,13 @@ void InputManager::Init(void)
 
 	SET_MOUSE_BUTTON(KEY_TYPE::PlayerKickDownAttack, MOUSE_INPUT_LEFT);
 
+	//メイントリガー使用
 	SET_MOUSE_BUTTON(KEY_TYPE::PlayerMain, MOUSE_INPUT_LEFT);
+	SET_C_BUTTON(KEY_TYPE::PlayerMain, XINPUT_BUTTON_B);
 
+	//メイントリガー切り替え
 	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_R);
+	SET_C_BUTTON(KEY_TYPE::PlayerMainSwitch, XINPUT_BUTTON_RIGHT_SHOULDER);
 
 	SET_KEYBOARD(KEY_TYPE::PlayerDebug, KEY_INPUT_T);
 
@@ -110,12 +114,12 @@ void InputManager::Init(void)
 
 	// 回転（右）
 	SET_KEYBOARD(KEY_TYPE::CameraRotRight, KEY_INPUT_RIGHT);
-	SET_C_BUTTON(KEY_TYPE::CameraRotRight, XINPUT_BUTTON_RIGHT_SHOULDER);
+	//SET_C_BUTTON(KEY_TYPE::CameraRotRight, XINPUT_BUTTON_RIGHT_SHOULDER);
 	SET_C_OTHERS(KEY_TYPE::CameraRotRight, CONTROLLER_OTHERS::RightstickRight);
 
 	// 回転（左）
 	SET_KEYBOARD(KEY_TYPE::CameraRotLeft, KEY_INPUT_LEFT);
-	SET_C_BUTTON(KEY_TYPE::CameraRotLeft, XINPUT_BUTTON_LEFT_SHOULDER);
+	//SET_C_BUTTON(KEY_TYPE::CameraRotLeft, XINPUT_BUTTON_LEFT_SHOULDER);
 	SET_C_OTHERS(KEY_TYPE::CameraRotLeft, CONTROLLER_OTHERS::RightstickLeft);
 
 #pragma endregion

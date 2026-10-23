@@ -32,6 +32,7 @@
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
 
 #include "../../Object/Common/MeshSlicer/CutRequestQueue.h"
+#include "../../Object/Mannequin/Mannequin.h"
 
 GameScene::GameScene() : SceneBase()
 {
@@ -79,15 +80,26 @@ void GameScene::SubPostUpdate(void)
 		if (fragment != nullptr) { AddActor(fragment); }
 	}
 
-	// ゲーム終了処理
-	if (Input::GetIns().GetInfo(KEY_TYPE::End).down) {
-		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
+	std::vector<ActorBase*> removeList;
+
+	for (ActorBase* a : actors) {
+		CuttableActor* c = dynamic_cast<CuttableActor*>(a);
+		if (c != nullptr && c->IsVanished()) { removeList.push_back(a); }
 	}
 
-	// 決定
-	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1) {
-		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
+	for (ActorBase* a : removeList) {
+		RemoveActor(a);
 	}
+
+		// ゲーム終了処理
+		if (Input::GetIns().GetInfo(KEY_TYPE::End).down) {
+			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
+		}
+
+		// 決定
+		if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || CountMannequins() == 0) {
+			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
+		}
 
 }
 
@@ -101,3 +113,25 @@ void GameScene::CreateCamera(void)
 	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3(0,1000, -300));
 }
 
+int GameScene::CountMannequins(void) const
+{
+	int count = 0;
+
+	for (ActorBase* a : actors) {
+
+		const MannequinManager* m = dynamic_cast<const MannequinManager*>(a);
+		if (m == nullptr) { continue; }
+		for (auto* b : m->GetChildActors()) {
+
+			const Mannequin* c = dynamic_cast<const Mannequin*>(b);
+
+			// 縮み始めた・消えたものは「もういない」扱いにする
+			if (c->IsVanished()) { continue; }
+
+			count++;
+		}
+		
+	}
+
+	return count;
+}

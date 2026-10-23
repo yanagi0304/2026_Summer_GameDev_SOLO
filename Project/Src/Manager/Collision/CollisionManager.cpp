@@ -2643,5 +2643,18 @@ void CollisionManager::DrawChunkGrid(const Vector3& cameraPos) const
 	}
 }
 
-
 #pragma endregion
+
+void CollisionManager::Remove(const std::vector<ColliderBase*>& targets)
+{
+	for (ColliderGroupData& group : groupColliders) {
+		for (ColliderBase* t : targets) {
+			group.colliders.erase(
+				std::remove(group.colliders.begin(), group.colliders.end(), t),
+				group.colliders.end());
+		}
+	}
+
+	// チャンクは外したコライダーのポインタを持っているので、作り直す
+	InitBuildChunks();
+}

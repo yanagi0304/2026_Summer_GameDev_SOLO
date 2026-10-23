@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <map>
 #include <vector>
@@ -10,180 +10,208 @@
 
 class MeshCollider;
 
-// ���ʂŐؒf�ł���A�N�^�[
-// �ECutMesh�����O�ŕ`�悷��i���f���͎����Ȃ��j
-// �E����CutMesh����MeshCollider�����i�����ڂƓ����蔻�肪��v����j
-// �ECut��2�ɕ����A�Е��������Ɏc���A�����Е���V�����A�N�^�[�Ƃ��ĕԂ�
+// 平面で切断できるアクター
+// ・CutMeshを自前で描画する（モデルは持たない）
+// ・同じCutMeshからMeshColliderを作る（見た目と当たり判定が一致する）
+// ・Cutで2つに分け、片方を自分に残し、もう片方を新しいアクターとして返す
 class CuttableActor : public ActorBase
 {
 public:
 
 	/// <summary>
-	/// �R���X�g���N�^
+	/// コンストラクタ
 	/// </summary>
-	/// <param name="colliderTag">MeshCollider�ɕt����^�O</param>
-	/// <param name="dynamic">true = ���I�Afalse = �ÓI�i�����Ȃ��}�l�L����X�e�[�W�j</param>
+	/// <param name="colliderTag">MeshColliderに付けるタグ</param>
+	/// <param name="dynamic">true = 動的、false = 静的（動かないマネキンやステージ）</param>
 	CuttableActor(COLLIDER_TAG colliderTag, bool dynamic = false);
 
 	/// <summary>
-	/// �p�����[�^�[�t�@�C�����g���h���N���X�iMannequin�Ȃǁj�p�̃R���X�g���N�^
+	/// パラメーターファイルを使う派生クラス（Mannequinなど）用のコンストラクタ
 	/// </summary>
-	/// <param name="parameterPath">ActorBase(const std::string&)�ɓn���p�����[�^�[�̃p�X</param>
+	/// <param name="parameterPath">ActorBase(const std::string&)に渡すパラメーターのパス</param>
 	CuttableActor(COLLIDER_TAG colliderTag, bool dynamic, const std::string& parameterPath);
 
 	~CuttableActor() override = default;
 
-	// MeshCollider�𐶐����ēo�^����iAddActor���ŌĂ΂��j
+	// MeshColliderを生成して登録する（AddActor内で呼ばれる）
 	void Load(void) override;
 
-	// �������iMeshCollider��CutMesh�����蒼���j
+	// 初期化（MeshColliderをCutMeshから作り直す）
 	void Init(void) override;
 
 	/// <summary>
-	/// ���b�V����ݒ肷��i�`��p�f�[�^��MeshCollider����蒼���j
-	/// ���_�̓A�N�^�[�̃��[�J�����W�Ŏw�肷��
+	/// メッシュを設定する（描画用データとMeshColliderも作り直す）
+	/// 頂点はアクターのローカル座標で指定する
 	/// </summary>
 	void SetMesh(CutMesh newMesh);
 
-	// ���݂̃��b�V��
+	// 現在のメッシュ
 	const CutMesh& GetMesh(void) const { return mesh; }
 
 	/// <summary>
-	/// �}�e���A���ԍ��Ƀe�N�X�`�������蓖�Ă�i���ݒ�̓e�N�X�`���Ȃ��j
-	/// �e�N�X�`���̎����͌Ăяo�������Ǘ�����
+	/// マテリアル番号にテクスチャを割り当てる（未設定はテクスチャなし）
+	/// テクスチャの寿命は呼び出し側が管理する
 	/// </summary>
 	void SetTexture(int materialIndex, int graphHandle);
 
 	/// <summary>
-	/// MV1���f���̌��݂̌`�ƃe�N�X�`�������̃A�N�^�[�֎�荞��
-	/// �E���f���́u�V�����ǂݍ��񂾂��́v��n���i��荞�݌�͕`�悵�Ȃ��B���̃A�N�^�[������ɕ`���j
-	/// �E���_�̓��f�����g�̍��W�ɂȂ�̂ŁA�ʒu�E�����E�傫���͂��̃A�N�^�[��trans�Ō��߂�
-	/// �E�e�N�X�`���̓��f���������̂��؂��̂ŁA���f���͂��̃A�N�^�[��蒷���c���Ă���
+	/// MV1モデルの現在の形とテクスチャをこのアクターへ取り込む
+	/// ・モデルは「新しく読み込んだもの」を渡す（取り込み後は描画しない。このアクターが代わりに描く）
+	/// ・頂点はモデル自身の座標になるので、位置・向き・大きさはこのアクターのtransで決める
+	/// ・テクスチャはモデルが持つものを借りるので、モデルはこのアクターより長く残しておく
 	/// </summary>
-	/// <param name="modelHandle">MV1���f���̃n���h��</param>
-	/// <returns>��荞�߂���true</returns>
+	/// <param name="modelHandle">MV1モデルのハンドル</param>
+	/// <returns>取り込めたらtrue</returns>
 	bool SetMeshFromModel(int modelHandle);
 
 	/// <summary>
-	/// ���[���h���W�̕��ʂŐؒf����
-	/// ���ʂ̖@�����̃��b�V���͂��̃A�N�^�[�Ɏc��A���Α��͐V�����A�N�^�[�Ƃ��ĕԂ�
+	/// ワールド座標の平面で切断する
+	/// 平面の法線側のメッシュはこのアクターに残り、反対側は新しいアクターとして返る
 	/// </summary>
-	/// <param name="worldPlane">���[���h���W�̐ؒf��</param>
-	/// <param name="cutId">��U�育�Ƃ̎a��ID�i���̃A�N�^�[�ƒf�ЂɋL�^�����B�s�v�Ȃ�-1�j</param>
+	/// <param name="worldPlane">ワールド座標の切断面</param>
+	/// <param name="cutId">一振りごとの斬撃ID（このアクターと断片に記録される。不要なら-1）</param>
 	/// <returns>
-	/// �V�������������f�ЃA�N�^�[�i�Ăяo������SceneBase::AddActor�ɓn���j
-	/// �؂�Ȃ������ꍇ��nullptr�i���̃A�N�^�[�͕ω����Ȃ��j
+	/// 新しく生成した断片アクター（呼び出し側でSceneBase::AddActorに渡す）
+	/// 切れなかった場合はnullptr（このアクターは変化しない）
 	/// </returns>
 	CuttableActor* Cut(const CutPlane& worldPlane, int cutId = -1);
 
-	// �Ō�ɐ؂�ꂽ�Ƃ��̎a��ID�i��x���؂��Ă��Ȃ����-1�j
-	// ������U��ŁA�f�Ђ�������x�؂�Ȃ����߂Ɏg��
+	// 最後に切られたときの斬撃ID（一度も切られていなければ-1）
+	// 同じ一振りで、断片をもう一度切らないために使う
 	int GetLastCutId(void) const { return lastCutId; }
 
 	/// <summary>
-	/// ���[���h���W�̕��ʂ��A���̃A�N�^�[�̃��[�J�����W�̕��ʂ֕ϊ�����
+	/// ワールド座標の平面を、このアクターのローカル座標の平面へ変換する
 	/// </summary>
 	CutPlane ToLocalPlane(const CutPlane& worldPlane) const;
 
 	/// <summary>
-	/// ������΂��i��]���Ȃ���d�͂ŗ����A���΂炭����Ək��ŏ�����j
-	/// ���I�A�N�^�[�Ƃ��Đ��������f�ЂɎg��
+	/// 吹き飛ばす（回転しながら重力で落ち、しばらくすると縮んで消える）
+	/// 動的アクターとして生成した断片に使う
 	/// </summary>
-	/// <param name="launchVelocity">�����i1�t���[��������̈ړ��ʁj</param>
-	/// <param name="axis">��]���i���[���h�j</param>
-	/// <param name="speed">��]���x�i���W�A��/�t���[���j</param>
+	/// <param name="launchVelocity">初速（1フレームあたりの移動量）</param>
+	/// <param name="axis">回転軸（ワールド）</param>
+	/// <param name="speed">回転速度（ラジアン/フレーム）</param>
 	void Launch(const Vector3& launchVelocity, const Vector3& axis, float speed);
+
+	/// <summary>
+	/// 残っている割合を取得する（切る前の表面積に対する、今の表面積）
+	/// ・切るたびに減っていく
+	/// ・断片は「元のモデル全体に対する自分の取り分」になる
+	/// </summary>
+	/// <returns>0.0（何も残っていない）〜 1.0（切られていない）</returns>
+	float GetRemainRate(void) const;
+
+	/// <summary>
+	/// 損傷率を取得する（1.0 - 残っている割合）
+	/// </summary>
+	/// <returns>0.0（無傷）〜 1.0（全部切れた）</returns>
+	float GetDamageRate(void) const { return 1.0f - GetRemainRate(); }
+
+	// 飛び終わって消えたか（シーンから外してよい状態か）
+	bool IsVanished(void) const { return vanished; }
+
+	// 飛ばさずに、その場で縮めて消す（残りがごくわずかになった本体用）
+	void StartVanish(void);
 
 protected:
 
-	// ���ł���Ԃ̍X�V�i��]�E�k���E���Łj
+	// 飛んでいる間の更新（回転・縮小・消滅）
 	void SubUpdate(void) override;
 
-	// ���b�V���̕`��
+	// メッシュの描画
 	void SubDraw(void) override;
 
-	// ���
+	// 解放
 	void SubRelease(void) override;
 
 private:
 
-	// 1�}�e���A�����̕`��f�[�^
+	// 1マテリアル分の描画データ
 	struct DrawBatch
 	{
-		// �����f���̃}�e���A���ԍ�
+		// 元モデルのマテリアル番号
 		int materialIndex;
 
-		// ���_����65535�ȉ��̂Ƃ��g��16bit�C���f�b�N�X
+		// 頂点数が65535以下のとき使う16bitインデックス
 		std::vector<unsigned short> indices16;
 
-		// ���_��������16bit�ő���Ȃ��Ƃ��A�O�p�`���Ƃɒ��_��W�J���Ď���
+		// 頂点数が多く16bitで足りないとき、三角形ごとに頂点を展開して持つ
 		std::vector<VERTEX3D> expanded;
 
 		DrawBatch(void) : materialIndex(0), indices16(), expanded() {}
 	};
 
-	// 16bit�C���f�b�N�X�Ŏw����ő�̒��_��
+	// 16bitインデックスで指せる最大の頂点数
 	static constexpr size_t INDEX16_VERTEX_MAX = 65535;
 
-	// MeshCollider�ɕt����^�O
+	// これより残りが少なくなったら消す（元の表面積に対する割合）
+	static constexpr float MIN_REMAIN_RATE = 0.05f;
+
+	// MeshColliderに付けるタグ
 	COLLIDER_TAG colliderTag;
 
-	// �ؒf�Ώۂ̃��b�V���i���[�J�����W�j
+	// 切断対象のメッシュ（ローカル座標）
 	CutMesh mesh;
 
-	// �}�e���A���ԍ� -> �e�N�X�`���n���h��
+	// マテリアル番号 -> テクスチャハンドル
 	std::map<int, int> textures;
 
-	// �����蔻��i���L��ActorBase���j
+	// 当たり判定（所有はActorBase側）
 	MeshCollider* meshCollider;
 
-	// �`��p�̒��_�z��i�C���f�b�N�X�`��Ŏg���j
+	// 描画用の頂点配列（インデックス描画で使う）
 	std::vector<VERTEX3D> drawVertices;
 
-	// �}�e���A�����Ƃ̕`��f�[�^
+	// マテリアルごとの描画データ
 	std::vector<DrawBatch> batches;
 
-	// �Ō�ɐ؂�ꂽ�Ƃ��̎a��ID
+	// 最後に切られたときの斬撃ID
 	int lastCutId;
 
-	// �؂����f�Ђ���ԋ����i�ؒf�ʂ̖@���̔��Ε����ցj
+	// 切った断片が飛ぶ強さ（切断面の法線の反対方向へ）
 	static constexpr float PUSH_SPEED = 6.0f;
 
-	// �؂����f�Ђ��ŏ��ɏ�֒��˂鋭��
+	// 切った断片が最初に上へ跳ねる強さ
 	static constexpr float PUSH_UP = 10.0f;
 
-	// �؂����f�Ђ̉�]���x�i���W�A��/�t���[���j
+	// 切った断片の回転速度（ラジアン/フレーム）
 	static constexpr float SPIN_SPEED = 0.04f;
 
-	// ��΂��Ă���k�ݎn�߂�܂ł̎��ԁi�t���[���j
+	// 飛ばしてから縮み始めるまでの時間（フレーム）
 	static constexpr float SHRINK_START_TIME = 40.0f;
 
-	// ��΂��Ă��犮�S�ɏ�����܂ł̎��ԁi�t���[���j
+	// 飛ばしてから完全に消えるまでの時間（フレーム）
 	static constexpr float VANISH_TIME = 90.0f;
 
-	// ���ł���Œ���
+	// 飛んでいる最中か
 	bool flying;
 
-	// ��΂��Ă���̌o�ߎ��ԁi�t���[���BTimeScale���f�j
+	// 飛ばしてからの経過時間（フレーム。TimeScale反映）
 	float flyTime;
 
-	// ��΂������_�̃X�P�[���i�k���̊�j
+	// 飛ばした時点のスケール（縮小の基準）
 	Vector3 launchScale;
 
-	// ��]���i���[���h�j�Ɖ�]���x
+	// 回転軸（ワールド）と回転速度
 	Vector3 spinAxis;
 	float spinSpeed;
 
-	// ���b�V���������̒��S�����_�ɂȂ�悤���炵�A���炵���ʁi���[�J���j��Ԃ�
-	// �i�f�Ђ����̔��̒��S�ł͂Ȃ��A�����̒��S�ŉ��悤�ɂ��邽�߁j
+	// 読み込み時点の表面積（損傷率の基準。フタは含めない）
+	float originalArea;
+
+	bool vanished;
+
+	// メッシュを自分の中心が原点になるようずらし、ずらした量（ローカル）を返す
+	// （断片が元の箱の中心ではなく、自分の中心で回るようにするため）
 	static Vector3 RecenterMesh(CutMesh& target);
 
-	// MeshCollider��mesh�����蒼��
+	// MeshColliderをmeshから作り直す
 	void RebuildCollider(void);
 
-	// �`��p�f�[�^��mesh�����蒼��
+	// 描画用データをmeshから作り直す
 	void BuildDrawBatches(void);
 
-	// �}�e���A���ԍ��̃e�N�X�`�����擾�i������΃e�N�X�`���Ȃ��j
+	// マテリアル番号のテクスチャを取得（無ければテクスチャなし）
 	int GetTexture(int materialIndex) const;
 };
