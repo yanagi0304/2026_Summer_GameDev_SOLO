@@ -24,7 +24,7 @@
 #include "../../Object/Common/DebugObject/MeshDebugObject.h"
 
 #include "../../Object/Jazz/Jazz.h"
-#include "../../Object/Mannequin/Mannequin.h"
+#include "../../Object/Mannequin/MannequinManager.h"
 #include "../../Object/Stage/StageTutrial/StageTutrial.h"
 
 #include "../../Object/Water.h"
@@ -43,7 +43,7 @@ void GameScene::SubPostLoad(void)
 
 	//AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
-	AddActor(new Mannequin);
+	AddActor(new MannequinManager());
 	operatorObject = new Jazz();
 	AddActor(operatorObject);
 	AddActor(new StageTutrial);

@@ -83,6 +83,11 @@ int ParameterLoad::GetParameterToInt(const std::string& fileName, const std::str
     return static_cast<int>(GetParameter(fileName, parameterName, index));
 }
 
+bool ParameterLoad::GetParameterToBool(const std::string& fileName, const std::string& parameterName) const
+{
+    return parameterMap.at(fileName).at(parameterName).at(0) != 0.0f;
+}
+
 Vector3 ParameterLoad::GetParameterToVector3(const std::string& fileName, const std::string& parameterName) const 
 {
     const std::vector<float>& param = GetParameterArray(fileName, parameterName);

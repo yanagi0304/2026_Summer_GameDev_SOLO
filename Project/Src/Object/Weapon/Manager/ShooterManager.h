@@ -36,7 +36,12 @@ public:
 	int GetAttackAnimeID(void) const override { return CHARACTER_ANIME::SLASH_A1; }
 
 	//ステートのセッター
-	void SetState(const CUBE_STATE state) { state_ = state; }
+	void SetState(const CUBE_STATE cubeState) { state = cubeState; }
+
+	//選択されたとき
+	void OnEquip(void)override;
+
+	void OnUnequip(void)override;
 
 	static constexpr int div = 27;
 
@@ -57,7 +62,7 @@ private:
 private:
 	int divideNum_;
 
-	CUBE_STATE state_;
+	CUBE_STATE state;
 	Asteroid* shot[div];
 
    int fireIndex_ = 0;

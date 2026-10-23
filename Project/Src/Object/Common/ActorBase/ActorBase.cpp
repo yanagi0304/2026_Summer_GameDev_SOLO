@@ -313,6 +313,12 @@ int ActorBase::GetParameterToInt(const std::string& fileName, const std::string&
 	return parameter->GetParameterToInt(fileName, parameterName, index);
 }
 
+bool ActorBase::GetParameterToBool(const std::string& fileName, const std::string& parameterName)const
+{
+	if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }
+	return parameter->GetParameterToBool(fileName, parameterName);
+}
+
 Vector3 ActorBase::GetParameterToVector3(const std::string& fileName, const std::string& parameterName)
 {
 	if (parameter == nullptr) { throw std::runtime_error("ParameterLoadクラスが生成されていません"); }

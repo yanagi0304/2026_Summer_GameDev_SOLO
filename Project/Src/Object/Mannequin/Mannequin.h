@@ -1,6 +1,8 @@
 #pragma once
 #include "../Common/CuttableActor/CuttableActor.h"
 
+#include "../../Common/Vector3.h"
+
 // 弧月で切れるマネキン
 // ・見た目と切断は CuttableActor が担当する（MV1モデルの形をCutMeshに取り込んで描く）
 // ・床に立たせる・押し出す用のカプセルコライダーは今まで通り持つ
@@ -8,7 +10,7 @@ class Mannequin :
     public CuttableActor
 {
 public:
-    Mannequin();
+    Mannequin(const Vector3& pos, bool dynamicFlg);
     ~Mannequin() = default;
     void Load(void) override;
     void SubInit(void) override;

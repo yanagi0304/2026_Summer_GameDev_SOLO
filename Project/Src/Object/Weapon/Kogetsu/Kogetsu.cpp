@@ -30,7 +30,7 @@ void Kogetsu::Load(void)
 
 	trans.SetLocalRotation(Quaternion::FromRotationZ(Deg2Rad(-90.0f)));
 
-	SetJudgeFlg(true);
+	SetJudgeFlg(false);
 	SetDynamicFlg(true);
 	SetPushFlg(false);
 
@@ -61,6 +61,13 @@ void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const 
 	CutPlane plane;
 	if (!slash_.GetPlane(plane)) { return; }            // ìÀÇ´ÅEí‚é~íÜÇÕå©ëóÇÈ
 	CutRequestQueue::Push(target, plane, cutId_);
+}
+
+void Kogetsu::OnEquip(void)
+{
+	SetJudgeFlg(false);
+	SetDynamicFlg(true);
+	SetPushFlg(false);
 }
 
 void Kogetsu::SubInit(void)

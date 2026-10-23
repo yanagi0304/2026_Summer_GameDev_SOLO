@@ -27,6 +27,8 @@ public:
 
     void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
+    void OnEquip(void)override;
+
 private:
 
     void SubInit(void) override;

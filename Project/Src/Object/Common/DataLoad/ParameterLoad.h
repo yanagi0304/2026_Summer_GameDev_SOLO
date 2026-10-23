@@ -37,6 +37,12 @@ public:
         const std::string& parameterName,
         int index = 0) const;
 
+    // boolŒ^‚É•ÏŠ·‚µ‚Äæ“¾
+    // 0‚Ífalse 1ˆÈã‚Í‚·‚×‚Ätrue
+    bool GetParameterToBool(
+        const std::string& fileName,
+        const std::string& parameterName) const;
+
     /// Vector3Œ^‚Æ‚µ‚Äæ“¾
     Vector3 GetParameterToVector3(
         const std::string& fileName,

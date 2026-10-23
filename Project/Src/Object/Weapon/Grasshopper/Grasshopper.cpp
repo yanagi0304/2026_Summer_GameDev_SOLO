@@ -17,11 +17,13 @@ Grasshopper::Grasshopper(const Transform& ownerTrans)
 void Grasshopper::Load(void)
 {
 	trans.LoadModel("Weapon/Grasshopper");
+
+	AddCollider(new BoxCollider(COLLIDER_TAG::Grasshopper, GetParameterToVector3("Collider", "Size")));
+
 	SetJudgeFlg(false);
 	SetDynamicFlg(true);
 	SetPushFlg(false);
-
-	AddCollider(new BoxCollider(COLLIDER_TAG::Grasshopper, GetParameterToVector3("Collider", "Size")));
+	SetIsDraw(false);
 	
 }
 
@@ -35,6 +37,14 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 		break;
 	}
 	}
+}
+
+void Grasshopper::OnEquip(void)
+{
+	SetJudgeFlg(false);
+	SetDynamicFlg(true);
+	SetPushFlg(false);
+	SetIsDraw(false);
 }
 
 void Grasshopper::Create(void)
@@ -87,6 +97,7 @@ void Grasshopper::SubUpdate(void)
 	{
 		Create();
 	}
+
 }
 
 void Grasshopper::SubDraw(void)

@@ -54,9 +54,9 @@ private:
 
 		0.5,	// Jump
 
-		0.5,	// SlashA1
-		0.5,	// SlashA2
-		0.5,	// SlashA3
+		0.7,	// SlashA1
+		0.7,	// SlashA2
+		0.6,	// SlashA3
 
 		0.5,	// AsteroidIdle.R
 		0.5,	// AsteroidCreate.R
@@ -81,8 +81,8 @@ private:
 		false,	// SlashA3
 
 		true,	// AsteroidIdle.R
-		true,	// AsteroidCreate.R
-		false,	// AsteroidIdleShot.R
+		true,	// AsteroidCreate.R 
+		true,	// AsteroidIdleShot.R
 
 	};
 
@@ -92,13 +92,16 @@ private:
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
+
+	//武器切り替えできるか取得
+	bool CanWeaponChange(void) const;
 	
-	//攻撃
-	void Attack(void);
 	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
 	void WeaponChange(TriggerType type = TriggerType::NONE);
 
 	Vector3 InputVec(void) const;
+
+	void SubDraw(void)override;
 
 	void IsJump(void);
 
@@ -108,20 +111,20 @@ private:
 private:
 
 	//所持トリガーの表示
-	TriggerUI* trigger_;
+	TriggerUI* trigger;
 
 	//武器の位置
-	Transform weaponTrans_;
+	Transform weaponTrans;
 	Vector3 prevPos;
 
 	//所持武器
-	std::map<TriggerType, WeaponBase*> weaponSet_;
+	std::map<TriggerType, WeaponBase*> weaponSet;
 
 	//現在の装備を保存
-	TriggerType currentWeaponID_;
+	TriggerType currentWeaponID;
 
-	int mainCurrentIndex_;
-	int subCurrentIndex_;
+	int mainCurrentIndex;
+	int subCurrentIndex;
 
 };
 

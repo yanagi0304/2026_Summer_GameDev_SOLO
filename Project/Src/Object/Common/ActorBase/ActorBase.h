@@ -232,6 +232,14 @@ protected:
 	int GetParameterToInt(const std::string& fileName, const std::string& parameterName, int index = 0)const;
 
 	/// <summary>
+	/// パラメータ外部ファイル管理クラスから指定のパラメーターをbool型に変換して取得する
+	/// </summary>
+	/// <param name="fileName"></param>
+	/// <param name="parameterName">パラメーターのID</param>
+	/// <returns></returns>
+	bool GetParameterToBool(const std::string& fileName, const std::string& parameterName)const;
+
+	/// <summary>
 	/// パラメーター外部ファイル管理クラスから指定のパラメーターをVector3構造体にして取得する
 	/// </summary>
 	/// <param name="parameterName">パラメーターのID</param>

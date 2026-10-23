@@ -22,16 +22,21 @@ void ShooterManager::Load(void)
 {
 	for (int i = 0; i < div; i++)
 	{
-		shot[i] = new Asteroid(ownerTrans_);
+		shot[i] = new Asteroid();
 		AddChildActor(shot[i]);
 		shot[i]->SetIsActive(false);
 	}
-	state_ = CUBE_STATE::NONE;
+	state = CUBE_STATE::NONE;
+
+	SetJudgeFlg(true);
+	SetDynamicFlg(true);
+	SetPushFlg(true);
+
 }
 
 int ShooterManager::GetIdleAnimeID(void) const
 {
-	switch (state_)
+	switch (state)
 	{
 	case CUBE_STATE::NONE:
 		return CHARACTER_ANIME::ASTEROID_IDLE_R;
@@ -43,14 +48,32 @@ int ShooterManager::GetIdleAnimeID(void) const
 		return CHARACTER_ANIME::ASTEROID_CREATE_R;
 		break;
 	case CUBE_STATE::FIRE:
-		return CHARACTER_ANIME::ASTEROID_IDLE_SHOT_R;
+		return CHARACTER_ANIME::ASTEROID_IDLE_R;
 		break;
+	}
+}
+
+void ShooterManager::OnEquip(void)
+{
+	state = state = CUBE_STATE::NONE;
+	for (auto* s : shot)
+	{
+		s->SetIsActive(false);
+	}
+}
+
+void ShooterManager::OnUnequip(void)
+{
+	SetIsDraw(false);
+	for (auto* s : shot)
+	{
+		s->SetIsActive(false);
 	}
 }
 
 void ShooterManager::SubUpdate(void)
 {
-	switch (state_)
+	switch (state)
 	{
 	case CUBE_STATE::CUBE:
 		CubeUpdate();
@@ -69,33 +92,34 @@ void ShooterManager::SubUpdate(void)
 
 void ShooterManager::ChangeState(void)
 {
-	switch (state_)
+	switch (state)
 	{
 	case CUBE_STATE::NONE:
 
 		// 状態をSPLITに変更する
-		state_ = CUBE_STATE::CUBE;
+		state = CUBE_STATE::CUBE;
 		// 1つ目のアステロイドだけ有効にする
 		shot[0]->SetIsActive(true);
+	
 		break;
 	case CUBE_STATE::CUBE:
 
 		// 状態をSPLITに変更する
-		state_ = CUBE_STATE::SPLIT;
+		state = CUBE_STATE::SPLIT;
 
 		break;
 
 	case CUBE_STATE::SPLIT:
 
 		// 状態をFIREに変更する
-		state_ = CUBE_STATE::FIRE;
+		state = CUBE_STATE::FIRE;
 		for (auto* s : shot) { s->SetFire(true); }
 		break;
 
 	case CUBE_STATE::FIRE:
 
 		// 状態をCUBEに戻す
-		state_ = CUBE_STATE::CUBE;
+		state = CUBE_STATE::CUBE;
 		for (auto* s : shot) { s->SetFire(false); s->ClearTrail(); }
 		// 1つ目のアステロイドだけ有効にする
 		shot[0]->SetIsActive(true);
@@ -243,9 +267,9 @@ void ShooterManager::SpritUpdate()
 void ShooterManager::FireUpdate()
 {
 
-	const float ratio = animeRatio();
+	//const float ratio = animeRatio();
 
-	if (ratio < 0.2f) { return; }
+	//if (ratio < 0.2f) { return; }
 
 	const float speed = 100.0f;
 
@@ -265,7 +289,7 @@ void ShooterManager::FireUpdate()
 		asteroid->SetTrans(centerPos, scale);
 	}
 
-	if (ratio >= 1.0f) { // 状態をCUBEに戻す
-		state_ = CUBE_STATE::NONE;; }
+	//if (ratio >= 1.0f) { // 状態をCUBEに戻す
+	//	state_ = CUBE_STATE::NONE;; }
 
 }

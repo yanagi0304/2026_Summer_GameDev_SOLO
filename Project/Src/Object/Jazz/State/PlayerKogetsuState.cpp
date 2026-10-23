@@ -104,7 +104,7 @@ void PlayerKogetsuState::Update(void)
 
 			// 入力がなかったらステップを「後隙」へ
 			if (!isInputBuffered) { step = STEP::Recovery; }
-			else { NextCombo(); }
+			else { NextCombo();}
 
 			// 当たり判定を消去
 			kogetsu.Off();
@@ -144,7 +144,7 @@ void PlayerKogetsuState::NextCombo(void)
 		//次コンボに切り替え
 		combo = COMBO_STEP::A2;
 		isInputBuffered = false;
-		STEP::Startup;
+		step = STEP::Startup;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A2:
 		playAnimeSlashA3();

@@ -24,17 +24,21 @@ public:
 	virtual int GetAttackAnimeID(void) const = 0;
 
 	void Update(void)override {
-		if (!isActive_) { return; }
+		if (!isActive) { return; }
 		ActorBase::Update();
 	}
-	void Draw(void)override {
-		if (!isActive_) { return; }
-		ActorBase::Draw();
-	}
 
-	void SetIsActive(bool isActive) { 
-		isActive_ = isActive;
-		SetJudgeFlg(isActive);
+	virtual void OnEquip(void) {}    // 選ばれた時
+	virtual void OnUnequip(void) {}  // 外れた時
+
+	void SetIsActive(bool Active) {
+		if (isActive == Active) { return; }
+		isActive = Active;
+		SetJudgeFlg(Active);
+		SetIsDraw(Active);
+		Active ? OnEquip() : OnUnequip();
+
+	
 	}
 
 	//当たり判定のオンオフ
@@ -52,7 +56,7 @@ private:
 	AnimationController* anime;
 
 	// 武器がアクティブかどうかのフラグ（true = アクティブ、false = 非アクティブ）
-	bool isActive_;
+	bool isActive;
 
 protected:
 

@@ -22,9 +22,6 @@ public:
 
 private:
 
-	// アニメーションコントローラーのインスタンス
-	AnimationController* anime;
-
 	// ステート管理用変数
 	int state;
 
@@ -78,6 +75,9 @@ protected:
 
 	// アニメーションコントローラーの作成
 	void CreateAnimationController(void);
+
+	// アニメーションコントローラーのインスタンス
+	AnimationController* anime;
 	
 	/// <summary>
 	/// モデルにくっついてるFBXアニメーションを全部登録する
@@ -136,6 +136,11 @@ protected:
 
 	// アニメーションの再生時間を設定（0.0f～再生時間）
 	void SetAnimeStep(float step);
-	
+
+	// 指定フレームのXYZ移動をモデル空間で打ち消す
+	bool SetPositionCorrectionFrame(const std::string& frameName);
+
+	void SetPositionCorrection(bool enabled);
+
 #pragma endregion
 };

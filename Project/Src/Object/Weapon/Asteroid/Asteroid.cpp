@@ -7,20 +7,17 @@ Asteroid::Asteroid()
 {
 }
 
-Asteroid::Asteroid(const Transform& ownerTrans)
-	:WeaponBase(ownerTrans, "Data/Parameter/Weapon/Asteroid/")
-{
-}
-
 void Asteroid::Load(void)
 {
 	trans.LoadModel("Weapon/Asteroid");
 
-	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+	AddCollider(new BoxCollider(COLLIDER_TAG::Stage, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
 
-	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
+	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
+
+	SetIsDraw(false);
+	SetJudgeFlg(false);
+
 }
 
 void Asteroid::SubInit(void)

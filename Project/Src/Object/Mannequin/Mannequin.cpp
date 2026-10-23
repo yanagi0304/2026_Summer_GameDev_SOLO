@@ -6,9 +6,13 @@
 
 #include "../Weapon/Kogetsu/Kogetsu.h"
 
-Mannequin::Mannequin()
+Mannequin::Mannequin(const Vector3& pos, bool dynamicFlg)
 	:CuttableActor(COLLIDER_TAG::DebugObject, true, "Data/Parameter/Mannequin/")
 {
+	//位置情報を設定
+	trans.pos = pos;
+	// 動的オブジェクトとしての処理を有効にする
+	SetDynamicFlg(dynamicFlg);
 }
 
 void Mannequin::Load(void)
@@ -25,11 +29,8 @@ void Mannequin::Load(void)
 	// 元のモデルは描画しない（テクスチャを借りているので、削除はしない）
 	MV1SetVisible(trans.model, FALSE);
 
-	// 動的オブジェクトとしての処理を有効にする
-	SetDynamicFlg(false);
-
 	// 重力を有効にする
-	SetGravityFlg(true);
+	SetGravityFlg(false);
 
 	// 当たり判定による押し出しを有効にする
 	SetPushFlg(true);
@@ -39,9 +40,6 @@ void Mannequin::Load(void)
 void Mannequin::SubInit(void)
 {
 	trans.scale = GetParameter("Init", "Scale");
-
-	trans.pos = Vector3(0.0f, 0.0f, 200.0f);
-
 }
 
 void Mannequin::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)

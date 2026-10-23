@@ -13,7 +13,6 @@ public:
     const float SIZE = GetParameter("Init", "scale");
 
     Asteroid();
-    Asteroid(const Transform& ownerTrans);
     ~Asteroid() override = default;
 
     void Load(void) override;
@@ -35,6 +34,7 @@ public:
 
     //‹OÕ‚ğ‰Šú‰»
     void ClearTrail(void) { trail.clear(); }
+
 
 private:
 
