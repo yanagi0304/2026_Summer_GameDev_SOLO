@@ -21,6 +21,20 @@ void Asteroid::Load(void)
 
 }
 
+void Asteroid::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
+{
+
+	if (other.GetTag() != COLLIDER_TAG::Stage) { return; }
+
+	SetIsDraw(false);
+	//SetJudgeFlg(false);
+}
+
+void Asteroid::OnEquip(void)
+{
+	SetIsDraw(true);
+}
+
 void Asteroid::SubInit(void)
 {
 	trans.scale = (SIZE);
@@ -35,6 +49,10 @@ void Asteroid::SubUpdate(void)
 		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
 	}
 	else { trail.clear(); }
+
+	bool a = GetIsDraw();
+
+	if (a) { int a = 0; }
 }
 
 void Asteroid::SubDraw(void)

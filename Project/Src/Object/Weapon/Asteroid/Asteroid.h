@@ -35,6 +35,11 @@ public:
     //‹OÕ‚ğ‰Šú‰»
     void ClearTrail(void) { trail.clear(); }
 
+    void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
+
+    //‘I‚Î‚ê‚½‚Æ‚«
+    void OnEquip(void)override;
+
 
 private:
 

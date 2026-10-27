@@ -32,6 +32,8 @@
 #include "State/PlayerMoveState.h"
 #include "State/PlayerKogetsuState.h"
 
+#include "../Common/Target/Target.h"
+
 Jazz::Jazz() :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
 
@@ -80,7 +82,6 @@ void Jazz::Load(void)
 	anime->SetPositionCorrectionFrame("mixamorig:Hips");
 
 	anime->SetPositionCorrection(true);
-
 	
 #pragma endregion
 

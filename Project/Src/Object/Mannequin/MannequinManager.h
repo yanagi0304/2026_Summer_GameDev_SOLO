@@ -10,5 +10,8 @@ public:
 	~MannequinManager()override = default;
 
 	void Load(void)override;
+
+	// ƒ^[ƒQƒbƒg‚Æ‚µ‚Ä‚Ìw‰c
+	TARGET_TEAM GetTargetTeam(void) const override { return TARGET_TEAM::Enemy; }
 };
 

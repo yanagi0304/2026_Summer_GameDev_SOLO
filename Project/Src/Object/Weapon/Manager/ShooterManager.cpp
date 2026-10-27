@@ -147,6 +147,8 @@ void ShooterManager::CubeUpdate()
 	// アステロイドの取得
 	Asteroid* asteroid = shot[0];
 
+	asteroid->SetIsActive(true);
+
 	// 右手の位置を基準にするため、位置を取得
 	const auto frameIndex =
 		MV1SearchFrame(

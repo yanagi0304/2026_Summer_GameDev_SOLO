@@ -34,6 +34,8 @@
 #include "../../Object/Common/MeshSlicer/CutRequestQueue.h"
 #include "../../Object/Mannequin/Mannequin.h"
 
+#include "../../Object/Common/Target/Target.h"
+
 GameScene::GameScene() : SceneBase()
 {
 }
@@ -44,7 +46,8 @@ void GameScene::SubPostLoad(void)
 
 	//AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
-	AddActor(new MannequinManager());
+	mannequinManager = new MannequinManager();
+	AddActor(mannequinManager);
 	operatorObject = new Jazz();
 	AddActor(operatorObject);
 	AddActor(new StageTutrial);
@@ -62,7 +65,6 @@ void GameScene::SubPostLoad(void)
 	//box->SetMesh(CutMesh::MakeBox(Vector3(200, 200, 200)));
 	//box->SetPos(Vector3(0, 100, 200));      // Jazz の前。位置は調整してください
 	//AddActor(box);
-
 
 }
 
@@ -91,16 +93,17 @@ void GameScene::SubPostUpdate(void)
 		RemoveActor(a);
 	}
 
-		// ゲーム終了処理
-		if (Input::GetIns().GetInfo(KEY_TYPE::End).down) {
-			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
-		}
+	// ゲーム終了処理
+	if (Input::GetIns().GetInfo(KEY_TYPE::End).down) {
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
+	}
 
-		// 決定
-		if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || CountMannequins() == 0) {
-			SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
-		}
+	// 決定
+	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || CountMannequins() == 0) {
+		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
+	}
 
+	target->Update();
 }
 
 void GameScene::SubUiDraw(void)
@@ -110,7 +113,8 @@ void GameScene::SubUiDraw(void)
 
 void GameScene::CreateCamera(void)
 {
-	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos, Vector3(0,1000, -300));
+	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos,
+		Vector3(0.0,500.0f,-300.0f),Vector3::Yonly(200.0f));
 }
 
 int GameScene::CountMannequins(void) const

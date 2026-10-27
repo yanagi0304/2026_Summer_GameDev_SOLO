@@ -77,6 +77,8 @@
     <ClCompile Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.cpp" />
     <ClCompile Include="Src\Object\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="Src\Object\Mannequin\MannequinManager.cpp" />
+    <ClCompile Include="Src\Object\Common\Collider\SweepLineCollider.cpp" />
+    <ClCompile Include="Src\Object\Common\Target\Target.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -184,6 +186,9 @@
     <ClInclude Include="Src\Object\Common\MeshSlicer\CutMeshBuilder.h" />
     <ClInclude Include="Src\Object\MessageWindow\MessageWindow.h" />
     <ClInclude Include="Src\Object\Mannequin\MannequinManager.h" />
+    <ClInclude Include="Src\Object\Common\Collider\SweepLineCollider.h" />
+    <ClInclude Include="Src\Object\Common\Target\Target.h" />
+    <ClInclude Include="Src\Object\Common\Target\TargetTeamDefine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

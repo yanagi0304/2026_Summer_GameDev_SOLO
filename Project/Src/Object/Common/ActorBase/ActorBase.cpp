@@ -17,9 +17,12 @@
 
 #include "../DataLoad/ParameterLoad.h"
 
+#include "../Target/Target.h"
+
 ActorBase::ActorBase() :
 	trans(),
 	colliders(),
+	target(),
 
 	dynamicFlg(true),
 	gravityFlg(false),
@@ -47,6 +50,7 @@ ActorBase::ActorBase() :
 ActorBase::ActorBase(const std::string& parameterPath) :
 	trans(),
 	colliders(),
+	target(),
 
 	dynamicFlg(true),
 	gravityFlg(false),
@@ -125,6 +129,9 @@ void ActorBase::Update(void)
 
 	// シェーダーの更新
 	if (shader != nullptr) { shader->Update(); }
+
+	//ターゲットの更新
+	if (target != nullptr) { target->Update(); }
 }
 
 void ActorBase::Draw(void)
@@ -172,6 +179,12 @@ void ActorBase::Release(void)
 		parameter->Release();
 		delete parameter;
 		parameter = nullptr;
+	}
+
+	//ターゲットの解放
+	if (target != nullptr) {
+		delete target;
+		target = nullptr;
 	}
 
 	// 当たり判定情報を解放

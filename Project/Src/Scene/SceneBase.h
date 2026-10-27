@@ -17,6 +17,8 @@ class PostEffectBase;
 
 class SkyBox;
 
+class Target;
+
 class SceneBase
 {
 public:
@@ -150,6 +152,12 @@ protected:
 
 	// スカイボックスを使用するかどうか
 	virtual bool UseSkyBox(void)const { return false; }
+
+	// ターゲットを使用するかどうか
+	virtual bool UseTarget(void)const { return true; }
+
+	//ターゲット管理
+	Target* target;
 
 private:
 

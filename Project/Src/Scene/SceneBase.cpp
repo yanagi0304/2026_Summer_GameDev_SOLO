@@ -18,6 +18,8 @@
 
 #include "../Object/Common/SkyBox/SkyBox.h"
 
+#include "../Object/Common/Target/Target.h"
+
 SceneBase::SceneBase(void) :
 
 	state(STATE::Created),
@@ -53,6 +55,8 @@ void SceneBase::Load(void)
 
 	// シーンごとに独立した当たり判定管理クラスを生成する
 	if (UseCollisionManager()) { collision = new CollisionManager(); }
+
+	if (UseTarget()) { target = new Target(); }
 
 	// 派生先の読み込み（後）
 	// Actorの生成はCollisionManager生成後に行う必要があるため、基本的にはここで行う
@@ -206,6 +210,8 @@ void SceneBase::Draw(void)
 
 	if (camera != nullptr) { camera->DrawDebug(); }
 
+	if (target != nullptr) { target->Draw(); }
+
 #pragma endregion
 }
 
@@ -290,6 +296,24 @@ void SceneBase::AddActor(ActorBase* newActor)
 
 	// Actorが持つコライダーをCollisionManagerへ登録
 	if (collision != nullptr) { collision->Add(newActor->GetColliders()); }
+
+	// Actorが持つターゲット情報をTargetへ登録
+	if(target!=nullptr )
+	{
+		switch (newActor->GetTargetTeam())
+		{
+		case TARGET_TEAM::None:
+			break;
+		case TARGET_TEAM::Ally:
+			target->SetTargetActor(newActor->GetTrans().pos);
+			break;
+		case TARGET_TEAM::Enemy:
+			target->IncludeSelfInTargets(newActor);
+			break;
+		default:
+			break;
+		}
+	}
 
 	// 読み込み以外で呼ばれたら
 	if(state == STATE::Initialized) {

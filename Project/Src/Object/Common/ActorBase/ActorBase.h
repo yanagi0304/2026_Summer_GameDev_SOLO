@@ -11,6 +11,9 @@
 #include "ActorDrawTypeDefine.h"
 
 #include "../../../Manager/Net/SenderID_Define.h"
+
+#include "../Target/TargetTeamDefine.h"
+
 class ColliderBase;
 struct CollisionResult;
 
@@ -20,6 +23,8 @@ class ParameterLoad;
 
 struct Vector2;
 struct Vector2I;
+
+class Target;
 
 class ActorBase
 {
@@ -95,6 +100,9 @@ public:
 	// 送信処理（通信）
 	virtual void SendUpdate(void) {}
 
+	// ターゲットとしての陣営
+	virtual TARGET_TEAM GetTargetTeam(void) const { return TARGET_TEAM::None; }
+
 private:
 
 	// 当たり判定情報
@@ -143,6 +151,9 @@ private:
 
 	// 誰が更新権限を持つか
 	MSG_SENDER_ID controlSenderId;
+
+	//ターゲットシステム
+	Target* target;
 
 protected:
 
@@ -202,7 +213,6 @@ protected:
 		childActors.push_back(child); 
 	}
 #pragma endregion
-
 
 #pragma region パラメーター外部ファイル管理に関する関数
 

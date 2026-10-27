@@ -5,8 +5,6 @@
 #include "../../Object/Common/MeshSlicer/CutMesh.h"
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
 
-
-
 class GameScene : public SceneBase
 {
 public:
@@ -37,7 +35,11 @@ private:
 
 	int CountMannequins(void) const;
 
+	//操縦オブジェ
 	ActorBase* operatorObject;
+
+	//マネキン
+	ActorBase* mannequinManager;
 
 	//debug
 	CutMesh front;

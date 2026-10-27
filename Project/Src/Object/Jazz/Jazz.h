@@ -10,19 +10,22 @@
 #include "../Weapon/TriggerTypeDefine.h"
 
 class TriggerUI;
-
 class WeaponBase;
+
 
 class Jazz : public CharacterBase
 {
 public:
 
-	Jazz();
+	Jazz(std::function<const Vector3&(void)> target);
 	~Jazz() override = default;
 
 	void Load(void)override;
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
+
+	// É^Å[ÉQÉbÉgÇ∆ÇµÇƒÇÃêwâc
+	TARGET_TEAM GetTargetTeam(void) const override { return TARGET_TEAM::Ally; }
 
 private:
 

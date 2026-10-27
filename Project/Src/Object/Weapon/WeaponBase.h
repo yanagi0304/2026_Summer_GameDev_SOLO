@@ -32,7 +32,6 @@ public:
 	virtual void OnUnequip(void) {}  // ŠO‚ê‚½Žž
 
 	void SetIsActive(bool Active) {
-		if (isActive == Active) { return; }
 		isActive = Active;
 		SetJudgeFlg(Active);
 		SetIsDraw(Active);

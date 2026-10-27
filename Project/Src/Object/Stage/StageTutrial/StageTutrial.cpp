@@ -17,7 +17,7 @@ void StageTutrial::Load(void)
 
 	// “–‚½‚è”»’è‚É‚æ‚é‰Ÿ‚µo‚µ‚ğ—LŒø‚É‚·‚é
 	SetPushFlg(true);
-	AddCollider(new MeshCollider(COLLIDER_TAG::DebugObject));
+	AddCollider(new MeshCollider(COLLIDER_TAG::Stage));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "2")));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "3")));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "4")));
