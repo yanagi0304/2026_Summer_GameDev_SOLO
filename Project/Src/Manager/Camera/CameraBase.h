@@ -57,6 +57,8 @@ public:
 	const Vector3& GetAngle(void)const { return angle; }
 	// 視野角
 	float GetFov(void)const { return fov; }
+	//正面ベクトル
+	const Vector3& GetFront(void);
 
 	// カメラ回転におけるマウス感度
 	static float GetMouseSensi(void) { return mouseRotSensi; }

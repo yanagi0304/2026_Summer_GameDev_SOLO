@@ -12,7 +12,7 @@ public:
 
     const float SIZE = GetParameter("Init", "scale");
 
-    Asteroid();
+    Asteroid(const Vector3& vec);
     ~Asteroid() override = default;
 
     void Load(void) override;
@@ -57,5 +57,13 @@ private:
     static constexpr int TRAIL_MAX = 10;
 
     std::deque<Vector3> trail;
+
+#pragma region 受け取り参照
+
+    //発射ベクトル
+    const Vector3& vec;
+
+#pragma endregion
+
 };
 

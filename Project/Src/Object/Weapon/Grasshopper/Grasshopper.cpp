@@ -56,8 +56,8 @@ void Grasshopper::Create(void)
 
 	// オーナーの回転に合わせてローカル位置を回転
 	trans.pos =
-		ownerTrans_.pos +
-		ownerTrans_.VTrans(
+		ownerTrans.pos +
+		ownerTrans.VTrans(
 			Vector3::YZonly(1.0f, 0.0f)
 		);
 
@@ -74,7 +74,7 @@ void Grasshopper::Create(void)
 	const MATRIX rotationMat =
 		MMult(
 			localRotation.ToMatrix(),
-			ownerTrans_.RotationMat()
+			ownerTrans.RotationMat()
 		);
 
 	trans.SetRotation(

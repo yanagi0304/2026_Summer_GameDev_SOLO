@@ -131,6 +131,6 @@ protected:
 
 #pragma endregion
 
-	const Transform& ownerTrans_;
+	const Transform& ownerTrans;
 };
 

@@ -1,9 +1,11 @@
 #include "Asteroid.h"
 
 #include "../../Common/Collider/BoxCollider.h"
+#include "../../../Manager/Camera/CurrentCamera.h"
 
-Asteroid::Asteroid()
-	:WeaponBase(Transform(), "Data/Parameter/Weapon/Asteroid/")
+Asteroid::Asteroid(const Vector3& vec)
+	:WeaponBase(Transform(), "Data/Parameter/Weapon/Asteroid/"),
+	vec(vec)
 {
 }
 
@@ -47,12 +49,11 @@ void Asteroid::SubUpdate(void)
 	{
 		trail.push_front(trans.pos);
 		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
+
+	
+		MoveAccel(vec);
 	}
 	else { trail.clear(); }
-
-	bool a = GetIsDraw();
-
-	if (a) { int a = 0; }
 }
 
 void Asteroid::SubDraw(void)
@@ -80,3 +81,4 @@ void Asteroid::SubDraw(void)
 void Asteroid::SubRelease(void)
 {
 }
+

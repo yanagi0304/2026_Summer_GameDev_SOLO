@@ -59,6 +59,9 @@ private:
 	void SpritUpdate();
 	void FireUpdate();
 
+	//発射速度、向きなどを発射前に決める
+	void GetFire();
+
 private:
 	int divideNum_;
 
@@ -67,6 +70,14 @@ private:
 
    int fireIndex_ = 0;
    int fireTimer_ = 0;
+
+   // 画面中央のX座標
+   int screenCenterX;
+   // 画面中央のY座標
+   int screenCenterY;
+
+   //発射角度
+   Vector3 dir;
 
 #pragma region 受け取る関数
 

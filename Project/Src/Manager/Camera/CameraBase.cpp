@@ -80,6 +80,18 @@ void CameraBase::Release(void)
 	EndEvent();
 }
 
+const Vector3& CameraBase::GetFront(void)
+{
+
+	//X回転、Y回転の順で、Z方向のベクトルを回す
+	MATRIX rotX = MGetRotX(angle.x);
+	MATRIX rotY = MGetRotY(angle.y);
+	MATRIX rot = MMult(rotX, rotY);
+
+	VECTOR front = VTransform(VGet(0.0f, 0.0f, 1.0f), rot);
+	return Vector3(front);
+}
+
 
 #pragma region イベント関数
 

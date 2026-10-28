@@ -4,7 +4,7 @@
 
 WeaponBase::WeaponBase(const Transform& ownerTrans)
 	:
-	ownerTrans_(ownerTrans),
+	ownerTrans(ownerTrans),
 	anime(nullptr)
 {
 }
@@ -12,7 +12,7 @@ WeaponBase::WeaponBase(const Transform& ownerTrans)
 WeaponBase::WeaponBase(const Transform& ownerTrans, const std::string& parameterPath)
 	:
 	ActorBase(parameterPath),
-	ownerTrans_(ownerTrans),
+	ownerTrans(ownerTrans),
 	anime(nullptr)
 {
 }

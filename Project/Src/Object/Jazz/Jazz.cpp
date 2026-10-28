@@ -108,31 +108,44 @@ void Jazz::Load(void)
 
 #pragma region 武器の生成
 
+	//メイントリガー
+
 	// 「弧月」生成
-	weaponSet.emplace(TriggerType::KOGETSU, new Kogetsu(trans));
+	mainWeaponSet.emplace(TriggerType::KOGETSU, new Kogetsu(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet.at(TriggerType::KOGETSU));
+	AddChildActor(mainWeaponSet.at(TriggerType::KOGETSU));
 
 	// 「アステロイド」生成
-	weaponSet.emplace(TriggerType::ASTEROID, new ShooterManager(
+	mainWeaponSet.emplace(TriggerType::ASTEROID, new ShooterManager(
 		trans,
 		[&]() { return GetAnimeRatio(); },
-		[&]() {AnimePlay(weaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
+		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet.at(TriggerType::ASTEROID));
+	AddChildActor(mainWeaponSet.at(TriggerType::ASTEROID));
 
 	// 「シールド」生成
-	weaponSet.emplace(TriggerType::SHIELD, new Shield(trans));
+	mainWeaponSet.emplace(TriggerType::SHIELD, new Shield(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet.at(TriggerType::SHIELD));
+	AddChildActor(mainWeaponSet.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	weaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
+	mainWeaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(weaponSet.at(TriggerType::GRASS_HOPPER));
+	AddChildActor(mainWeaponSet.at(TriggerType::GRASS_HOPPER));
 
 	// トリガーUIの登録
-	for (auto& w : weaponSet) { trigger->AddMain(w.first); }
+	for (auto& w : mainWeaponSet) { trigger->AddMain(w.first); }
+
+	//サブトリガー
+		// 「ハウンド」生成
+	subWeaponSet.emplace(TriggerType::HOUND, new ShooterManager(
+		trans,
+		[&]() { return GetAnimeRatio(); },
+		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
+	// Jazzクラスの下位クラスとして登録する
+	AddChildActor(subWeaponSet.at(TriggerType::HOUND));
+
+	for (auto& w : subWeaponSet) { trigger->AddSub(w.first); }
 
 #pragma endregion
 
@@ -143,7 +156,7 @@ void Jazz::Load(void)
 	// 待機状態
 	AddState(
 		STATE::Idle,
-		new PlayerIdleState([&]() { AnimePlay(weaponSet.at(currentWeaponID)->GetIdleAnimeID()); })
+		new PlayerIdleState([&]() { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); })
 	);
 
 	// 移動状態
@@ -186,7 +199,7 @@ void Jazz::Load(void)
 				0.7f,
 				0.9f
 			},
-			*weaponSet.at(TriggerType::KOGETSU),
+			*mainWeaponSet.at(TriggerType::KOGETSU),
 			[&]() { return IsTrigger(TriggerType::KOGETSU); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A2); },
@@ -226,7 +239,7 @@ void Jazz::SubInit(void)
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
 	AnimePlay(CHARACTER_ANIME::IDLE);
-	for (auto& w : weaponSet) { w.second->SetIsActive(true); }
+	for (auto& w : mainWeaponSet) { w.second->SetIsActive(true); }
 	WeaponChange(TriggerType::KOGETSU);
 }
 
@@ -253,9 +266,9 @@ void Jazz::WeaponChange(TriggerType type)
 
 	currentWeaponID = mains[mainCurrentIndex];
 
-	for (auto& w : weaponSet) { w.second->SetIsActive(w.first == currentWeaponID); }
+	for (auto& w : mainWeaponSet) { w.second->SetIsActive(w.first == currentWeaponID); }
 
-	AnimePlay(weaponSet.at(currentWeaponID)->GetIdleAnimeID());
+	AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID());
 }
 
 Vector3 Jazz::InputVec(void) const

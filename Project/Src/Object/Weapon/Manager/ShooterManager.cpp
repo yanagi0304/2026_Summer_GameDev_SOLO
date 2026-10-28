@@ -2,7 +2,11 @@
 
 #include "../../../Utility/Utility.h"
 
+#include "../../../Application/Application.h"
+
 #include "../../../Manager/Input/InputManager.h"
+
+#include "../../../Manager/Camera/CurrentCamera.h"
 
 #include "../Asteroid/Asteroid.h"
 
@@ -14,15 +18,19 @@ ShooterManager::ShooterManager(
 ) :
 	WeaponBase(ownerTrans),
 	animeRatio(animeRate),
-	playAnime(playAnime)
+	playAnime(playAnime),
+	screenCenterX(Application::SCREEN_SIZE_X_HALF),
+	screenCenterY(Application::SCREEN_SIZE_Y_HALF),
+	dir()
 {
+	//SetDrawType(ACTOR_DRAW_TYPE::Alpha);
 }
 
 void ShooterManager::Load(void)
 {
 	for (int i = 0; i < div; i++)
 	{
-		shot[i] = new Asteroid();
+		shot[i] = new Asteroid(dir);
 		AddChildActor(shot[i]);
 		shot[i]->SetIsActive(false);
 	}
@@ -30,7 +38,7 @@ void ShooterManager::Load(void)
 
 	SetJudgeFlg(true);
 	SetDynamicFlg(true);
-	SetPushFlg(true);
+	SetPushFlg(false);
 
 }
 
@@ -55,6 +63,7 @@ int ShooterManager::GetIdleAnimeID(void) const
 
 void ShooterManager::OnEquip(void)
 {
+
 	state = state = CUBE_STATE::NONE;
 	for (auto* s : shot)
 	{
@@ -64,7 +73,7 @@ void ShooterManager::OnEquip(void)
 
 void ShooterManager::OnUnequip(void)
 {
-	SetIsDraw(false);
+	SetIsDraw(true);
 	for (auto* s : shot)
 	{
 		s->SetIsActive(false);
@@ -113,7 +122,10 @@ void ShooterManager::ChangeState(void)
 
 		// 状態をFIREに変更する
 		state = CUBE_STATE::FIRE;
-		for (auto* s : shot) { s->SetFire(true); }
+		for (auto* s : shot) { s->SetFire(true); 
+		}
+		GetFire();
+
 		break;
 
 	case CUBE_STATE::FIRE:
@@ -152,19 +164,19 @@ void ShooterManager::CubeUpdate()
 	// 右手の位置を基準にするため、位置を取得
 	const auto frameIndex =
 		MV1SearchFrame(
-			ownerTrans_.model,
+			ownerTrans.model,
 			"mixamorig:RightHandIndex2"
 		);
 
 	const Vector3 hand =
 		MV1GetFramePosition(
-			ownerTrans_.model,
+			ownerTrans.model,
 			frameIndex
 		);
 
 	// オーナーの右方向を取得
 	const Vector3 right =
-		ownerTrans_.VTrans(
+		ownerTrans.VTrans(
 			Vector3(1.0f, 0.0f, 0.0f)
 		);
 
@@ -181,13 +193,13 @@ void ShooterManager::SpritUpdate()
 	// 右手の位置を基準にするため、位置を取得
 	auto frameIndex =
 		MV1SearchFrame(
-			ownerTrans_.model,
+			ownerTrans.model,
 			"mixamorig:RightHandIndex2"
 		);
 
 	Vector3 handPos =
 		MV1GetFramePosition(
-			ownerTrans_.model,
+			ownerTrans.model,
 			frameIndex
 		);
 
@@ -195,13 +207,13 @@ void ShooterManager::SpritUpdate()
 
 	// オーナーの前方向
 	const Vector3 forward =
-		ownerTrans_.VTrans(
+		ownerTrans.VTrans(
 			Vector3(0.0f, 0.0f, 1.0f)
 		);
 
 	// オーナーの右方向
 	const Vector3 right =
-		ownerTrans_.VTrans(
+		ownerTrans.VTrans(
 			Vector3(1.0f, 0.0f, 0.0f)
 		);
 
@@ -264,34 +276,27 @@ void ShooterManager::SpritUpdate()
 
 		asteroid->SetIsActive(false);
 	}
+
 }
 
 void ShooterManager::FireUpdate()
 {
 
-	//const float ratio = animeRatio();
 
-	//if (ratio < 0.2f) { return; }
+}
 
-	const float speed = 100.0f;
+void ShooterManager::GetFire()
+{
 
-	Vector3 scale = 0.3f;
+	// カメラの角度(angle:アングル=角度)
+	Vector3 camAngle = CurrentCamera::Get().GetAngle();
 
-	for (const auto& s : shot)
-	{
-		Asteroid* asteroid = s;
-
-		auto sp = GetRand(speed);
-		if (sp < 50) { sp = 70; }
-
-		Vector3 centerPos =
-			asteroid->GetTrans().pos +
-			asteroid->GetDir() * sp;
-
-		asteroid->SetTrans(centerPos, scale);
-	}
-
-	//if (ratio >= 1.0f) { // 状態をCUBEに戻す
-	//	state_ = CUBE_STATE::NONE;; }
+	// 上下の回転(pitch:ピッチ)の影響を含めた前方向ベクトル
+	// sinf:サイン・エフ(正弦) cosf:コサイン・エフ(余弦)
+	dir = VGet(
+		sinf(camAngle.y) * cosf(camAngle.x),  // 横方向(X)
+		0.0f,                    // 上下方向(Y)
+		cosf(camAngle.y) * cosf(camAngle.x)   // 奥方向(Z)
+	);
 
 }

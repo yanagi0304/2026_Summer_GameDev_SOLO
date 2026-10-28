@@ -23,6 +23,7 @@ void TriggerUI::Load()
 	//武器アイコンの読み込み
 	icon_.emplace(TriggerType::KOGETSU, LoadGraph("Data/Image/TriggerUI/Kogetsu.png"));
 	icon_.emplace(TriggerType::GRASS_HOPPER, LoadGraph("Data/Image/TriggerUI/Grasshopper.png"));
+	icon_.emplace(TriggerType::HOUND, LoadGraph("Data/Image/TriggerUI/Grasshopper.png"));
 	icon_.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
 
 	// このアクターは「UI」として描画する
@@ -70,6 +71,18 @@ void TriggerUI::SubDraw()
 		if (it != icon_.end() && it->second != -1)
 		{
 			DrawRotaGraph(479, 606 + (i * 50), 1.0f, 0.0f, it->second, false);
+		}
+
+	}
+
+	for (int i = 0; i < subTrig_.size(); i++)
+	{
+		DrawFormatString(116 - 84, 600 + (i * 50), 0xffffff, TriggerToString(subTrig_[i]));
+		//アイコンを表示
+		auto it = icon_.find(subTrig_[i]);
+		if (it != icon_.end() && it->second != -1)
+		{
+			DrawRotaGraph(232, 606 + (i * 50), 1.0f, 0.0f, it->second, false);
 		}
 
 	}

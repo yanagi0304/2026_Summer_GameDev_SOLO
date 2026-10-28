@@ -79,7 +79,7 @@ void Kogetsu::SubUpdate(void)
 {
 	const int frameIndex =
 		MV1SearchFrame(
-			ownerTrans_.model,
+			ownerTrans.model,
 			"mixamorig:RightHand"
 		);
 
@@ -91,7 +91,7 @@ void Kogetsu::SubUpdate(void)
 	// 右手ボーンのワールド行列
 	MATRIX handMat =
 		MV1GetFrameLocalWorldMatrix(
-			ownerTrans_.model,
+			ownerTrans.model,
 			frameIndex
 		);
 

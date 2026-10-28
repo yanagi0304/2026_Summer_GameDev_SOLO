@@ -31,19 +31,19 @@ void Shield::SubUpdate(void)
 
 	const auto frameIndex =
 		MV1SearchFrame(
-			ownerTrans_.model,
+			ownerTrans.model,
 			"mixamorig:Spine2"
 		);
 
 	const Vector3 framePos =
 		MV1GetFramePosition(
-			ownerTrans_.model,
+			ownerTrans.model,
 			frameIndex
 		);
 
 	// オーナーの前方向
 	const Vector3 forward =
-		ownerTrans_.VTrans(
+		ownerTrans.VTrans(
 			Vector3(0.0f, 0.0f, 1.0f)
 		);
 
@@ -54,5 +54,5 @@ void Shield::SubUpdate(void)
 		forward * 80.0f;
 
 	// オーナーと同じ姿勢にする
-	trans.SetRotation(ownerTrans_.rotation);
+	trans.SetRotation(ownerTrans.rotation);
 }

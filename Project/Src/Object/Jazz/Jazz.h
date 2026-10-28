@@ -17,7 +17,7 @@ class Jazz : public CharacterBase
 {
 public:
 
-	Jazz(std::function<const Vector3&(void)> target);
+	Jazz(/*std::function<const Vector3&(void)> target*/);
 	~Jazz() override = default;
 
 	void Load(void)override;
@@ -121,7 +121,8 @@ private:
 	Vector3 prevPos;
 
 	//Š•Ší
-	std::map<TriggerType, WeaponBase*> weaponSet;
+	std::map<TriggerType, WeaponBase*> mainWeaponSet;
+	std::map<TriggerType, WeaponBase*> subWeaponSet;
 
 	//Œ»İ‚Ì‘•”õ‚ğ•Û‘¶
 	TriggerType currentWeaponID;
