@@ -13,7 +13,8 @@ public:
 		std::function<void(const Vector3&)> moveAccel,
 		float& accelMax,
 		std::function<void(void)> playAnimeWalk,
-		std::function<void(void)> playAnimeRun
+		std::function<void(void)> playAnimeRun,
+		std::function<bool(void)> isGrashopper
 	);
 
 	~PlayerMoveState()override = default;
@@ -49,6 +50,9 @@ private:
 	// ダッシュのスタミナの最大量（1フレームずつデクリメント）
 	const short DASH_STAMINA_MAX;
 
+	// 空中での最大速度の倍率
+	static constexpr float AIR_ACCEL_RATE = 0.5f;
+
 #pragma endregion
 
 #pragma region 受け取る参照変数・関数
@@ -63,6 +67,9 @@ private:
 	const std::function<void(void)> playAnimeWalk;
 	// 走りアニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeRun;
+
+	// グラスホッパーの使用状況取得関数のポインタ
+	const std::function<bool(void)> isGrashopper;
 
 #pragma endregion
 

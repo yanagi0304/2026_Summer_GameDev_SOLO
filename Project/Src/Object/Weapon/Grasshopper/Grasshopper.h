@@ -8,7 +8,7 @@ class Grasshopper :
 {
 
 public:
-    Grasshopper(const Transform& ownerTrans);
+    Grasshopper(const Transform& ownerTrans,bool& isGrashpper);
     ~Grasshopper() override = default;
 
     void Load(void) override;
@@ -37,8 +37,15 @@ private:
 
     MATRIX weaponMatrix_;
 
+    //生成時の傾き
+    MATRIX rotationMat;
+
     float tiltPitch_;   // 現在のピッチ角(ラジアン)
     float tiltRoll_;   // 現在のロール角(ラジアン)
+
+#pragma region 受け取り参照
+    bool& isGrashpper;
+#pragma endregion
 
 };
 

@@ -148,6 +148,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Weapon\Hound\Hound.cpp" />
     <ClCompile Include="Src\Object\Mannequin\MannequinManager.cpp" />
     <ClCompile Include="Src\Object\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="Src\Application\Application.cpp" />
@@ -228,6 +229,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Common\Target\Target.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Weapon\Hound\Hound.h" />
     <ClInclude Include="Src\Object\Common\Target\TargetTeamDefine.h" />
     <ClInclude Include="Src\Object\Mannequin\MannequinManager.h" />
     <ClInclude Include="Src\Object\MessageWindow\MessageWindow.h" />

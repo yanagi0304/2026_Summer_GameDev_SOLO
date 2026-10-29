@@ -18,6 +18,7 @@
 #include "../DataLoad/ParameterLoad.h"
 
 #include "../Target/Target.h"
+#include "../../../Utility/Utility.h"
 
 ActorBase::ActorBase() :
 	trans(),
@@ -43,7 +44,9 @@ ActorBase::ActorBase() :
 
 	childActors(),
 
-	controlSenderId(MSG_SENDER_ID::None)
+	controlSenderId(MSG_SENDER_ID::None),
+
+	launchTimer(0.0f)
 {
 }
 
@@ -71,7 +74,10 @@ ActorBase::ActorBase(const std::string& parameterPath) :
 
 	childActors(),
 
-	controlSenderId(MSG_SENDER_ID::None)
+	controlSenderId(MSG_SENDER_ID::None),
+
+	launchTimer(0.0f)
+
 {
 }
 
@@ -212,6 +218,18 @@ std::vector<ColliderBase*> ActorBase::GetColliders(void) const
 	return ret;
 }
 
+// éwíËï˚å¸Ç…êÅÇ´îÚÇŒÇ∑
+void ActorBase::Launch(const Vector3& launchVelocity)
+{
+	velocity = launchVelocity;
+
+	float widthAccelLen = sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+
+	// â°é≤ÇÃâ¡ë¨ìxÇ™Ç†ÇÈèÍçá
+	// ÇµÇŒÇÁÇ≠ÇÕå¥ë•Ç∆ë¨ìxè„å¿ÇéÛÇØÇ»Ç¢ÇÊÇ§Ç…Ç∑ÇÈ
+	if (widthAccelLen > 0.0f) { launchTimer = LAUNCH_FREE_TIME; }
+}
+
 void ActorBase::DrawColliderDebug(void) const
 {
 	for (ColliderBase* collider : GetColliders()) {
@@ -247,8 +265,12 @@ void ActorBase::VelocityUpdate(bool	deceleration)
 		// ï‚ê≥î{ó¶
 		float scale = 1.0f;
 
+		//êÅÇ´îÚÇŒÇµíÜÇ©Ç«Ç§Ç©
+		const bool isLaunching = launchTimer > 0.0f;
+		if (isLaunching) { launchTimer -=TimeScale::Get(); }
+
 		// å∏ë¨èàóù
-		if (deceleration) {
+		if (deceleration && !isLaunching) {
 			// â°é≤ÇÃâ¡ë¨ìxÇ™å∏ë¨ÇÃîºï™à»â∫ÇÃèÍçáÇÕÅAâ°é≤ÇÃâ¡ë¨ìxÇ0Ç…Ç∑ÇÈ
 			if (widthAccelLen <= (DECEL_RATE * TimeScale::Get()) * 0.5f) { velocity.x = velocity.z = 0.0f; }
 
@@ -259,7 +281,7 @@ void ActorBase::VelocityUpdate(bool	deceleration)
 		// ç≈ëÂâ¡ë¨êßå¿Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`Å`
 
 		// ç≈ëÂâ¡ë¨Çí¥Ç¶ÇƒÇ¢ÇÍÇŒÅAí¥âﬂï™Çë≈Çøè¡Ç∑ï‚ê≥î{ó¶ÇëgÇ›çûÇﬁ
-		if (widthAccelLen > ACCEL_MAX) { scale = ACCEL_MAX / widthAccelLen; }
+		if ( !isLaunching && widthAccelLen > ACCEL_MAX) { scale = ACCEL_MAX / widthAccelLen; }
 
 		// é¿ç€Ç…ï‚ê≥
 		velocity.x *= scale;

@@ -48,7 +48,7 @@ void GameScene::SubPostLoad(void)
 
 	mannequinManager = new MannequinManager();
 	AddActor(mannequinManager);
-	operatorObject = new Jazz();
+	operatorObject = new Jazz([&]() {return target->GetTargetPos(); });
 	AddActor(operatorObject);
 	AddActor(new StageTutrial);
 

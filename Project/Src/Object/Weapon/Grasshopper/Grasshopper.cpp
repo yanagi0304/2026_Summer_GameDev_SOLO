@@ -1,16 +1,18 @@
-#include "Grasshopper.h"
+ï»¿#include "Grasshopper.h"
 
 #include "../../../Utility/Utility.h"
 
 #include "../../../Manager/Input/InputManager.h"
 
 #include "../../Common/Collider/BoxCollider.h"
+#include "../../../Manager/Camera/CurrentCamera.h"
 
-Grasshopper::Grasshopper(const Transform& ownerTrans)
+Grasshopper::Grasshopper(const Transform& ownerTrans, bool& isGrashpper)
 	:
 	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Grasshopper/"),
 	tiltPitch_(0),
-	tiltRoll_(0)
+	tiltRoll_(0),
+	isGrashpper(isGrashpper)
 {
 }
 
@@ -24,19 +26,23 @@ void Grasshopper::Load(void)
 	SetDynamicFlg(true);
 	SetPushFlg(false);
 	SetIsDraw(false);
+
+	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
 	
 }
 
 void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
-	SetJudgeFlg(false);
-	switch (other.GetTag())
-	{
-	case COLLIDER_TAG::Player: {
-		
-		break;
-	}
-	}
+	//SetJudgeFlg(false);
+
+	const VECTOR localUp = VGet(0.0f, 1.0f, 0.0f);
+	const Vector3 launchDir = VNorm(VTransformSR(localUp, rotationMat));
+
+	// é£›ã°ã™é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«(Velocity:ãƒ™ãƒ­ã‚·ãƒ†ã‚£=é€Ÿåº¦)
+	const Vector3 launchVelocity = launchDir * 40.0f;
+	other.GetActor()->Launch(launchVelocity);
+	//isGrashpper = false;
+
 }
 
 void Grasshopper::OnEquip(void)
@@ -53,29 +59,26 @@ void Grasshopper::Create(void)
 	SetJudgeFlg(true);
 	SetDynamicFlg(true);
 	MV1SetOpacityRate(trans.model, 0.4f);
+	isGrashpper = true;
 
-	// ƒI[ƒi[‚Ì‰ñ“]‚É‡‚í‚¹‚Äƒ[ƒJƒ‹ˆÊ’u‚ğ‰ñ“]
+	// ã‚ªãƒ¼ãƒŠãƒ¼ã®å›è»¢ã«åˆã‚ã›ã¦ãƒ­ãƒ¼ã‚«ãƒ«ä½ç½®ã‚’å›è»¢
 	trans.pos =
 		ownerTrans.pos +
 		ownerTrans.VTrans(
 			Vector3::YZonly(1.0f, 0.0f)
 		);
+	static constexpr float TILT_MAX_DEG = 40.0f;
+	// å…¥åŠ›ãƒ™ã‚¯ãƒˆãƒ«
+	auto input = InputVec();
 
-	auto vec = InputVec() * 40.0f;
-	// ƒI[ƒi[‚Ìp¨‚ğŠî€‚ÉAƒ[ƒJƒ‹X²‚Ö-40“x‰ñ“]
-	// ‘OŒã“ü—Í ¨ X²‰ñ“]A‰¡“ü—Í ¨ Z²‰ñ“]
-	const Quaternion tiltX = Quaternion::FromRotationX(Deg2Rad(vec.z));
-	const Quaternion tiltZ = Quaternion::FromRotationZ(Deg2Rad(-vec.x));
+	input.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));
 
-	// ƒ[ƒJƒ‹‰ñ“](2²‚Ô‚ñ)‚ğ‡¬
+	const Quaternion tiltX = Quaternion::FromRotationX(Deg2Rad(input.z * TILT_MAX_DEG));
+	const Quaternion tiltZ = Quaternion::FromRotationZ(Deg2Rad(-input.x * TILT_MAX_DEG));
+
+	// ãƒ­ãƒ¼ã‚«ãƒ«å›è»¢ã‚’åˆæˆ
 	const Quaternion localRotation = tiltZ * tiltX;
-
-	// ƒI[ƒi[‚Ì‰ñ“] + GrasshopperŒÅ—L‚Ì‰ñ“]
-	const MATRIX rotationMat =
-		MMult(
-			localRotation.ToMatrix(),
-			ownerTrans.RotationMat()
-		);
+	rotationMat = localRotation.ToMatrix();
 
 	trans.SetRotation(
 		Quaternion::FromMatrix(rotationMat)
@@ -110,13 +113,13 @@ void Grasshopper::SubRelease(void)
 
 Vector3 Grasshopper::InputVec(void) const
 {
-	// •Ô‹p—pˆê•Ï”
+	// è¿”å´ç”¨ä¸€æ™‚å¤‰æ•°
 	Vector3 vec = Vector3();
 
-	// ƒRƒ“ƒgƒ[ƒ‰[‚Ì“ü—Í‚ğæ“¾
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®å…¥åŠ›ã‚’å–å¾—
 	vec = Input::GetIns().GetLeftStickVec(false).ToVector3XZInvertY();
 
-	// “ü—Í‚ª‚È‚¯‚ê‚ÎŸ‚ÉƒL[ƒ{[ƒh‚Ì“ü—Í‚ğæ“¾
+	// å…¥åŠ›ãŒãªã‘ã‚Œã°æ¬¡ã«ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã®å…¥åŠ›ã‚’å–å¾—
 	if (vec == 0.0f) {
 		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMoveRight).now) { vec.x++; }
 		if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMoveLeft).now) { vec.x--; }

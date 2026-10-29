@@ -18,6 +18,8 @@ static constexpr float DEG2RAD = (DX_PI_F / 180.0f);
 
 static constexpr float kEpsilonNormalSqrt = 1e-15F;
 
+static constexpr float DeltaTime = 1.0f/60.0f;
+
 // ŽlŽÌŒÜ“ü
 static int Round(float v) { return static_cast<int>(roundf(v)); }
 

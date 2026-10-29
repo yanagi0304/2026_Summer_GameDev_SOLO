@@ -38,8 +38,9 @@ private:
 
 	int x, y = 0;
 
-	void SubUpdate();
-	void SubDraw();
+	void SubUpdate()override;
+	void SubDraw()override;
+	void SubRelease()override;
 
 	// 現在の選択状態の参照（メイントリガー）
 	const int& mainCurrentIndex_;

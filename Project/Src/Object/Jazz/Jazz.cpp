@@ -34,7 +34,7 @@
 
 #include "../Common/Target/Target.h"
 
-Jazz::Jazz() :
+Jazz::Jazz(std::function<const Vector3& (void)> target) :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
 
 	weaponTrans(),
@@ -42,7 +42,9 @@ Jazz::Jazz() :
 	mainCurrentIndex(0),
 	subCurrentIndex(0),
 
-	trigger(nullptr)
+	trigger(nullptr),
+
+	target(target)
 {
 }
 
@@ -129,7 +131,8 @@ void Jazz::Load(void)
 	AddChildActor(mainWeaponSet.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	mainWeaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(trans));
+	mainWeaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(
+		trans,isGrashpper));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::GRASS_HOPPER));
 
@@ -163,27 +166,28 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Move,
 		new PlayerMoveState(
-			10.0f, 50.0f, 300,
+			10.0f, 10.0f, 30,
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
 			ACCEL_MAX,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
-			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
+			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
+			[&]() {return GetIsGrashopper(); }
 		)
 	);
 
-	//// ジャンプ状態
-	//AddState(
-	//	STATE::Jump,
-	//	new PlayerJumpState(
-	//		20.0f, velocity.y, isGround,
-	//		std::bind(&Player::MoveAccel, this, std::placeholders::_1),
-	//		[&]() { AnimePlay(ANIME_TYPE::JumpStart); },
-	//		[&]() { AnimePlay(ANIME_TYPE::JumpLoop); },
-	//		[&]() { AnimePlay(ANIME_TYPE::Stamp); },
-	//		std::bind(&Player::IsAnimeEnd, this),
-	//		[&]() { ChangeState(STATE::Idle); }
-	//	)
-	//);
+	// ジャンプ状態
+	AddState(
+		STATE::Jump,
+		new PlayerJumpState(
+			20.0f, velocity.y, isGround,
+			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1,true),
+			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
+			[&]() { AnimePlay(CHARACTER_ANIME::ASTEROID_CREATE_R); },
+			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
+			std::bind(&Jazz::IsAnimeEnd, this),
+			[&]() { ChangeState(STATE::Idle); }
+		)
+	);
 
 	//弧月
 	AddState(
@@ -214,6 +218,11 @@ void Jazz::Load(void)
 	// 「移動状態」->「待機状態」の自動遷移登録
 	RegisterStateTransition(STATE::Move, STATE::Idle);
 
+	// 「待機状態」->「移動状態」の自動遷移登録
+	RegisterStateTransition(STATE::Idle, STATE::Jump);
+	// 「移動状態」->「待機状態」の自動遷移登録
+	RegisterStateTransition(STATE::Move, STATE::Jump);
+
 	//「待機状態」->「弧月」の自動遷移登録
 	RegisterStateTransition(STATE::Idle, STATE::Kogetsu);
 	// 「移動状態」->「弧月」の自動遷移登録
@@ -227,7 +236,7 @@ void Jazz::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const Col
 	switch (other.GetTag())
 	{
 	case COLLIDER_TAG::Grasshopper:
-		velocity.y = 40.0f;
+		
 		break;
 	default:
 		break;

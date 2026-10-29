@@ -19,7 +19,7 @@ void Asteroid::Load(void)
 
 	SetIsDraw(false);
 	SetJudgeFlg(false);
-	SetPushFlg(true);
+	SetPushFlg(false);
 
 }
 
@@ -49,8 +49,8 @@ void Asteroid::SubUpdate(void)
 	{
 		trail.push_front(trans.pos);
 		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
-
-	
+		ACCEL_MAX = 50.0f;
+		ACCEL_RATE = 10.0f;
 		MoveAccel(vec);
 	}
 	else { trail.clear(); }

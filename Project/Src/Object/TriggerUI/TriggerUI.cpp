@@ -20,10 +20,14 @@ void TriggerUI::Load()
 	//画像の読み込み
 	triggerUI_ = LoadGraph("Data/Image/TriggerUI/TriggerUI.png");
 	select_ = LoadGraph("Data/Image/TriggerUI/SelectUI.png");
+
+	//共通のアイコンは使いまわす
+	int optionIcon = LoadGraph("Data/Image/TriggerUI/Option.png");
+
 	//武器アイコンの読み込み
 	icon_.emplace(TriggerType::KOGETSU, LoadGraph("Data/Image/TriggerUI/Kogetsu.png"));
-	icon_.emplace(TriggerType::GRASS_HOPPER, LoadGraph("Data/Image/TriggerUI/Grasshopper.png"));
-	icon_.emplace(TriggerType::HOUND, LoadGraph("Data/Image/TriggerUI/Grasshopper.png"));
+	icon_.emplace(TriggerType::GRASS_HOPPER, optionIcon);
+	icon_.emplace(TriggerType::SHIELD, LoadGraph("Data/Image/TriggerUI/Shield.png"));
 	icon_.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
 
 	// このアクターは「UI」として描画する
@@ -89,6 +93,18 @@ void TriggerUI::SubDraw()
 
 	DrawFormatString(0, 100, 0xffffff, "%d,%d", x, y);
 
+}
+
+void TriggerUI::SubRelease()
+{
+	// 同じハンドルを二重に解放しないよう、重複を除いて解放する
+	std::set<int> released;
+	for (auto& pair : icon_) {
+		if (released.insert(pair.second).second) {
+			DeleteGraph(pair.second);
+		}
+	}
+	icon_.clear();
 }
 
 const char* TriggerUI::TriggerToString(TriggerType trigger)

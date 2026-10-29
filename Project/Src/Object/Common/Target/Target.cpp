@@ -61,17 +61,22 @@ void Target::Update(void)
 
 void Target::Draw(void)
 {
-	// ターゲットのマーク表示
-	if (target != nullptr && HasTarget()) {
+	// ターゲットがいなければ何もしない
+	if (target == nullptr || !HasTarget()) { return; }
+	static int targetMarkHandle_ = LoadGraph("Data/Image/Target/Target_Candidate.png");
+	// ターゲット位置(高さ補正つき)
+	Vector3 pos = (0,0,0);
+	pos.y += 0;
 
-		// ワールド座標を画面座標へ変換
-		VECTOR screenPos = ConvWorldPosToScreenPos(GetTargetPos().ToVECTOR());
-
-		// 画面内(カメラの前)にある時だけ描画
-		if (screenPos.z > 0.0f && screenPos.z < 1.0f) {
-			DrawCircle((int)screenPos.x, (int)screenPos.y, 20, 0xff0000, FALSE, 3);
-		}
-	}
+	// カメラの方を向く板を3D空間に描画(Billboard:ビルボード)
+	DrawBillboard3D(
+		pos.ToVECTOR(),   // 中心位置
+		0.5f, 0.5f,       // 画像上の中心(0.5=中央)
+		80,        // 大きさ
+		0.0f,             // 回転角(ラジアン)
+		targetMarkHandle_,
+		TRUE              // 透過を有効
+	);
 }
 
 Vector3 Target::CalcCameraForward(void) const

@@ -17,7 +17,7 @@ class Jazz : public CharacterBase
 {
 public:
 
-	Jazz(/*std::function<const Vector3&(void)> target*/);
+	Jazz(std::function<const Vector3&(void)> target);
 	~Jazz() override = default;
 
 	void Load(void)override;
@@ -26,6 +26,9 @@ public:
 
 	// ターゲットとしての陣営
 	TARGET_TEAM GetTargetTeam(void) const override { return TARGET_TEAM::Ally; }
+
+	//グラスホッパーの使用状況取得
+	bool GetIsGrashopper(void) const { return isGrashpper; }
 
 private:
 
@@ -129,6 +132,15 @@ private:
 
 	int mainCurrentIndex;
 	int subCurrentIndex;
+
+	//現在グラスホッパーの使用をしているか
+	bool isGrashpper;
+
+#pragma region 受け取り参照
+
+	std::function<const Vector3& (void)> target;
+
+#pragma endregion
 
 };
 

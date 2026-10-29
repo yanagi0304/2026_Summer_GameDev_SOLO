@@ -103,6 +103,9 @@ public:
 	// ターゲットとしての陣営
 	virtual TARGET_TEAM GetTargetTeam(void) const { return TARGET_TEAM::None; }
 
+	// 指定方向に吹き飛ばす
+	void Launch(const Vector3& launchVelocity);
+
 private:
 
 	// 当たり判定情報
@@ -155,6 +158,12 @@ private:
 	//ターゲットシステム
 	Target* target;
 
+	// 吹き飛ばし中に減速と速度上限を無効にする残りフレーム数
+	float launchTimer;
+
+	// 吹き飛ばし後に減速を無効にするフレーム数
+	static constexpr float LAUNCH_FREE_TIME = 30.0f;
+
 protected:
 
 	// モデル制御情報構造体
@@ -166,9 +175,9 @@ protected:
 	// 横軸加速度の1フレームごとの加速量
 	float ACCEL_RATE = 5.0f;
 	// 横軸加速度の1フレームごとの減速量
-	float DECEL_RATE = 5.0f;
+	float DECEL_RATE = 1.0f;
 	// 横軸加速度の最大値
-	float ACCEL_MAX = 40.0f;
+	float ACCEL_MAX = 30.0f;
 
 	// 接地判定(派生先で参照用)
 	const bool& isGround = isGroundMaster;

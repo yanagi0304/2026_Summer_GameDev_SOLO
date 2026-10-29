@@ -13,7 +13,9 @@ PlayerMoveState::PlayerMoveState(
 	float& accelMax,
 
 	std::function<void(void)> playAnimeWalk,
-	std::function<void(void)> playAnimeRun
+	std::function<void(void)> playAnimeRun,
+
+	std::function<bool(void)> isGrashopper
 ) :
 	ACCEL_MAX(ACCEL_MAX), DASH_SPEED_RATE(DASH_SPEED_RATE), DASH_STAMINA_MAX(DASH_STAMINA_MAX),
 
@@ -24,6 +26,8 @@ PlayerMoveState::PlayerMoveState(
 	playAnimeWalk(playAnimeWalk),
 	playAnimeRun(playAnimeRun),
 
+	isGrashopper(isGrashopper),
+
 	isDash(false),
 	dashStamina(DASH_STAMINA_MAX),
 	isTired(false)
@@ -32,12 +36,14 @@ PlayerMoveState::PlayerMoveState(
 
 void PlayerMoveState::OwnStateConditionUpdate(void)
 {
+
 	// 移動入力があれば、自分の状態に遷移
 	if (InputVec() != 0.0f) { OwnChangeState(); }
 }
 
 void PlayerMoveState::Enter(void)
 {
+
 	// 非ダッシュ
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerDash).now) { playAnimeRun(); }
 	// ダッシュ
@@ -54,6 +60,7 @@ void PlayerMoveState::Update(void)
 
 	// 移動量の最大値を更新する
 	accelMax = (isDash) ? ACCEL_MAX * DASH_SPEED_RATE : ACCEL_MAX * inputVec.Length();
+
 
 	// 最終的に入力があれば加速度に加算する
 	if (inputVec != 0.0f) {
