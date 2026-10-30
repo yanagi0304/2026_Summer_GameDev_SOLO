@@ -27,7 +27,8 @@ public:
 	/// <param name="pos">座標</param>
 	/// <param name="angle">角度</param>
 	/// <param name="fov">視野角</param>
-	CameraBase(const Vector3& pos = Vector3(), const Vector3& angle = Vector3(), float fov = 60.0f * (DX_PI_F / 180.0f));
+	CameraBase(const Vector3& pos = Vector3(), const Quaternion& rotation = Quaternion::Identity(), float fov = 60.0f * (DX_PI_F / 180.0f));
+	CameraBase(const Vector3& pos, const Vector3& angle, float fov = 60.0f * (DX_PI_F / 180.0f));
 	// デストラクタ
 	virtual ~CameraBase() = default;
 
@@ -53,12 +54,13 @@ public:
 #pragma region ゲット関数
 	// 座標
 	const Vector3& GetPos(void)const { return pos; }
-	// 角度
-	const Vector3& GetAngle(void)const { return angle; }
+	// 回転
+	const Quaternion& GetRotation(void)const { return rotation; }
 	// 視野角
 	float GetFov(void)const { return fov; }
-	//正面ベクトル
-	const Vector3& GetFront(void);
+
+	// 現在の時間倍率
+	float GetTimeScale(void)const;
 
 	// カメラ回転におけるマウス感度
 	static float GetMouseSensi(void) { return mouseRotSensi; }
@@ -67,15 +69,21 @@ public:
 
 	// カメラ移動における補間数値
 	static float GetSmoothCameraMoveRate(void) { return smoothCameraMoveRate; }
+
 #pragma endregion
 
 #pragma region セット関数
 	// 座標
 	void SetPos(const Vector3& pos) { this->pos = pos; }
-	// 角度
-	void SetAngle(const Vector3& angle) { this->angle = angle; }
+	// 回転
+	void SetRotation(const Quaternion& rotation) { this->rotation = rotation.Normalized(); }
+	// Euler角から回転を設定する
+	void SetAngle(const Vector3& angle) { SetRotation(Quaternion::FromEulerXZY(angle)); }
 	// 視野角
 	void SetFov(float fov) { this->fov = fov; }
+
+	// 時間倍率を適用するか
+	void SetUseTimeScale(bool flg) { useTimeScale = flg; }
 
 	// カメラ回転におけるマウス感度
 	static void SetMouseSensi(float sensi) { mouseRotSensi = sensi; }
@@ -104,8 +112,8 @@ protected:
 	// 座標
 	Vector3 pos;
 
-	// 角度
-	Vector3 angle;
+	// 回転
+	Quaternion rotation;
 
 	// 視野角
 	float fov;
@@ -117,19 +125,19 @@ protected:
 	virtual void SubRelease(void) {}
 
 	// 座標と注視点から角度を割り出す
-	static Vector3 CalcCameraAngle(const Vector3& pos, const Vector3& lookAtPos) {
+	static Quaternion CalcCameraRotation(const Vector3& pos, const Vector3& lookAtPos) {
 
 		// カメラから注視点へ向かうベクトル
 		Vector3 vec = lookAtPos - pos;
 
 		// 安全処理
-		if (vec.LengthSq() <= 0.000001f) { return Vector3(); }
+		if (vec.LengthSq() <= 0.000001f) { return Quaternion::Identity(); }
 
 		// 正規化
 		vec.Normalize();
 
 		// 角度を返す
-		return Vector3(-asinf(std::clamp(vec.y, -1.0f, 1.0f)), atan2f(vec.x, vec.z), 0.0f);
+		return Quaternion::FromEulerXZY(Vector3(-asinf(std::clamp(vec.y, -1.0f, 1.0f)), atan2f(vec.x, vec.z), 0.0f));
 	}
 
 	// カメラ回転入力情報を取得
@@ -150,6 +158,9 @@ private:
 
 	// カメラ移動における補間数値
 	static float smoothCameraMoveRate;
+
+	// 時間倍率を適用するかどうか
+	bool useTimeScale;
 
 	// イベントカメラ
 	CameraEventBase* cameraEvent;

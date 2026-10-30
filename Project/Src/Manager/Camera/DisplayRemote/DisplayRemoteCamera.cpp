@@ -21,7 +21,7 @@ DisplayRemoteCamera::DisplayRemoteCamera(const Vector3& fixedLookAtPos, const Ve
 	pos = fixedLookAtPos + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(controlAngle.x,controlAngle.y) }));
 
 	// 角度
-	this->angle = CalcCameraAngle(pos, fixedLookAtPos);
+	this->rotation = CalcCameraRotation(pos, fixedLookAtPos);
 
 	// カメラ回転が有効だったらマウスを固定しておく
 	if (ROT_POWER != 0.0f) { Input::GetIns().SetMouseFixed(true); }
@@ -33,7 +33,7 @@ void DisplayRemoteCamera::NormalUpdate(void)
 	if (RotationInput(rotInput)) {
 
 		// 回転させる
-		controlAngle += (rotInput * ROT_POWER) * TimeScale::Get();
+		controlAngle += (rotInput * ROT_POWER) * GetTimeScale();
 
 		// 回転の数値制御
 		if (controlAngle.y <= Deg2Rad(0.0f)) { controlAngle.y += Deg2Rad(360.0f); }
@@ -46,7 +46,7 @@ void DisplayRemoteCamera::NormalUpdate(void)
 	SmoothCameraMove(pos, fixedLookAtPos + lookAtDiff.TransMat(MatrixAllMultXY({ Vector3::XYonly(controlAngle.x,controlAngle.y) })));
 
 	// 角度
-	angle = CalcCameraAngle(pos, fixedLookAtPos);
+	rotation = CalcCameraRotation(pos, fixedLookAtPos);
 }
 
 void DisplayRemoteCamera::SubRelease(void)

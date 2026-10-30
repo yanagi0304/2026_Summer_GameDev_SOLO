@@ -13,6 +13,7 @@ public:
 
 		float& velocityY,
 		const bool& isGround,
+		bool& isGrashopper,
 
 		std::function<void(const Vector3&)> moveAccel,
 
@@ -24,7 +25,9 @@ public:
 
 		std::function<void(void)> changeStateIdle,
 
-		std::function<float(void)> getAnimeRatio
+		std::function<float(void)> getAnimeRatio,
+
+		std::function<bool(void)> isLaunching
 	);
 
 	~PlayerJumpState()override = default;
@@ -54,6 +57,9 @@ private:
 	// 地面と設置しているか
 	const bool& isGround;
 
+	//グラスホッパーを使っているか
+	bool& isGrashopper;
+
 	// 移動関数のポインタ
 	const std::function<void(const Vector3&)> moveAccel;
 
@@ -72,6 +78,9 @@ private:
 
 	//アニメーションの割合を取得
 	const std::function<float(void)> getAnimeRatio;
+
+	// 吹っ飛ばし中かを取得する関数
+	const std::function<bool(void)> isLaunching;
 
 #pragma endregion
 

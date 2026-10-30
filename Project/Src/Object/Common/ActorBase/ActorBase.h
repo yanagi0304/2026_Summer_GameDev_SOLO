@@ -106,6 +106,9 @@ public:
 	// w’è•ûŒü‚É‚«”ò‚Î‚·
 	void Launch(const Vector3& launchVelocity);
 
+	// ‚Á”ò‚Î‚µ’†‚©
+	bool IsLaunching(void) const { return launchTimer > 0.0f; }
+
 private:
 
 	// “–‚½‚è”»’èî•ñ

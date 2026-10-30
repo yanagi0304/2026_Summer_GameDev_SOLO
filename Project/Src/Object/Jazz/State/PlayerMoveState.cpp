@@ -13,9 +13,8 @@ PlayerMoveState::PlayerMoveState(
 	float& accelMax,
 
 	std::function<void(void)> playAnimeWalk,
-	std::function<void(void)> playAnimeRun,
+	std::function<void(void)> playAnimeRun
 
-	std::function<bool(void)> isGrashopper
 ) :
 	ACCEL_MAX(ACCEL_MAX), DASH_SPEED_RATE(DASH_SPEED_RATE), DASH_STAMINA_MAX(DASH_STAMINA_MAX),
 
@@ -25,8 +24,6 @@ PlayerMoveState::PlayerMoveState(
 
 	playAnimeWalk(playAnimeWalk),
 	playAnimeRun(playAnimeRun),
-
-	isGrashopper(isGrashopper),
 
 	isDash(false),
 	dashStamina(DASH_STAMINA_MAX),

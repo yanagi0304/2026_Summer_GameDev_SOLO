@@ -33,7 +33,10 @@ void Grasshopper::Load(void)
 
 void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
+
+	if (other.GetTag() != COLLIDER_TAG::Player) { return; }
 	//SetJudgeFlg(false);
+	isGrashpper = true;
 
 	const VECTOR localUp = VGet(0.0f, 1.0f, 0.0f);
 	const Vector3 launchDir = VNorm(VTransformSR(localUp, rotationMat));
@@ -41,8 +44,6 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 	// 飛ばす速度ベクトル(Velocity:ベロシティ=速度)
 	const Vector3 launchVelocity = launchDir * 40.0f;
 	other.GetActor()->Launch(launchVelocity);
-	//isGrashpper = false;
-
 }
 
 void Grasshopper::OnEquip(void)
@@ -59,7 +60,6 @@ void Grasshopper::Create(void)
 	SetJudgeFlg(true);
 	SetDynamicFlg(true);
 	MV1SetOpacityRate(trans.model, 0.4f);
-	isGrashpper = true;
 
 	// オーナーの回転に合わせてローカル位置を回転
 	trans.pos =
@@ -71,7 +71,7 @@ void Grasshopper::Create(void)
 	// 入力ベクトル
 	auto input = InputVec();
 
-	input.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));
+	//input.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));
 
 	const Quaternion tiltX = Quaternion::FromRotationX(Deg2Rad(input.z * TILT_MAX_DEG));
 	const Quaternion tiltZ = Quaternion::FromRotationZ(Deg2Rad(-input.x * TILT_MAX_DEG));

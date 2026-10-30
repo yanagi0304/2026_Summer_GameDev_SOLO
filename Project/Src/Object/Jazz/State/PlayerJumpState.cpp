@@ -10,6 +10,7 @@ PlayerJumpState::PlayerJumpState(
 
 	float& velocityY,
 	const bool& isGround,
+	bool& isGrashopper,
 
 	std::function<void(const Vector3&)> moveAccel,
 
@@ -21,12 +22,15 @@ PlayerJumpState::PlayerJumpState(
 
 	std::function<void(void)> changeStateIdle,
 
-	std::function<float(void)> getAnimeRatio
+	std::function<float(void)> getAnimeRatio,
+
+	std::function<bool(void)> isLaunching
 ):
 	JUMP_POWER(JUMP_POWER),
 
 	velocityY(velocityY),
 	isGround(isGround),
+	isGrashopper(isGrashopper),
 
 	moveAccel(moveAccel),
 
@@ -40,14 +44,16 @@ PlayerJumpState::PlayerJumpState(
 
 	getAnimeRatio(getAnimeRatio),
 
+	isLaunching(isLaunching),
+
 	step(STEP::Start)
 {
 }
 
 void PlayerJumpState::OwnStateConditionUpdate(void)
 {
-	// ジャンプキーのダウントリガーで遷移
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down) { OwnChangeState(); }
+	// ジャンプキーのダウントリガーまたは、グラスホッパー使用で遷移
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down || isGrashopper) { OwnChangeState(); }
 }
 
 void PlayerJumpState::Enter(void)
@@ -56,7 +62,7 @@ void PlayerJumpState::Enter(void)
 	step = STEP::Start;
 
 	// ジャンプ開始アニメを再生
-	playAnimeJumpStart();
+	isGrashopper ? playAnimeJumpLoop() : playAnimeJumpStart();
 }
 
 void PlayerJumpState::Update(void)
@@ -69,8 +75,10 @@ void PlayerJumpState::Update(void)
 		// アニメーション終了
 		if (0.5 < getAnimeRatio()) {
 
+			//グラスホッパーを不使用時
 			// 加速度加算
-			velocityY = JUMP_POWER;
+			if(!isGrashopper){ velocityY = JUMP_POWER; }
+			
 			// 滞空アニメーションを再生
 			playAnimeJumpLoop();
 
@@ -96,8 +104,12 @@ void PlayerJumpState::Update(void)
 			vec.Normalize();
 		}
 
-		// 最終的に入力があれば移動させる
-		if (vec != 0.0f) {
+		//グラスホッパーの使用を許可する
+		isGrashopper = false;
+
+		// 吹っ飛ばし中は移動入力を受け付けない
+		// 入力があり、かつ吹っ飛ばし中でなければ移動させる
+		if (vec != 0.0f && !isLaunching()) {
 
 			// 移動方向をカメラで回転させる
 			vec.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));

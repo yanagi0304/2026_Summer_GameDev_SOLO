@@ -13,8 +13,7 @@ public:
 		std::function<void(const Vector3&)> moveAccel,
 		float& accelMax,
 		std::function<void(void)> playAnimeWalk,
-		std::function<void(void)> playAnimeRun,
-		std::function<bool(void)> isGrashopper
+		std::function<void(void)> playAnimeRun
 	);
 
 	~PlayerMoveState()override = default;
@@ -67,9 +66,6 @@ private:
 	const std::function<void(void)> playAnimeWalk;
 	// 走りアニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeRun;
-
-	// グラスホッパーの使用状況取得関数のポインタ
-	const std::function<bool(void)> isGrashopper;
 
 #pragma endregion
 

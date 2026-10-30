@@ -289,14 +289,14 @@ void ShooterManager::GetFire()
 {
 
 	// カメラの角度(angle:アングル=角度)
-	Vector3 camAngle = CurrentCamera::Get().GetAngle();
+	//Vector3 camAngle = CurrentCamera::Get().GetAngle();
 
-	// 上下の回転(pitch:ピッチ)の影響を含めた前方向ベクトル
-	// sinf:サイン・エフ(正弦) cosf:コサイン・エフ(余弦)
-	dir = VGet(
-		sinf(camAngle.y) * cosf(camAngle.x),  // 横方向(X)
-		0.0f,                    // 上下方向(Y)
-		cosf(camAngle.y) * cosf(camAngle.x)   // 奥方向(Z)
-	);
+	//// 上下の回転(pitch:ピッチ)の影響を含めた前方向ベクトル
+	//// sinf:サイン・エフ(正弦) cosf:コサイン・エフ(余弦)
+	//dir = VGet(
+	//	sinf(camAngle.y) * cosf(camAngle.x),  // 横方向(X)
+	//	0.0f,                    // 上下方向(Y)
+	//	cosf(camAngle.y) * cosf(camAngle.x)   // 奥方向(Z)
+	//);
 
 }

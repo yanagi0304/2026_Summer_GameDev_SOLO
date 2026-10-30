@@ -140,7 +140,7 @@ void Jazz::Load(void)
 	for (auto& w : mainWeaponSet) { trigger->AddMain(w.first); }
 
 	//サブトリガー
-		// 「ハウンド」生成
+	// 「ハウンド」生成
 	subWeaponSet.emplace(TriggerType::HOUND, new ShooterManager(
 		trans,
 		[&]() { return GetAnimeRatio(); },
@@ -170,8 +170,7 @@ void Jazz::Load(void)
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
 			ACCEL_MAX,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
-			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
-			[&]() {return GetIsGrashopper(); }
+			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
 		)
 	);
 
@@ -179,14 +178,15 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Jump,
 		new PlayerJumpState(
-			30.0f, velocity.y, isGround,
+			30.0f, velocity.y, isGround,isGrashpper,
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1,true),
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
 			std::bind(&Jazz::IsAnimeEnd, this),
 			[&]() { ChangeState(STATE::Idle); },
-			[&]() {return GetAnimeRatio(); }
+			[&]() {return GetAnimeRatio(); },
+			[&]() {return IsLaunching(); }
 		)
 	);
 
