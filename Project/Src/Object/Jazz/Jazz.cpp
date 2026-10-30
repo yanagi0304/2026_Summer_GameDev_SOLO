@@ -68,7 +68,7 @@ void Jazz::Load(void)
 #pragma region ÉÇÉfÉã
 
 	// ÉÇÉfÉãÇÃì«Ç›çûÇ›
-	trans.LoadModel("Character/Jazz/wocamore");
+	trans.LoadModel("Character/WoChamolenium/WoChamolenium");
 
 	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
@@ -179,13 +179,14 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Jump,
 		new PlayerJumpState(
-			20.0f, velocity.y, isGround,
+			30.0f, velocity.y, isGround,
 			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1,true),
-			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
-			[&]() { AnimePlay(CHARACTER_ANIME::ASTEROID_CREATE_R); },
-			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
 			std::bind(&Jazz::IsAnimeEnd, this),
-			[&]() { ChangeState(STATE::Idle); }
+			[&]() { ChangeState(STATE::Idle); },
+			[&]() {return GetAnimeRatio(); }
 		)
 	);
 
@@ -303,16 +304,6 @@ Vector3 Jazz::InputVec(void) const
 void Jazz::SubDraw(void)
 {
 	//DrawFormatString(0, 120, 0x000000, "%f,%f,%f", trans.pos.x, trans.pos.y, trans.pos.z);
-}
-
-void Jazz::IsJump(void)
-{
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down && isGround) {
-		AnimePlay(CHARACTER_ANIME::JUMP);
-
-		velocity.y = 20.0f;
-
-	}
 }
 
 bool Jazz::IsTrigger(TriggerType trigger)

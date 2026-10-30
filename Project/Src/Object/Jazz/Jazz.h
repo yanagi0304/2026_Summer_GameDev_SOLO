@@ -58,8 +58,6 @@ private:
 		0.5,	// SwordIdle.R
 		0.5,	// ShildIdle.L
 
-		0.5,	// Jump
-
 		0.7,	// SlashA1
 		0.7,	// SlashA2
 		0.6,	// SlashA3
@@ -67,6 +65,10 @@ private:
 		0.5,	// AsteroidIdle.R
 		0.5,	// AsteroidCreate.R
 		1.5f,	// AsteroidIdleShot.R
+
+		0.5,	// JumpStart
+		0.5,	// Jumping
+		0.5,	// JumpEnd
 
 	};
 
@@ -80,8 +82,6 @@ private:
 		true,	// SwordIdle.R
 		true,	// ShildIdle.L
 
-		false,	// Jump
-
 		false,	// SlashA1
 		false,	// SlashA2
 		false,	// SlashA3
@@ -89,6 +89,10 @@ private:
 		true,	// AsteroidIdle.R
 		true,	// AsteroidCreate.R 
 		true,	// AsteroidIdleShot.R
+
+		false,	// JumpStart
+		true,	// Jumping
+		false,	// JumpEnd
 
 	};
 
@@ -108,8 +112,6 @@ private:
 	Vector3 InputVec(void) const;
 
 	void SubDraw(void)override;
-
-	void IsJump(void);
 
 	//所持トリガーの確認
 	bool IsTrigger(TriggerType trigger);

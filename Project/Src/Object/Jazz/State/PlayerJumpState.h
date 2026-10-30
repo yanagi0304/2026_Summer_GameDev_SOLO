@@ -22,7 +22,9 @@ public:
 
 		std::function<bool(void)> isAnimeEnd,
 
-		std::function<void(void)> changeStateIdle
+		std::function<void(void)> changeStateIdle,
+
+		std::function<float(void)> getAnimeRatio
 	);
 
 	~PlayerJumpState()override = default;
@@ -67,6 +69,9 @@ private:
 
 	// 待機状態に戻る関数のポインタ
 	const std::function<void(void)> changeStateIdle;
+
+	//アニメーションの割合を取得
+	const std::function<float(void)> getAnimeRatio;
 
 #pragma endregion
 

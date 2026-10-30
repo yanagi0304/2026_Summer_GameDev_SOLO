@@ -19,7 +19,9 @@ PlayerJumpState::PlayerJumpState(
 
 	std::function<bool(void)> isAnimeEnd,
 
-	std::function<void(void)> changeStateIdle
+	std::function<void(void)> changeStateIdle,
+
+	std::function<float(void)> getAnimeRatio
 ):
 	JUMP_POWER(JUMP_POWER),
 
@@ -35,6 +37,8 @@ PlayerJumpState::PlayerJumpState(
 	isAnimeEnd(isAnimeEnd),
 
 	changeStateIdle(changeStateIdle),
+
+	getAnimeRatio(getAnimeRatio),
 
 	step(STEP::Start)
 {
@@ -63,11 +67,10 @@ void PlayerJumpState::Update(void)
 		// ジャンプ開始
 
 		// アニメーション終了
-		if (isAnimeEnd()) {
+		if (0.5 < getAnimeRatio()) {
 
 			// 加速度加算
 			velocityY = JUMP_POWER;
-
 			// 滞空アニメーションを再生
 			playAnimeJumpLoop();
 
