@@ -33,14 +33,14 @@ public:
 
 	~CuttableActor() override = default;
 
-	// MeshColliderを生成して登録する（AddActor内で呼ばれる）
+	// MeshColliderを生成して登録する
 	void Load(void) override;
 
-	// 初期化（MeshColliderをCutMeshから作り直す）
+	// 初期化
 	void Init(void) override;
 
 	/// <summary>
-	/// メッシュを設定する（描画用データとMeshColliderも作り直す）
+	/// メッシュを設定する
 	/// 頂点はアクターのローカル座標で指定する
 	/// </summary>
 	void SetMesh(CutMesh newMesh);
@@ -49,14 +49,14 @@ public:
 	const CutMesh& GetMesh(void) const { return mesh; }
 
 	/// <summary>
-	/// マテリアル番号にテクスチャを割り当てる（未設定はテクスチャなし）
+	/// マテリアル番号にテクスチャを割り当てる
 	/// テクスチャの寿命は呼び出し側が管理する
 	/// </summary>
 	void SetTexture(int materialIndex, int graphHandle);
 
 	/// <summary>
 	/// MV1モデルの現在の形とテクスチャをこのアクターへ取り込む
-	/// ・モデルは「新しく読み込んだもの」を渡す（取り込み後は描画しない。このアクターが代わりに描く）
+	/// ・モデルは「新しく読み込んだもの」を渡す
 	/// ・頂点はモデル自身の座標になるので、位置・向き・大きさはこのアクターのtransで決める
 	/// ・テクスチャはモデルが持つものを借りるので、モデルはこのアクターより長く残しておく
 	/// </summary>
@@ -71,12 +71,12 @@ public:
 	/// <param name="worldPlane">ワールド座標の切断面</param>
 	/// <param name="cutId">一振りごとの斬撃ID（このアクターと断片に記録される。不要なら-1）</param>
 	/// <returns>
-	/// 新しく生成した断片アクター（呼び出し側でSceneBase::AddActorに渡す）
-	/// 切れなかった場合はnullptr（このアクターは変化しない）
+	/// 新しく生成した断片アクター
+	/// 切れなかった場合はnullptr
 	/// </returns>
 	CuttableActor* Cut(const CutPlane& worldPlane, int cutId = -1);
 
-	// 最後に切られたときの斬撃ID（一度も切られていなければ-1）
+	// 最後に切られたときの斬撃ID
 	// 同じ一振りで、断片をもう一度切らないために使う
 	int GetLastCutId(void) const { return lastCutId; }
 
@@ -86,16 +86,16 @@ public:
 	CutPlane ToLocalPlane(const CutPlane& worldPlane) const;
 
 	/// <summary>
-	/// 吹き飛ばす（回転しながら重力で落ち、しばらくすると縮んで消える）
+	/// 吹き飛ばす
 	/// 動的アクターとして生成した断片に使う
 	/// </summary>
-	/// <param name="launchVelocity">初速（1フレームあたりの移動量）</param>
-	/// <param name="axis">回転軸（ワールド）</param>
-	/// <param name="speed">回転速度（ラジアン/フレーム）</param>
+	/// <param name="launchVelocity">初速</param>
+	/// <param name="axis">回転軸</param>
+	/// <param name="speed">回転速度</param>
 	void Launch(const Vector3& launchVelocity, const Vector3& axis, float speed);
 
 	/// <summary>
-	/// 残っている割合を取得する（切る前の表面積に対する、今の表面積）
+	/// 残っている割合を取得する
 	/// ・切るたびに減っていく
 	/// ・断片は「元のモデル全体に対する自分の取り分」になる
 	/// </summary>
@@ -108,10 +108,10 @@ public:
 	/// <returns>0.0（無傷）〜 1.0（全部切れた）</returns>
 	float GetDamageRate(void) const { return 1.0f - GetRemainRate(); }
 
-	// 飛び終わって消えたか（シーンから外してよい状態か）
+	// 飛び終わって消えたか
 	bool IsVanished(void) const { return vanished; }
 
-	// 飛ばさずに、その場で縮めて消す（残りがごくわずかになった本体用）
+	// 飛ばさずに、その場で縮めて消す
 	void StartVanish(void);
 
 protected:

@@ -6,7 +6,6 @@
 
 namespace
 {
-	// 0`255 ‚ğ 0.0`1.0 ‚É•ÏŠ·‚·‚é
 	float ToFloat(unsigned char value)
 	{
 		return static_cast<float>(value) / 255.0f;

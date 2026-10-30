@@ -9,7 +9,7 @@
 #include "../../Manager/Sound/SoundManager.h"
 #include "../../Manager/Font/FontManager.h"
 
-#include "../../Manager/Camera/FollowRemote/FollowRemoteCamera.h"
+#include "../../Manager/Camera/ShoulderCamera/ShoulderCamera.h"
 
 #include "../SceneManager.h"
 
@@ -113,8 +113,7 @@ void GameScene::SubUiDraw(void)
 
 void GameScene::CreateCamera(void)
 {
-	camera = new FollowRemoteCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos,
-		Vector3(0.0,500.0f,-300.0f),Vector3::Yonly(200.0f));
+	camera = new ShoulderCamera(&ActorSerch<Jazz>(actors)->GetTrans().pos);
 }
 
 int GameScene::CountMannequins(void) const

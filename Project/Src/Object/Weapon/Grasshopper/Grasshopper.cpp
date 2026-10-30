@@ -71,7 +71,7 @@ void Grasshopper::Create(void)
 	// 入力ベクトル
 	auto input = InputVec();
 
-	//input.TransMatOwn(MGetRotY(CurrentCamera::Get().GetAngle().y));
+	input.TransMatOwn(MGetRotY(CurrentCamera::Get().GetRotation().GetYaw()));
 
 	const Quaternion tiltX = Quaternion::FromRotationX(Deg2Rad(input.z * TILT_MAX_DEG));
 	const Quaternion tiltZ = Quaternion::FromRotationZ(Deg2Rad(-input.x * TILT_MAX_DEG));

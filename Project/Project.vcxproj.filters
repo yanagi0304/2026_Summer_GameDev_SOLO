@@ -80,6 +80,7 @@
     <ClCompile Include="Src\Object\Common\Collider\SweepLineCollider.cpp" />
     <ClCompile Include="Src\Object\Common\Target\Target.cpp" />
     <ClCompile Include="Src\Object\Weapon\Hound\Hound.cpp" />
+    <ClCompile Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Src\Object\Common\Target\Target.h" />
     <ClInclude Include="Src\Object\Common\Target\TargetTeamDefine.h" />
     <ClInclude Include="Src\Object\Weapon\Hound\Hound.h" />
+    <ClInclude Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

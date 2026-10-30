@@ -81,15 +81,15 @@ void Target::Draw(void)
 
 Vector3 Target::CalcCameraForward(void) const
 {
-    const Vector3& angle = CurrentCamera::Get().GetAngle();
+   // const Vector3& angle = CurrentCamera::Get().GetAngle();
 
-    const float pitch = angle.x;
+ /*   const float pitch = angle.x;
     const float yaw = angle.y;
 
     return Vector3(
         std::sin(yaw) * std::cos(pitch),
         -std::sin(pitch),
         std::cos(yaw) * std::cos(pitch)
-    ).Normalized();
-
+    ).Normalized();*/
+	return Vector3();
 }

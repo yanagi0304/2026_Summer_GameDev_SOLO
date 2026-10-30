@@ -51,6 +51,8 @@ private:
 
 	void SubUpdate(void) override;
 
+	void SubDraw(void)override;
+
 	//ステート切り替え
 	void ChangeState(void);
 

@@ -1,4 +1,4 @@
-#include "ShooterManager.h"
+ï»¿#include "ShooterManager.h"
 
 #include "../../../Utility/Utility.h"
 
@@ -23,7 +23,7 @@ ShooterManager::ShooterManager(
 	screenCenterY(Application::SCREEN_SIZE_Y_HALF),
 	dir()
 {
-	//SetDrawType(ACTOR_DRAW_TYPE::Alpha);
+	SetDrawType(ACTOR_DRAW_TYPE::Ui);
 }
 
 void ShooterManager::Load(void)
@@ -99,28 +99,46 @@ void ShooterManager::SubUpdate(void)
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { ChangeState(); }
 }
 
+void ShooterManager::SubDraw(void)
+{
+	// åå­—ã®è…•ã®é•·ã•(ä¸­å¿ƒã‹ã‚‰ç«¯ã¾ã§)
+	const int armLength = 20;
+
+	// ç¸å–ã‚Š(é»’)ã®å¤ªã•ã¨ã€æœ¬ä½“(ç™½)ã®å¤ªã•
+	const int outlineThickness = 4;
+	const int lineThickness = 2;
+
+	// æ˜ã‚‹ã„èƒŒæ™¯ã§ã‚‚æš—ã„èƒŒæ™¯ã§ã‚‚è¦‹ãˆã‚‹ã‚ˆã†ã€é»’ã®ç¸å–ã‚Šã‚’å…ˆã«æã
+	DrawLine(screenCenterX - armLength - 1, screenCenterY, screenCenterX + armLength + 1, screenCenterY, 0x000000, outlineThickness);
+	DrawLine(screenCenterX, screenCenterY - armLength - 1, screenCenterX, screenCenterY + armLength + 1, 0x000000, outlineThickness);
+
+	// ç™½ã„åå­—ã‚’é‡ã­ã¦æã
+	DrawLine(screenCenterX - armLength, screenCenterY, screenCenterX + armLength, screenCenterY, 0xffffff, lineThickness);
+	DrawLine(screenCenterX, screenCenterY - armLength, screenCenterX, screenCenterY + armLength, 0xffffff, lineThickness);
+}
+
 void ShooterManager::ChangeState(void)
 {
 	switch (state)
 	{
 	case CUBE_STATE::NONE:
 
-		// ó‘Ô‚ğSPLIT‚É•ÏX‚·‚é
+		// çŠ¶æ…‹ã‚’SPLITã«å¤‰æ›´ã™ã‚‹
 		state = CUBE_STATE::CUBE;
-		// 1‚Â–Ú‚ÌƒAƒXƒeƒƒCƒh‚¾‚¯—LŒø‚É‚·‚é
+		// 1ã¤ç›®ã®ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã ã‘æœ‰åŠ¹ã«ã™ã‚‹
 		shot[0]->SetIsActive(true);
 	
 		break;
 	case CUBE_STATE::CUBE:
 
-		// ó‘Ô‚ğSPLIT‚É•ÏX‚·‚é
+		// çŠ¶æ…‹ã‚’SPLITã«å¤‰æ›´ã™ã‚‹
 		state = CUBE_STATE::SPLIT;
 
 		break;
 
 	case CUBE_STATE::SPLIT:
 
-		// ó‘Ô‚ğFIRE‚É•ÏX‚·‚é
+		// çŠ¶æ…‹ã‚’FIREã«å¤‰æ›´ã™ã‚‹
 		state = CUBE_STATE::FIRE;
 		for (auto* s : shot) { s->SetFire(true); 
 		}
@@ -130,12 +148,12 @@ void ShooterManager::ChangeState(void)
 
 	case CUBE_STATE::FIRE:
 
-		// ó‘Ô‚ğCUBE‚É–ß‚·
+		// çŠ¶æ…‹ã‚’CUBEã«æˆ»ã™
 		state = CUBE_STATE::CUBE;
 		for (auto* s : shot) { s->SetFire(false); s->ClearTrail(); }
-		// 1‚Â–Ú‚ÌƒAƒXƒeƒƒCƒh‚¾‚¯—LŒø‚É‚·‚é
+		// 1ã¤ç›®ã®ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã ã‘æœ‰åŠ¹ã«ã™ã‚‹
 		shot[0]->SetIsActive(true);
-		// c‚è‚ÌƒAƒXƒeƒƒCƒh‚ğ–³Œø‚É‚·‚é
+		// æ®‹ã‚Šã®ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã‚’ç„¡åŠ¹ã«ã™ã‚‹
 		for (int i = 1; i < div; ++i) { shot[i]->SetIsActive(false); }
 		break;
 	}
@@ -156,12 +174,12 @@ void ShooterManager::CubeUpdate()
 	//	asteroid->SetTrans(handPos, Vector3(asteroid->GetSize()));
 	//}
 
-	// ƒAƒXƒeƒƒCƒh‚Ìæ“¾
+	// ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã®å–å¾—
 	Asteroid* asteroid = shot[0];
 
 	asteroid->SetIsActive(true);
 
-	// ‰Eè‚ÌˆÊ’u‚ğŠî€‚É‚·‚é‚½‚ßAˆÊ’u‚ğæ“¾
+	// å³æ‰‹ã®ä½ç½®ã‚’åŸºæº–ã«ã™ã‚‹ãŸã‚ã€ä½ç½®ã‚’å–å¾—
 	const auto frameIndex =
 		MV1SearchFrame(
 			ownerTrans.model,
@@ -174,7 +192,7 @@ void ShooterManager::CubeUpdate()
 			frameIndex
 		);
 
-	// ƒI[ƒi[‚Ì‰E•ûŒü‚ğæ“¾
+	// ã‚ªãƒ¼ãƒŠãƒ¼ã®å³æ–¹å‘ã‚’å–å¾—
 	const Vector3 right =
 		ownerTrans.VTrans(
 			Vector3(1.0f, 0.0f, 0.0f)
@@ -190,7 +208,7 @@ void ShooterManager::CubeUpdate()
 
 void ShooterManager::SpritUpdate()
 {
-	// ‰Eè‚ÌˆÊ’u‚ğŠî€‚É‚·‚é‚½‚ßAˆÊ’u‚ğæ“¾
+	// å³æ‰‹ã®ä½ç½®ã‚’åŸºæº–ã«ã™ã‚‹ãŸã‚ã€ä½ç½®ã‚’å–å¾—
 	auto frameIndex =
 		MV1SearchFrame(
 			ownerTrans.model,
@@ -205,13 +223,13 @@ void ShooterManager::SpritUpdate()
 
 	Vector3 scale = 0.3f;
 
-	// ƒI[ƒi[‚Ì‘O•ûŒü
+	// ã‚ªãƒ¼ãƒŠãƒ¼ã®å‰æ–¹å‘
 	const Vector3 forward =
 		ownerTrans.VTrans(
 			Vector3(0.0f, 0.0f, 1.0f)
 		);
 
-	// ƒI[ƒi[‚Ì‰E•ûŒü
+	// ã‚ªãƒ¼ãƒŠãƒ¼ã®å³æ–¹å‘
 	const Vector3 right =
 		ownerTrans.VTrans(
 			Vector3(1.0f, 0.0f, 0.0f)
@@ -222,7 +240,7 @@ void ShooterManager::SpritUpdate()
 		right * 80.0f +
 		Vector3(0.0f, 60.0f, 0.0f);
 
-	// ƒAƒXƒeƒƒCƒh•ªŠ„‚ÌŒ`
+	// ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰åˆ†å‰²ã®å½¢
 	std::vector<Vector3> offsets;
 
 	static constexpr int SIZE = 3;
@@ -245,7 +263,7 @@ void ShooterManager::SpritUpdate()
 		}
 	}
 
-	// •K—v‚ÈƒAƒXƒeƒƒCƒh‚Ì”‚¾‚¯•\¦‚·‚é
+	// å¿…è¦ãªã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã®æ•°ã ã‘è¡¨ç¤ºã™ã‚‹
 	for (int i = 0; i < offsets.size(); ++i)
 	{
 		if (shot[i] == nullptr) { continue; }
@@ -267,7 +285,7 @@ void ShooterManager::SpritUpdate()
 		asteroid->SetIsActive(true);
 	}
 
-	// —]‚Á‚½ƒAƒXƒeƒƒCƒh‚ğ”ñ•\¦‚É‚·‚é
+	// ä½™ã£ãŸã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ã‚’éè¡¨ç¤ºã«ã™ã‚‹
 	for (int i = static_cast<int>(offsets.size()); i < div; ++i)
 	{
 		if (shot[i] == nullptr) { continue; }
@@ -287,16 +305,5 @@ void ShooterManager::FireUpdate()
 
 void ShooterManager::GetFire()
 {
-
-	// ƒJƒƒ‰‚ÌŠp“x(angle:ƒAƒ“ƒOƒ‹=Šp“x)
-	//Vector3 camAngle = CurrentCamera::Get().GetAngle();
-
-	//// ã‰º‚Ì‰ñ“](pitch:ƒsƒbƒ`)‚Ì‰e‹¿‚ğŠÜ‚ß‚½‘O•ûŒüƒxƒNƒgƒ‹
-	//// sinf:ƒTƒCƒ“EƒGƒt(³Œ·) cosf:ƒRƒTƒCƒ“EƒGƒt(—]Œ·)
-	//dir = VGet(
-	//	sinf(camAngle.y) * cosf(camAngle.x),  // ‰¡•ûŒü(X)
-	//	0.0f,                    // ã‰º•ûŒü(Y)
-	//	cosf(camAngle.y) * cosf(camAngle.x)   // ‰œ•ûŒü(Z)
-	//);
 
 }
