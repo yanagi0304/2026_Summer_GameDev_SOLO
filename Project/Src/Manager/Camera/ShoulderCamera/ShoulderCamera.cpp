@@ -31,7 +31,7 @@ ShoulderCamera::ShoulderCamera(const Vector3* targetPos, float fov)
     aimDistance(120.0f),
 
     normalShoulder(100.0f),
-    aimShoulder(45.0f),
+    aimShoulder(90.0f),
 
     normalFov(fov),
     aimFov(fov * 0.85f)

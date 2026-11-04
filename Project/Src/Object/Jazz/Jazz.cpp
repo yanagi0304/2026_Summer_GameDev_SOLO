@@ -33,6 +33,7 @@
 #include "State/PlayerKogetsuState.h"
 
 #include "../Common/Target/Target.h"
+#include "../../Manager/Camera/ShoulderCamera/ShoulderCamera.h"
 
 Jazz::Jazz(std::function<const Vector3& (void)> target) :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
@@ -44,7 +45,10 @@ Jazz::Jazz(std::function<const Vector3& (void)> target) :
 
 	trigger(nullptr),
 
-	target(target)
+	target(target),
+
+	currentWeaponID(TriggerType::NONE),
+	isAim(false)
 {
 }
 
@@ -167,7 +171,7 @@ void Jazz::Load(void)
 		STATE::Move,
 		new PlayerMoveState(
 			10.0f, 10.0f, 30,
-			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1, true),
+			[&](const Vector3& vec) { MoveAccel(vec, !isAim); },
 			ACCEL_MAX,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
@@ -249,18 +253,22 @@ void Jazz::SubInit(void)
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
 	AnimePlay(CHARACTER_ANIME::IDLE);
-	for (auto& w : mainWeaponSet) { w.second->SetIsActive(true); }
+//	for (auto& w : mainWeaponSet) { w.second->SetIsActive(false); }
 	WeaponChange(TriggerType::KOGETSU);
 }
 
 void Jazz::SubUpdate(void)
 {
+	//エイム中か
+	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
+	if (cam != nullptr) { isAim = cam->IsAiming(); }
+
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down && CanWeaponChange()) { WeaponChange(); }
 }
 
 bool Jazz::CanWeaponChange(void) const
 {
-	// 攻撃中などは不可。切り替えてよい状態だけを許可する(ホワイトリスト)
+	// 攻撃中などは不可。切り替えてよい状態だけを許可する
 	const STATE s = static_cast<STATE>(GetState());
 	return s == STATE::Idle || s == STATE::Move;
 }
@@ -269,14 +277,30 @@ void Jazz::WeaponChange(TriggerType type)
 {
 	const auto& mains = trigger->GetMainTrigger();
 
-	auto it = std::find(mains.begin(), mains.end(), type);
+	if (mains.empty()) { return; }
 
-	if (it != mains.end()) { mainCurrentIndex = (int)(it - mains.begin()); }
-	else { mainCurrentIndex = (mainCurrentIndex + 1) % (int)mains.size(); }
+	if (type == TriggerType::NONE) {
+		mainCurrentIndex = (mainCurrentIndex + 1) % (int)mains.size();
+	}
+	else if (auto it = std::find(mains.begin(), mains.end(), type); it != mains.end()) {
+		mainCurrentIndex = (int)(it - mains.begin());
+	}
+	else {
+		return;   // 未登録の武器は無視する
+	}
 
-	currentWeaponID = mains[mainCurrentIndex];
+	// 同じ武器なら何もしない
+	const TriggerType next = mains[mainCurrentIndex];
+	if (next == currentWeaponID) { return; }
 
-	for (auto& w : mainWeaponSet) { w.second->SetIsActive(w.first == currentWeaponID); }
+	// 前の武器だけ止める
+	if (auto prev = mainWeaponSet.find(currentWeaponID); prev != mainWeaponSet.end()) {
+		prev->second->SetIsActive(false);
+	}
+
+	// 新しい武器だけ起動する
+	currentWeaponID = next;
+	mainWeaponSet.at(currentWeaponID)->SetIsActive(true);
 
 	AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID());
 }
@@ -309,4 +333,19 @@ void Jazz::SubDraw(void)
 bool Jazz::IsTrigger(TriggerType trigger)
 {
 	return currentWeaponID == trigger;
+}
+
+void Jazz::AimRotate(void)
+{
+	// カメラの水平方向の向き
+	const float camYaw = CurrentCamera::Get().GetRotation().GetYaw();
+
+	// 現在の回転から目標の回転へ補間する
+	trans.SetRotation(
+		Quaternion::Slerp(
+			trans.rotation,
+			Quaternion::FromRotationY(camYaw),
+			TimeScale::Get()
+		)
+	);
 }

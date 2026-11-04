@@ -7,6 +7,7 @@
 #include "../../../Manager/Input/InputManager.h"
 
 #include "../../../Manager/Camera/CurrentCamera.h"
+#include "../../../Manager/Camera/ShoulderCamera/ShoulderCamera.h"
 
 #include "../Asteroid/Asteroid.h"
 
@@ -142,8 +143,9 @@ void ShooterManager::ChangeState(void)
 		state = CUBE_STATE::FIRE;
 		for (auto* s : shot) { s->SetFire(true); 
 		}
+		//カメラを元に戻す
+		ZoomOut();
 		GetFire();
-
 		break;
 
 	case CUBE_STATE::FIRE:
@@ -155,6 +157,7 @@ void ShooterManager::ChangeState(void)
 		shot[0]->SetIsActive(true);
 		// 残りのアステロイドを無効にする
 		for (int i = 1; i < div; ++i) { shot[i]->SetIsActive(false); }
+	
 		break;
 	}
 
@@ -163,16 +166,6 @@ void ShooterManager::ChangeState(void)
 
 void ShooterManager::CubeUpdate()
 {
-	//shot[0]->Update();
-
-	//auto frameIndex = MV1SearchFrame(ownerTrans_->get().model, "mixamorig:RightHandIndex2");
-	//Vector3 handPos = MV1GetFramePosition(ownerTrans_->get().model, frameIndex);
-
-	//for (const auto& s : shot)
-	//{
-	//	Asteroid* asteroid = static_cast<Asteroid*>(s.get());
-	//	asteroid->SetTrans(handPos, Vector3(asteroid->GetSize()));
-	//}
 
 	// アステロイドの取得
 	Asteroid* asteroid = shot[0];
@@ -295,6 +288,8 @@ void ShooterManager::SpritUpdate()
 		asteroid->SetIsActive(false);
 	}
 
+	//エイム
+	AimInput();
 }
 
 void ShooterManager::FireUpdate()
@@ -303,7 +298,33 @@ void ShooterManager::FireUpdate()
 
 }
 
-void ShooterManager::GetFire()
+void ShooterManager::GetFire(void)
 {
+	// カメラの回転(rotation:ローテーション=回転、クォータニオン)
+	const Quaternion& camRotation = CurrentCamera::Get().GetRotation();
 
+	// カメラの前方向ベクトル(Zプラス方向をカメラの回転で回す)
+	Vector3 forward = camRotation.Rotate(Vector3(0.0f, 0.0f, 1.0f));
+
+	// 元のコードと同じく、上下(Y)は使わず水平方向だけにする
+	forward.y = 0.0f;
+
+	// Yを消すと長さが1でなくなるので、正規化し直す
+	dir = forward.Normalized();
+}
+
+void ShooterManager::AimInput(void)
+{
+	bool zoom = Input::GetIns().GetInfo(KEY_TYPE::CameraZoomIn).now;
+
+	//ズームイン・ズームアウトさせる
+	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
+	if (cam != nullptr) { cam->SetAiming(zoom); }
+}
+
+void ShooterManager::ZoomOut(void)
+{
+	//ズームアウトさせる
+	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
+	if (cam != nullptr) { cam->SetAiming(false); }
 }

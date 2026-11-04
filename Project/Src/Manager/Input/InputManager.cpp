@@ -67,7 +67,7 @@ void InputManager::Init(void)
 	SET_C_BUTTON(KEY_TYPE::PlayerMain, XINPUT_BUTTON_B);
 
 	//メイントリガー切り替え
-	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_R);
+	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_E);
 	SET_C_BUTTON(KEY_TYPE::PlayerMainSwitch, XINPUT_BUTTON_RIGHT_SHOULDER);
 
 	SET_KEYBOARD(KEY_TYPE::PlayerDebug, KEY_INPUT_T);
@@ -121,6 +121,10 @@ void InputManager::Init(void)
 	SET_KEYBOARD(KEY_TYPE::CameraRotLeft, KEY_INPUT_LEFT);
 	//SET_C_BUTTON(KEY_TYPE::CameraRotLeft, XINPUT_BUTTON_LEFT_SHOULDER);
 	SET_C_OTHERS(KEY_TYPE::CameraRotLeft, CONTROLLER_OTHERS::RightstickLeft);
+
+	//ズーム
+	SET_KEYBOARD(KEY_TYPE::CameraZoomIn, KEY_INPUT_R);
+
 
 #pragma endregion
 

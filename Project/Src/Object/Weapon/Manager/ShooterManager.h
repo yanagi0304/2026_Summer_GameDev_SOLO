@@ -62,7 +62,13 @@ private:
 	void FireUpdate();
 
 	//発射速度、向きなどを発射前に決める
-	void GetFire();
+	void GetFire(void);
+
+	//エイム入力
+	void AimInput(void);
+
+	//強制ズームアウト
+	void ZoomOut(void);
 
 private:
 	int divideNum_;

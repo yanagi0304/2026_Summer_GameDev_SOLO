@@ -40,6 +40,8 @@ void Asteroid::OnEquip(void)
 void Asteroid::SubInit(void)
 {
 	trans.scale = (SIZE);
+	ACCEL_MAX = 50.0f;
+	ACCEL_RATE = 10.0f;
 }
 
 void Asteroid::SubUpdate(void)
@@ -49,15 +51,16 @@ void Asteroid::SubUpdate(void)
 	{
 		trail.push_front(trans.pos);
 		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
-		ACCEL_MAX = 50.0f;
-		ACCEL_RATE = 10.0f;
+
 		MoveAccel(vec);
 	}
 	else { trail.clear(); }
+
 }
 
 void Asteroid::SubDraw(void)
 {
+
 	if (trail.size() < 2) { return; }
 
 	//‰ÁŽZ‡¬

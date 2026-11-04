@@ -116,6 +116,9 @@ private:
 	//所持トリガーの確認
 	bool IsTrigger(TriggerType trigger);
 
+	//エイム中のプレイヤー回転
+	void AimRotate(void);
+
 private:
 
 	//所持トリガーの表示
@@ -137,6 +140,9 @@ private:
 
 	//現在グラスホッパーの使用をしているか
 	bool isGrashpper;
+
+	//エイム中か
+	bool isAim;
 
 #pragma region 受け取り参照
 

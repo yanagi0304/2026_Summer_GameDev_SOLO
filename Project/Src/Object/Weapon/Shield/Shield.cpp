@@ -14,9 +14,11 @@ void Shield::Load(void)
 {
 	trans.LoadModel("Weapon/Shield");
 
-	SetJudgeFlg(true);
+	SetJudgeFlg(false);
 	SetDynamicFlg(true);
-	SetPushFlg(true);
+	SetPushFlg(false);
+	SetIsDraw(false);
+
 }
 
 void Shield::SubInit(void)

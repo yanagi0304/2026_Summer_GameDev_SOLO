@@ -79,6 +79,9 @@ public:
 		CameraRotRight,
 		CameraRotLeft,
 
+		//ズーム
+		CameraZoomIn,
+
 #pragma endregion
 
 #pragma region システム操作
