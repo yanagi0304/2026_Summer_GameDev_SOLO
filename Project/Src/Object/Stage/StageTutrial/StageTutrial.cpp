@@ -9,20 +9,18 @@ StageTutrial::StageTutrial():
 void StageTutrial::Load(void)
 {
 	trans.LoadModel("Stage/demoStage");
-	// 動的オブジェクトとしての処理を有効にする
-	SetDynamicFlg(false);
 
-	// 重力を有効にする
-	SetGravityFlg(true);
+	// 動的オブジェクトとしての処理を無効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Static);
 
 	// 当たり判定による押し出しを有効にする
-	SetPushFlg(true);
+	SetContactResponseEnabled(true);
+
 	AddCollider(new MeshCollider(COLLIDER_TAG::Stage));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "2")));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "3")));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "4")));
 	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "5")));
-	
 }
 
 void StageTutrial::SubInit(void)

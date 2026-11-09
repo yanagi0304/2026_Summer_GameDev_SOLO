@@ -36,11 +36,6 @@ void ShooterManager::Load(void)
 		shot[i]->SetIsActive(false);
 	}
 	state = CUBE_STATE::NONE;
-
-	SetJudgeFlg(true);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
-
 }
 
 int ShooterManager::GetIdleAnimeID(void) const
@@ -64,7 +59,6 @@ int ShooterManager::GetIdleAnimeID(void) const
 
 void ShooterManager::OnEquip(void)
 {
-
 	state = state = CUBE_STATE::NONE;
 	for (auto* s : shot)
 	{
@@ -167,36 +161,10 @@ void ShooterManager::ChangeState(void)
 void ShooterManager::CubeUpdate()
 {
 
-	// アステロイドの取得
+	// CubeUpdate の中身
 	Asteroid* asteroid = shot[0];
-
 	asteroid->SetIsActive(true);
-
-	// 右手の位置を基準にするため、位置を取得
-	const auto frameIndex =
-		MV1SearchFrame(
-			ownerTrans.model,
-			"mixamorig:RightHandIndex2"
-		);
-
-	const Vector3 hand =
-		MV1GetFramePosition(
-			ownerTrans.model,
-			frameIndex
-		);
-
-	// オーナーの右方向を取得
-	const Vector3 right =
-		ownerTrans.VTrans(
-			Vector3(1.0f, 0.0f, 0.0f)
-		);
-
-	asteroid->SetTrans(
-		hand +
-		right * 80.0f +
-		Vector3(0.0f, 60.0f, 0.0f),
-		asteroid->SIZE
-	);
+	asteroid->SetTrans(GetCenterPos(), asteroid->SIZE);
 }
 
 void ShooterManager::SpritUpdate()
@@ -300,17 +268,14 @@ void ShooterManager::FireUpdate()
 
 void ShooterManager::GetFire(void)
 {
-	// カメラの回転(rotation:ローテーション=回転、クォータニオン)
-	const Quaternion& camRotation = CurrentCamera::Get().GetRotation();
+	// オーナー(Jazz)の正面方向(+Z)
+	Vector3 forward = ownerTrans.VTrans(Vector3(0.0f, 0.0f, 1.0f));
 
-	// カメラの前方向ベクトル(Zプラス方向をカメラの回転で回す)
-	Vector3 forward = camRotation.Rotate(Vector3(0.0f, 0.0f, 1.0f));
-
-	// 元のコードと同じく、上下(Y)は使わず水平方向だけにする
+	// 上下(Y)は使わず水平方向だけにする
 	forward.y = 0.0f;
 
-	// Yを消すと長さが1でなくなるので、正規化し直す
-	dir = forward.Normalized();
+	// 長さが0に近いときは、前回の向きのままにする
+	if (forward.LengthSq() > 0.000001f) { dir = forward.Normalized(); }
 }
 
 void ShooterManager::AimInput(void)
@@ -327,4 +292,23 @@ void ShooterManager::ZoomOut(void)
 	//ズームアウトさせる
 	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
 	if (cam != nullptr) { cam->SetAiming(false); }
+}
+
+// 右手の位置を取得する
+// モデルの行列はDraw時にしか更新されないため、先に今フレームの座標を反映する
+Vector3 ShooterManager::GetHandPos(void) const
+{
+	MV1SetMatrix(ownerTrans.model, ownerTrans.GetWorldMatrix());
+
+	const int frameIndex = MV1SearchFrame(ownerTrans.model, "mixamorig:RightHandIndex2");
+
+	return Vector3(MV1GetFramePosition(ownerTrans.model, frameIndex));
+}
+
+// アステロイド群の中心位置を取得する(手の右80、上60)
+Vector3 ShooterManager::GetCenterPos(void) const
+{
+	const Vector3 right = ownerTrans.VTrans(Vector3(1.0f, 0.0f, 0.0f));
+
+	return GetHandPos() + right * 80.0f + Vector3(0.0f, 60.0f, 0.0f);
 }

@@ -12,7 +12,7 @@ Mannequin::Mannequin(const Vector3& pos, bool dynamicFlg)
 	//位置情報を設定
 	trans.pos = pos;
 	// 動的オブジェクトとしての処理を有効にする
-	SetDynamicFlg(dynamicFlg);
+	SetColliderMobility(dynamicFlg ? COLLIDER_MOBILITY::Movable : COLLIDER_MOBILITY::Static);
 }
 
 void Mannequin::Load(void)
@@ -29,11 +29,8 @@ void Mannequin::Load(void)
 	// 元のモデルは描画しない（テクスチャを借りているので、削除はしない）
 	MV1SetVisible(trans.model, FALSE);
 
-	// 重力を有効にする
-	SetGravityFlg(false);
-
 	// 当たり判定による押し出しを有効にする
-	SetPushFlg(true);
+	SetContactResponseEnabled(true);
 
 }
 

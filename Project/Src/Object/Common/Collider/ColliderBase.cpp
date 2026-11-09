@@ -24,7 +24,7 @@ ColliderBase::ColliderBase(COLLIDER_TAG type, const Vector3& pos, const Quaterni
 	shape(COLLIDER_SHAPE::None),
 
 	OnCollision(nullptr),
-	OnGrounded(nullptr)
+	OnPushed(nullptr)
 {
 }
 
@@ -40,11 +40,18 @@ void ColliderBase::SetOnCollisionFunc(std::function<void(COLLIDER_TAG, const Col
 }
 
 
-void ColliderBase::SetOnGroundedFunc(std::function<void(COLLIDER_TAG, const ColliderBase&)> OnGroundedFunc)
+void ColliderBase::SetOnPushedFunc(std::function<void(COLLIDER_TAG, const ColliderBase&, const Vector3&)> OnPushedFunc)
 {
-	OnGrounded = std::move(OnGroundedFunc);
+	OnPushed = std::move(OnPushedFunc);
 }
 
+
+ActorBase* ColliderBase::GetActor(void) const
+{
+	assert(owner != nullptr);
+
+	return owner;
+}
 
 Vector3 ColliderBase::GetPos(void) const
 {
@@ -103,44 +110,10 @@ Vector3 ColliderBase::VTrans(const Vector3& v) const
 	return Vector3(VTransform(v.ToVECTOR(), GetRotationMat()));
 }
 
-
-const Transform& ColliderBase::GetTransform(void) const
-{
-	assert(owner != nullptr);
-
-	return owner->GetTrans();
-}
-
-
-bool ColliderBase::GetDynamicFlg(void) const
-{
-	assert(owner != nullptr);
-
-	return owner->GetDynamicFlg();
-}
-
-
 bool ColliderBase::GetJudgeFlg(void) const
 {
 	return judgeFlg;
 }
-
-
-bool ColliderBase::GetPushFlg(void) const
-{
-	assert(owner != nullptr);
-
-	return owner->GetPushFlg();
-}
-
-
-unsigned char ColliderBase::GetPushWeight(void) const
-{
-	assert(owner != nullptr);
-
-	return owner->GetPushWeight();
-}
-
 
 COLLIDER_TAG ColliderBase::GetTag(void) const
 {
@@ -162,11 +135,11 @@ void ColliderBase::CallOnCollision(COLLIDER_TAG ownTag, const ColliderBase& othe
 }
 
 
-void ColliderBase::CallOnGrounded(COLLIDER_TAG ownTag, const ColliderBase& other)
+void ColliderBase::CallOnPushed(COLLIDER_TAG ownTag, const ColliderBase& other, const Vector3& pushVec)
 {
-	if (!OnGrounded) { return; }
+	if (!OnPushed) { return; }
 
-	OnGrounded(ownTag, other);
+	OnPushed(ownTag, other, pushVec);
 }
 
 

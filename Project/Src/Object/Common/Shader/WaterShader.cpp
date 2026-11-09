@@ -31,6 +31,7 @@ void WaterShader::Init(void)
 
 
     // 頂点シェーダー定数バッファ
+
     vertexShaderConstBufferHandle = CreateShaderConstantBuffer(sizeof(VertexShaderConstBuffer));
 
     // 初期値

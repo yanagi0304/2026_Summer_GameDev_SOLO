@@ -297,24 +297,6 @@ void SceneBase::AddActor(ActorBase* newActor)
 	// Actorが持つコライダーをCollisionManagerへ登録
 	if (collision != nullptr) { collision->Add(newActor->GetColliders()); }
 
-	// Actorが持つターゲット情報をTargetへ登録
-	if(target!=nullptr )
-	{
-		switch (newActor->GetTargetTeam())
-		{
-		case TARGET_TEAM::None:
-			break;
-		case TARGET_TEAM::Ally:
-			target->SetTargetActor(newActor->GetTrans().pos);
-			break;
-		case TARGET_TEAM::Enemy:
-			target->IncludeSelfInTargets(newActor);
-			break;
-		default:
-			break;
-		}
-	}
-
 	// 読み込み以外で呼ばれたら
 	if(state == STATE::Initialized) {
 		// Actor共通初期化

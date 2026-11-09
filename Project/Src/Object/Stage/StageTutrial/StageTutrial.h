@@ -9,4 +9,3 @@ public:
 	void Load(void) override;
     void SubInit(void) override;
 };
-

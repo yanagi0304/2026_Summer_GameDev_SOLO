@@ -16,7 +16,6 @@ public:
 	// İ’è
 	static void Set(CollisionManager* currentCollisionManager) { collision = currentCollisionManager; }
 
-
 private:
 
 	// Œ»İ‚Ì“–‚½‚è”»’èŠÇ—ƒNƒ‰ƒX

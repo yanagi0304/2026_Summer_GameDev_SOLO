@@ -10,9 +10,7 @@
 
 #include "ActorDrawTypeDefine.h"
 
-#include "../../../Manager/Net/SenderID_Define.h"
-
-#include "../Target/TargetTeamDefine.h"
+#include "../PhysicsBody/PhysicsBody.h"
 
 class ColliderBase;
 struct CollisionResult;
@@ -23,8 +21,6 @@ class ParameterLoad;
 
 struct Vector2;
 struct Vector2I;
-
-class Target;
 
 class ActorBase
 {
@@ -54,22 +50,32 @@ public:
 
 	// モデル制御情報構造体のゲット関数
 	const Transform& GetTrans(void)const { return trans; }
+    // 物理ソルバーによる微小な姿勢補正（ワールド軸・ラジアン）
+    void ApplyPhysicsRotation(const Vector3& rotationVector);
 
 	// 座標セット
 	void SetPos(const Vector3& pos) { trans.pos = pos; }
 
 	// 当たり判定の通知
-	virtual void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result) {}
+	virtual void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result);
 
 	// 接地判定の通知
-	virtual void OnGrounded(COLLIDER_TAG ownTag, const ColliderBase& other) {
+	virtual void OnPushed(COLLIDER_TAG ownTag, const ColliderBase& other, const Vector3& pushVec) {
 
 		// 接地判定
-		isGroundMaster = true;
+		if (pushVec.y > 0.0f && pushVec.Abs().MaxElement().y > 0.0f) { isGroundMaster = true; }
 
 		// 挙動
-		SubOnGrounded(ownTag, other);
+		SubOnPushed(ownTag, other, pushVec);
 	}
+
+	// 受信処理（通信）
+	virtual void ReceptionUpdate(void) {}
+	// 送信処理（通信）
+	virtual void SendUpdate(void) {}
+
+	// 物理挙動管理を取得
+	PhysicsBody* GetPhysicsBody(void)const { return physicsBody; }
 
 	// コライダーすべてを取得
 	virtual std::vector<ColliderBase*> GetColliders(void)const;
@@ -83,59 +89,27 @@ public:
 	// 子クラスを取得する
 	const std::vector<ActorBase*>& GetChildActors(void)const { return childActors; }
 
-	// 動的オブジェクトかどうか（true = 動的、false = 静的）
-	bool GetDynamicFlg(void)const { return dynamicFlg; }
+	// 当たり判定の移動区分を取得
+	COLLIDER_MOBILITY GetColliderMobility(void)const { return colliderMobility; }
 
-	// 衝突時押し出しを行うかどうか（true = 押し出す、false = 押し出さず通り抜ける）
-	bool GetPushFlg(void)const { return pushFlg; }
+	// 接触時の物理応答を行うかどうか（true = 応答する、false = 応答しない）
+	bool IsContactResponseEnabled(void)const { return contactResponseEnabled; }
 
-	// 押し出しを行う際の重さ（0 ～ 100 で設定）
-	unsigned char GetPushWeight(void)const { return pushWeight; }
-
-	// 自分が更新権限を持っているかどうか
-	bool IsOwnControl(void)const;
-
-	// 受信処理（通信）
-	virtual void ReceptionUpdate(void) {}
-	// 送信処理（通信）
-	virtual void SendUpdate(void) {}
-
-	// ターゲットとしての陣営
-	virtual TARGET_TEAM GetTargetTeam(void) const { return TARGET_TEAM::None; }
-
-	// 指定方向に吹き飛ばす
-	void Launch(const Vector3& launchVelocity);
-
-	// 吹っ飛ばし中か
-	bool IsLaunching(void) const { return launchTimer > 0.0f; }
-
+	// 外部から吹っ飛ばす
+	virtual void Launch(const Vector3& vec);
 private:
+
+	// 物理挙動制御
+	PhysicsBody* physicsBody;
 
 	// 当たり判定情報
 	std::vector<ColliderBase*> colliders;
 	
-	// 動的オブジェクトかどうか（true = 動的、false = 静的）
-	bool dynamicFlg;
+	// 動的オブジェクトかどうか（Static = 静的、Movable = 動的）
+	COLLIDER_MOBILITY colliderMobility = COLLIDER_MOBILITY::Movable;
 
-	// 重力を適用するかどうか（true = する、false = しない）
-	bool gravityFlg;
-
-	// 衝突時押し出しを行うかどうか（true = 押し出す、false = 押し出さず通り抜ける）
-	bool pushFlg;
-
-	// 押し出しを行う際の重さ（0 ～ 100 で設定）
-	unsigned char pushWeight;
-
-	// 加速度の更新
-	void VelocityUpdate(bool deceleration);
-
-	// 重力更新
-	void Gravity(void);
-
-	// 重力加速度
-	static constexpr float GRAVITY = -0.9f;
-	// 重力の最大値
-	static constexpr float GRAVITY_MAX = -100.0f;
+	// 接触時の物理応答を行うかどうか（true = 応答する、false = 応答しない）
+	bool contactResponseEnabled;
 
 	// 接地判定 管理用(派生先で変更不可で参照渡し)
 	bool isGroundMaster;
@@ -155,76 +129,49 @@ private:
 	// 子クラス
 	std::vector<ActorBase*> childActors;
 
-	// 誰が更新権限を持つか
-	MSG_SENDER_ID controlSenderId;
-
-	//ターゲットシステム
-	Target* target;
-
-	// 吹き飛ばし中に減速と速度上限を無効にする残りフレーム数
-	float launchTimer;
-
-	// 吹き飛ばし後に減速を無効にするフレーム数
-	static constexpr float LAUNCH_FREE_TIME = 30.0f;
-
 protected:
 
 	// モデル制御情報構造体
 	Transform trans;
 
-	// 移動量
-	Vector3 velocity;
-
-	// 横軸加速度の1フレームごとの加速量
-	float ACCEL_RATE = 5.0f;
-	// 横軸加速度の1フレームごとの減速量
-	float DECEL_RATE = 1.0f;
-	// 横軸加速度の最大値
-	float ACCEL_MAX = 30.0f;
-
-	// 接地判定(派生先で参照用)
+// 接地判定(派生先で参照用)
 	const bool& isGround = isGroundMaster;
 
 #pragma region 初期設定
+
+	// 物理挙動を有効化（PhysicsBodyがなければ生成する）
+	void EnablePhysics(void);
+
+	// 物理挙動の種類を設定（Character / Dynamic / Kinematic）
+	void SetColliderMobility(COLLIDER_MOBILITY value);
 
 	// コライダー追加
 	void AddCollider(ColliderBase* newCollider);
 
 	/// <summary>
-	/// 移動するかを切り替える
+	/// 接触時の物理応答（押し出し）を行うかを設定する
 	/// </summary>
-	/// <param name="flg">true = 「移動する」に切り替える、false = 「移動しない」に切り替える</param>
-	void SetDynamicFlg(bool flg) { dynamicFlg = trans.dynamicFlg = flg; }
+	/// <param name="flg">true = 応答する、false = 応答しない</param>
+	void SetContactResponseEnabled(bool flg) { contactResponseEnabled = flg; }
 
-	/// <summary>
-	/// 重力を適用するかを切り替える
-	/// </summary>
-	/// <param name="flg">true = 「する」に切り替える、false = 「しない」に切り替える</param>
-	void SetGravityFlg(bool flg) { gravityFlg = flg; }
-
-	/// <summary>
-	/// 衝突時押し出しを行うかを設定する
-	/// </summary>
-	/// <param name="flg">true = 押し出す、false = 押し出さず通り抜ける</param>
-	void SetPushFlg(bool flg) { pushFlg = flg; }
-
-	/// <summary>
-	/// 押し出しを行う際の重さ
-	/// </summary>
-	/// <param name="weight">0 ～ 100 で設定（数値が大きいほど重い）</param>
-	void SetPushWeight(unsigned char weight) { pushWeight = weight; }
+	// 子クラスを追加する
+	void AddChildActor(ActorBase* child) {
+		child->Load();
+		childActors.push_back(child);
+	}
 
 	// シェーダーを設定
 	void CreateShader(ShaderBase* newShader);
 	// シェーダーを消去
 	void ResetShader();
+	// シェーダーのデフォルト設定
+	virtual void DefaultCreateShader(void);
 
-	// 子クラスを追加する
-	void AddChildActor(ActorBase* child) {
-		child->Load();
-		childActors.push_back(child); 
-	}
+	// デフォルト描画タイプ設定
+	virtual ACTOR_DRAW_TYPE DefaultDrawType(void)const { return ACTOR_DRAW_TYPE::Default; }
+
 #pragma endregion
+
 
 #pragma region パラメーター外部ファイル管理に関する関数
 
@@ -284,7 +231,6 @@ protected:
 
 #pragma endregion
 
-
 	/// <summary>
 	/// 当たり判定フラグの取得
 	/// </summary>
@@ -292,9 +238,6 @@ protected:
 	bool GetJudgeFlg(void);
 	// 当たり判定の設定（true = 「判定する」、false = 「判定しない」）
 	void SetJudgeFlg(bool flg);
-
-	// 重力の設定の状態を取得
-	bool GetGravityFlg(void)const { return gravityFlg; }
 
 	// 描画判定の取得（true = 「描画する」、false = 「描画しない」）
 	bool GetIsDraw(void)const { return isDraw; }
@@ -306,10 +249,7 @@ protected:
 	// 描画タイプの設定
 	void SetDrawType(const ACTOR_DRAW_TYPE& type) { drawType = type; }
 
-	// 指定の方向に向かって加速度を用いて移動する
-	void MoveAccel(const Vector3& vec, bool isRotate = true);
-
-	// 派生先追加初期化
+// 派生先追加初期化
 	virtual void SubInit(void) {}
 	// 派生先追加更新
 	virtual void SubUpdate(void) {}
@@ -318,12 +258,8 @@ protected:
 	// 派生先追加解放
 	virtual void SubRelease(void) {}
 
-	// 派生先追加接地判定（デフォルトはY軸加速度の打ち消し）
-	virtual void SubOnGrounded(COLLIDER_TAG ownTag, const ColliderBase& other) {
-
-		// 動的オブジェクトの場合のみ、下方向のY軸加速度のみを打ち消す
-		if (dynamicFlg) { velocity.y = (velocity.y < 0.0f) ? 0.0f : velocity.y; }
-	}
+	// 派生先追加接地判定
+	virtual void SubOnPushed(COLLIDER_TAG ownTag, const ColliderBase& other, const Vector3& pushVec) {}
 
 private:
 

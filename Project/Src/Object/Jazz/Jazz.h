@@ -24,9 +24,6 @@ public:
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
-	// ターゲットとしての陣営
-	TARGET_TEAM GetTargetTeam(void) const override { return TARGET_TEAM::Ally; }
-
 	//グラスホッパーの使用状況取得
 	bool GetIsGrashopper(void) const { return isGrashpper; }
 

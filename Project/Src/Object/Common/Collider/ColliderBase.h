@@ -29,7 +29,6 @@ struct CollisionResult
 	CollisionResult(void);
 };
 
-
 class ColliderBase
 {
 public:
@@ -80,14 +79,15 @@ public:
 	void SetOnCollisionFunc(std::function<void(COLLIDER_TAG, const ColliderBase&, const CollisionResult&)> OnCollisionFunc);
 
 	// 接地判定通知用関数セット
-	void SetOnGroundedFunc(std::function<void(COLLIDER_TAG, const ColliderBase&)> OnGroundedFunc);
+	void SetOnPushedFunc(std::function<void(COLLIDER_TAG, const ColliderBase&, const Vector3&)> OnPushedFunc);
 
 #pragma endregion
 
 
 #pragma region ゲット関数
 
-	ActorBase* GetActor(void)const { return owner; }
+	// アクター取得
+	ActorBase* GetActor(void)const;
 
 	// コライダー座標
 	Vector3 GetPos(void) const;
@@ -104,20 +104,8 @@ public:
 	// コライダー回転を適用したベクトルを取得
 	Vector3 VTrans(const Vector3& v) const;
 
-	// モデル制御情報を直接取得
-	const Transform& GetTransform(void) const;
-
-	// 動的オブジェクトか否か
-	bool GetDynamicFlg(void) const;
-
 	// 当たり判定フラグ
 	bool GetJudgeFlg(void) const;
-
-	// 押し出しのフラグ
-	bool GetPushFlg(void) const;
-
-	// 押し出し時の重さ
-	unsigned char GetPushWeight(void) const;
 
 	// 当たり判定のタイプ
 	COLLIDER_TAG GetTag(void) const;
@@ -129,7 +117,7 @@ public:
 	void CallOnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result);
 
 	// 接地判定通知の呼び出し
-	void CallOnGrounded(COLLIDER_TAG ownTag, const ColliderBase& other);
+	void CallOnPushed(COLLIDER_TAG ownTag, const ColliderBase& other, const Vector3& pushVec);
 
 	// 自分が占有している範囲
 	virtual AABB GetAABB(void) const = 0;
@@ -146,6 +134,10 @@ public:
 	// 当たり判定フラグセット
 	void SetJudgeFlg(bool flg);
 
+	// 物理演算とは独立したチャンク登録区分
+	void SetMobility(COLLIDER_MOBILITY value) { mobility = value; }
+	COLLIDER_MOBILITY GetMobility(void) const { return mobility; }
+
 #pragma endregion
 
 
@@ -153,6 +145,8 @@ private:
 
 	// 参照アクター
 	ActorBase* owner;
+
+	COLLIDER_MOBILITY mobility = COLLIDER_MOBILITY::Movable;
 
 	// 相対座標
 	Vector3 pos;
@@ -173,7 +167,7 @@ private:
 	std::function<void(COLLIDER_TAG, const ColliderBase&, const CollisionResult&)> OnCollision;
 
 	// 接地したときに呼び出す関数
-	std::function<void(COLLIDER_TAG, const ColliderBase&)> OnGrounded;
+	std::function<void(COLLIDER_TAG, const ColliderBase&, const Vector3&)> OnPushed;
 
 protected:
 

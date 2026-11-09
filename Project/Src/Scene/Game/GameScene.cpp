@@ -27,8 +27,6 @@
 #include "../../Object/Mannequin/MannequinManager.h"
 #include "../../Object/Stage/StageTutrial/StageTutrial.h"
 
-#include "../../Object/Water.h"
-
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
 
 #include "../../Object/Common/MeshSlicer/CutRequestQueue.h"
@@ -76,7 +74,6 @@ void GameScene::SubPostInit(void)
 
 void GameScene::SubPostUpdate(void)
 {
-
 	for (const CutRequest& request : CutRequestQueue::Drain()) {
 		CuttableActor* fragment = request.target->Cut(request.plane, request.cutId);
 		if (fragment != nullptr) { AddActor(fragment); }

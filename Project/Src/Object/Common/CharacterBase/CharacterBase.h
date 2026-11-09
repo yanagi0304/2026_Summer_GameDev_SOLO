@@ -6,6 +6,8 @@
 
 class CharacterStateBase;
 
+class MotionControllerBase;
+
 class AnimationController;
 
 class CharacterBase : public ActorBase
@@ -40,12 +42,18 @@ private:
 	// 指定のステートインスタンスをゲットする関数
 	CharacterStateBase& GetStateIns(int state);
 
+	// モーションコントローラーのインスタンス
+	MotionControllerBase* motionController; // CharacterBaseが所有し、解放する
+
 	// キャラクターベース固有の更新処理
 	void BaseUpdate(void) override final;
 	// キャラクターベース固有の解放処理
 	void BaseRelease(void) override final;
 
 protected:
+
+	// アニメーションコントローラーのインスタンス
+	AnimationController* anime;
 
 #pragma region ステート管理関数
 
@@ -71,13 +79,20 @@ protected:
 
 #pragma endregion
 
+#pragma region モーションコントローラー
+
+	// モーションコントローラーを生成
+	void AddMotionController(MotionControllerBase* controller);
+
+	// モーションコントローラー取得
+	MotionControllerBase* GetMotionController(void)const { return motionController; }
+
+#pragma endregion
+
 #pragma region アニメーションコントローラー
 
 	// アニメーションコントローラーの作成
 	void CreateAnimationController(void);
-
-	// アニメーションコントローラーのインスタンス
-	AnimationController* anime;
 	
 	/// <summary>
 	/// モデルにくっついてるFBXアニメーションを全部登録する

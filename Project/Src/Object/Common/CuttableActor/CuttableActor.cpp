@@ -47,7 +47,7 @@ CuttableActor::CuttableActor(COLLIDER_TAG colliderTag, bool dynamic) :
 	originalArea(0.0f),
 	vanished(false)
 {
-	SetDynamicFlg(dynamic);
+	SetColliderMobility(dynamic ? COLLIDER_MOBILITY::Movable : COLLIDER_MOBILITY::Static);
 }
 
 CuttableActor::CuttableActor(COLLIDER_TAG colliderTag, bool dynamic, const std::string& parameterPath) :
@@ -74,13 +74,32 @@ CuttableActor::CuttableActor(COLLIDER_TAG colliderTag, bool dynamic, const std::
 	originalArea(0.0f),
 	vanished(false)
 {
-	SetDynamicFlg(dynamic);
+	SetColliderMobility(dynamic ? COLLIDER_MOBILITY::Movable : COLLIDER_MOBILITY::Static);
 }
 
 void CuttableActor::Load(void)
 {
 	// 二重Load防止（コライダーが二重登録されるため）
 	if (meshCollider != nullptr) { return; }
+
+#pragma region オブジェクト設定
+
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
+
+	// 物理挙動の有効化
+	EnablePhysics();
+
+	// 重力を有効にする
+	GetPhysicsBody()->SetGravityEnabled(true);
+
+	// キャラクター用の物理挙動に設定する
+	GetPhysicsBody()->SetMode(PhysicsBody::MotionMode::Dynamic);
+
+	// 当たり判定による押し出しを無効にする
+	SetContactResponseEnabled(false);
+
+#pragma endregion
 
 	meshCollider = new MeshCollider(colliderTag);
 
@@ -198,9 +217,6 @@ CuttableActor* CuttableActor::Cut(const CutPlane& worldPlane, int cutId)
 	// 断片にも同じ斬撃IDを記録する（同じ一振りで切り直されないようにする）
 	fragment->lastCutId = cutId;
 
-	// 飛んでいく断片がプレイヤーを押し出さないようにする
-	fragment->SetPushFlg(false);
-	fragment->SetPushWeight(GetPushWeight());
 	fragment->SetDrawType(GetDrawType());
 
 	fragment->SetMesh(std::move(back));
@@ -228,14 +244,11 @@ CuttableActor* CuttableActor::Cut(const CutPlane& worldPlane, int cutId)
 
 void CuttableActor::Launch(const Vector3& launchVelocity, const Vector3& axis, float speed)
 {
-	velocity = launchVelocity;
+	GetPhysicsBody()->AddAngularVelocity(launchVelocity);
 	spinAxis = axis;
 	spinSpeed = speed;
 
-	// 水平方向の速度が毎フレーム減らされないようにする
-	DECEL_RATE = 0.0f;
-
-	SetGravityFlg(true);
+	GetPhysicsBody()->SetGravityEnabled(true);
 
 	launchScale = trans.scale;
 	flyTime = 0.0f;
@@ -293,9 +306,6 @@ void CuttableActor::SubUpdate(void)
 
 		flying = false;
 		vanished = true;
-
-		velocity = Vector3();
-		SetGravityFlg(false);
 
 		SetIsDraw(false);
 		SetJudgeFlg(false);

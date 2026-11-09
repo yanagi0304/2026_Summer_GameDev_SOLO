@@ -5,34 +5,20 @@
 #include "../../../Manager/Input/InputManager.h"
 #include "../../../Manager/Camera/CurrentCamera.h"
 
+#include "../../Common/MotionController/GroundMotionController.h"
+
 PlayerJumpState::PlayerJumpState(
-	float JUMP_POWER,
+	GroundMotionController& motion,
 
-	float& velocityY,
-	const bool& isGround,
-	bool& isGrashopper,
+	const std::function<void(void)>& playAnimeJumpStart,
+	const std::function<void(void)>& playAnimeJumpLoop,
+	const std::function<void(void)>& playAnimeStamp,
 
-	std::function<void(const Vector3&)> moveAccel,
+	const std::function<bool(void)>& isAnimeEnd,
 
-	std::function<void(void)> playAnimeJumpStart,
-	std::function<void(void)> playAnimeJumpLoop,
-	std::function<void(void)> playAnimeStamp,
-
-	std::function<bool(void)> isAnimeEnd,
-
-	std::function<void(void)> changeStateIdle,
-
-	std::function<float(void)> getAnimeRatio,
-
-	std::function<bool(void)> isLaunching
+	const std::function<void(void)>& changeStateIdle
 ):
-	JUMP_POWER(JUMP_POWER),
-
-	velocityY(velocityY),
-	isGround(isGround),
-	isGrashopper(isGrashopper),
-
-	moveAccel(moveAccel),
+	motion(motion),
 
 	playAnimeJumpStart(playAnimeJumpStart),
 	playAnimeJumpLoop(playAnimeJumpLoop),
@@ -42,18 +28,14 @@ PlayerJumpState::PlayerJumpState(
 
 	changeStateIdle(changeStateIdle),
 
-	getAnimeRatio(getAnimeRatio),
-
-	isLaunching(isLaunching),
-
 	step(STEP::Start)
 {
 }
 
 void PlayerJumpState::OwnStateConditionUpdate(void)
 {
-	// ジャンプキーのダウントリガーまたは、グラスホッパー使用で遷移
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down || isGrashopper) { OwnChangeState(); }
+	// ジャンプキーのダウントリガーで遷移
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down) { OwnChangeState(); }
 }
 
 void PlayerJumpState::Enter(void)
@@ -62,7 +44,7 @@ void PlayerJumpState::Enter(void)
 	step = STEP::Start;
 
 	// ジャンプ開始アニメを再生
-	isGrashopper ? playAnimeJumpLoop() : playAnimeJumpStart();
+	playAnimeJumpStart();
 }
 
 void PlayerJumpState::Update(void)
@@ -73,12 +55,11 @@ void PlayerJumpState::Update(void)
 		// ジャンプ開始
 
 		// アニメーション終了
-		if (0.5 < getAnimeRatio()) {
+		if (isAnimeEnd()) {
 
-			//グラスホッパーを不使用時
-			// 加速度加算
-			if(!isGrashopper){ velocityY = JUMP_POWER; }
-			
+			// ジャンプ開始
+			motion.TryJump();
+
 			// 滞空アニメーションを再生
 			playAnimeJumpLoop();
 
@@ -104,22 +85,18 @@ void PlayerJumpState::Update(void)
 			vec.Normalize();
 		}
 
-		//グラスホッパーの使用を許可する
-		isGrashopper = false;
-
-		// 吹っ飛ばし中は移動入力を受け付けない
-		// 入力があり、かつ吹っ飛ばし中でなければ移動させる
-		if (vec != 0.0f && !isLaunching()) {
+		// 最終的に入力があれば移動させる
+		if (vec != 0.0f) {
 
 			// 移動方向をカメラで回転させる
 			vec.TransMatOwn(MGetRotY(CurrentCamera::Get().GetRotation().GetYaw()));
 
 			// 移動
-			moveAccel(vec);
+			motion.ApplyInput(vec);
 		}
 
 		// 着地
-		if (isGround) {
+		if (motion.IsGrounded()) {
 
 			// 着地のアニメーションを再生
 			playAnimeStamp();

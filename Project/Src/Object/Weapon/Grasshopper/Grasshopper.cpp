@@ -23,8 +23,8 @@ void Grasshopper::Load(void)
 	AddCollider(new BoxCollider(COLLIDER_TAG::Grasshopper, GetParameterToVector3("Collider", "Size")));
 
 	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	SetIsDraw(false);
 
 	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
@@ -49,8 +49,8 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 void Grasshopper::OnEquip(void)
 {
 	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	SetIsDraw(false);
 }
 
@@ -58,7 +58,8 @@ void Grasshopper::Create(void)
 {
 	SetIsDraw(true);
 	SetJudgeFlg(true);
-	SetDynamicFlg(true);
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	MV1SetOpacityRate(trans.model, 0.4f);
 
 	// オーナーの回転に合わせてローカル位置を回転
@@ -90,8 +91,9 @@ void Grasshopper::SubInit(void)
 	trans.scale = Vector3(GetParameter("Init", "scale"));
 	SetIsDraw(false);
 	SetJudgeFlg(false);
-	SetDynamicFlg(false);
-	SetPushFlg(false);
+
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 }
 
 void Grasshopper::SubUpdate(void)

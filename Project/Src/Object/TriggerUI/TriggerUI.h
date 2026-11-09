@@ -46,5 +46,8 @@ private:
 	const int& mainCurrentIndex_;
 	// 現在の選択状態の参照（サブトリガー）
 	const int& subCurrentIndex_;
+
+	ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Ui; }
+
 };
 

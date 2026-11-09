@@ -31,8 +31,9 @@ void Kogetsu::Load(void)
 	trans.SetLocalRotation(Quaternion::FromRotationZ(Deg2Rad(-90.0f)));
 
 	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 
 	attackColl->SetJudgeFlg(false);
 
@@ -66,8 +67,8 @@ void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const 
 void Kogetsu::OnEquip(void)
 {
 	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 }
 
 void Kogetsu::SubInit(void)

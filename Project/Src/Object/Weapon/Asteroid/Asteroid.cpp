@@ -19,8 +19,9 @@ void Asteroid::Load(void)
 
 	SetIsDraw(false);
 	SetJudgeFlg(false);
-	SetPushFlg(false);
+	SetContactResponseEnabled(false);
 
+	EnablePhysics();
 }
 
 void Asteroid::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
@@ -40,22 +41,26 @@ void Asteroid::OnEquip(void)
 void Asteroid::SubInit(void)
 {
 	trans.scale = (SIZE);
-	ACCEL_MAX = 50.0f;
-	ACCEL_RATE = 10.0f;
 }
 
 void Asteroid::SubUpdate(void)
 {
-	//”­ŽË’†‚¾‚¯‹OÕ‚ð‹L˜^‚·‚é
+	// ”­ŽË’†‚¾‚¯‹OÕ‚ð‹L˜^‚·‚é
 	if (isFire)
 	{
 		trail.push_front(trans.pos);
 		if (trail.size() > TRAIL_MAX) { trail.pop_back(); }
 
-		MoveAccel(vec);
+		// ”­ŽË•ûŒü‚Ö‰Á‘¬‚³‚¹‚é
+		if (GetPhysicsBody() != nullptr) { GetPhysicsBody()->AddAcceleration(vec); }
 	}
-	else { trail.clear(); }
+	else
+	{
+		trail.clear();
 
+		// ’Ç]’†‚Í•¨—‚Å“®‚©‚³‚È‚¢(”­ŽËŽž‚Ì‘¬“x‚ªŽc‚Á‚ÄƒYƒŒ‚é‚Ì‚ð–h‚®)
+		if (GetPhysicsBody() != nullptr) { GetPhysicsBody()->SetVelocity(Vector3(0.0f)); }
+	}
 }
 
 void Asteroid::SubDraw(void)

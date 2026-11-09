@@ -15,6 +15,10 @@
 #include "../Common/Collider/SphereCollider.h"
 #include "../Common/Collider/CapsuleCollider.h"
 
+#include "../Common/PhysicsBody/PhysicsBody.h"
+
+#include "../Common/MotionController/GroundMotionController.h"
+
 #include "../Common/AnimationController/AnimationController.h"
 
 #include "../TriggerUI/TriggerUI.h"
@@ -58,18 +62,44 @@ void Jazz::Load(void)
 #pragma region オブジェクト設定
 
 	// 動的オブジェクトとしての処理を有効にする
-	SetDynamicFlg(true);
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
+
+	// 物理挙動の有効化
+	EnablePhysics();
 
 	// 重力を有効にする
-	SetGravityFlg(true);
+	GetPhysicsBody()->SetGravityEnabled(true);
+
+	// キャラクター用の物理挙動に設定する
+	GetPhysicsBody()->SetMode(PhysicsBody::MotionMode::Character);
 
 	// 当たり判定による押し出しを有効にする
-	SetPushFlg(true);
+	SetContactResponseEnabled(true);
+	// 物理衝突時の重さを設定
+	GetPhysicsBody()->SetMass(1.0f);
 
-	// 通常描画に設定
-	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
-	
-#pragma region モデル
+	// 移動・ジャンプ・回避で共有するControllerを生成
+	GroundMotionController* groundMotionController = new GroundMotionController();
+
+	// アクターにMotionControllerを登録
+	AddMotionController(groundMotionController);
+
+	// モデル制御情報を設定
+	groundMotionController->SetTransform(&trans);
+	// 接地判定の参照先を設定
+	groundMotionController->SetGroundedSource(&isGround);
+	// 接地時の加速度を設定
+	groundMotionController->SetGroundAcceleration(3.0f);
+	// 空中時の加速度を設定
+	groundMotionController->SetAirAcceleration(3.0f);
+	// 慣性操作の強さを設定
+	groundMotionController->SetMomentumSteering(0.2f);
+	// 慣性操作が効く速度の閾値を設定
+	groundMotionController->SetMomentumThreshold(40.0f);
+	// ジャンプ力を設定
+	groundMotionController->SetJumpSpeed(20.0f);
+
+#pragma endregion
 
 	// モデルの読み込み
 	trans.LoadModel("Character/WoChamolenium/WoChamolenium");
@@ -170,9 +200,8 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Move,
 		new PlayerMoveState(
-			10.0f, 10.0f, 30,
-			[&](const Vector3& vec) { MoveAccel(vec, !isAim); },
-			ACCEL_MAX,
+			10.0f, 1.5f, 300,
+			*groundMotionController,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
 		)
@@ -182,15 +211,12 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Jump,
 		new PlayerJumpState(
-			30.0f, velocity.y, isGround,isGrashpper,
-			std::bind(&Jazz::MoveAccel, this, std::placeholders::_1,true),
+			*groundMotionController,
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
 			std::bind(&Jazz::IsAnimeEnd, this),
-			[&]() { ChangeState(STATE::Idle); },
-			[&]() {return GetAnimeRatio(); },
-			[&]() {return IsLaunching(); }
+			[&]() { ChangeState(STATE::Idle); }
 		)
 	);
 

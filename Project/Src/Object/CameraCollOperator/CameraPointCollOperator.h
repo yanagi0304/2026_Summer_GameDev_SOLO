@@ -1,0 +1,32 @@
+#pragma once
+
+#include "../Common/ActorBase/ActorBase.h"
+
+class CameraBase;
+
+class CameraPointCollOperator : public ActorBase
+{
+public:
+
+	CameraPointCollOperator(const CameraBase& camera, float radius = 10.0f);
+	CameraPointCollOperator(const Vector3& cameraPos, float radius = 10.0f);
+	~CameraPointCollOperator()override = default;
+
+	void Load(void)override {};
+	void Init(void)override {
+
+		// 動的オブジェクトとして扱う
+		SetColliderMobility(COLLIDER_MOBILITY::Movable);
+
+		// 接触時の物理応答を行わない
+		SetContactResponseEnabled(false);
+	};
+	void Draw(void)override {};
+	void Release(void)override {}
+
+private:
+
+	const Vector3& cameraPos;
+
+	void SubUpdate(void)override;
+};

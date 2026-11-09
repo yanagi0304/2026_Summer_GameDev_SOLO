@@ -97,6 +97,9 @@ private:
 
 #pragma endregion
 
-	
+   // 右手の位置を取得する(GetHandPos:ゲット ハンド ポス)
+   Vector3 GetHandPos(void) const;
+   // アステロイド群の中心位置を取得する(GetCenterPos:ゲット センター ポス)
+   Vector3 GetCenterPos(void) const;
 };
 

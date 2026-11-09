@@ -81,6 +81,11 @@
     <ClCompile Include="Src\Object\Common\Target\Target.cpp" />
     <ClCompile Include="Src\Object\Weapon\Hound\Hound.cpp" />
     <ClCompile Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.cpp" />
+    <ClCompile Include="Src\Manager\Collision\ContactSolver.cpp" />
+    <ClCompile Include="Src\Object\Common\MotionController\GroundMotionController.cpp" />
+    <ClCompile Include="Src\Object\Common\PhysicsBody\PhysicsBody.cpp" />
+    <ClCompile Include="Src\Object\CameraCollOperator\CameraLineCollOperator.cpp" />
+    <ClCompile Include="Src\Object\CameraCollOperator\CameraPointCollOperator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -156,7 +161,6 @@
     <ClInclude Include="Src\Object\Common\Shader\DefaultShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\RimLightShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\WaterShader.h" />
-    <ClInclude Include="Src\Object\Water.h" />
     <ClInclude Include="Src\Scene\Common\PostEffect\PostEffectBase.h" />
     <ClInclude Include="Src\Scene\Common\PostEffect\GrayScalePostEffect\GrayScalePostEffect.h" />
     <ClInclude Include="Src\Scene\Common\PostEffect\CRTPostEffect\CRTPostEffect.h" />
@@ -193,6 +197,12 @@
     <ClInclude Include="Src\Object\Common\Target\TargetTeamDefine.h" />
     <ClInclude Include="Src\Object\Weapon\Hound\Hound.h" />
     <ClInclude Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.h" />
+    <ClInclude Include="Src\Manager\Collision\ContactSolver.h" />
+    <ClInclude Include="Src\Object\Common\MotionController\GroundMotionController.h" />
+    <ClInclude Include="Src\Object\Common\MotionController\MotionControllerBase.h" />
+    <ClInclude Include="Src\Object\Common\PhysicsBody\PhysicsBody.h" />
+    <ClInclude Include="Src\Object\CameraCollOperator\CameraLineCollOperator.h" />
+    <ClInclude Include="Src\Object\CameraCollOperator\CameraPointCollOperator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

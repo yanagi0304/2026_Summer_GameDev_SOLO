@@ -15,8 +15,10 @@ void Shield::Load(void)
 	trans.LoadModel("Weapon/Shield");
 
 	SetJudgeFlg(false);
-	SetDynamicFlg(true);
-	SetPushFlg(false);
+
+	// 動的オブジェクトとしての処理を有効にする
+	SetColliderMobility(COLLIDER_MOBILITY::Movable);
+	SetContactResponseEnabled(false);
 	SetIsDraw(false);
 
 }
