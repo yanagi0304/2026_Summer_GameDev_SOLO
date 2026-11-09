@@ -264,6 +264,10 @@ void Jazz::SubUpdate(void)
 	if (cam != nullptr) { isAim = cam->IsAiming(); }
 
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down && CanWeaponChange()) { WeaponChange(); }
+
+
+
+	if (isAim) { AimRotate(); }
 }
 
 bool Jazz::CanWeaponChange(void) const
@@ -323,6 +327,7 @@ Vector3 Jazz::InputVec(void) const
 	}
 
 	return vec;
+	
 }
 
 void Jazz::SubDraw(void)
