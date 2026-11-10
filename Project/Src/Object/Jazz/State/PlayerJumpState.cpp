@@ -10,15 +10,21 @@
 PlayerJumpState::PlayerJumpState(
 	GroundMotionController& motion,
 
+	bool& isGrashopper,
+
 	const std::function<void(void)>& playAnimeJumpStart,
 	const std::function<void(void)>& playAnimeJumpLoop,
 	const std::function<void(void)>& playAnimeStamp,
 
 	const std::function<bool(void)>& isAnimeEnd,
 
-	const std::function<void(void)>& changeStateIdle
-):
+	const std::function<void(void)>& changeStateIdle,
+
+	const std::function<float(void)>& getAnimeRatio
+) :
 	motion(motion),
+
+	isGrashopper(isGrashopper),
 
 	playAnimeJumpStart(playAnimeJumpStart),
 	playAnimeJumpLoop(playAnimeJumpLoop),
@@ -28,6 +34,8 @@ PlayerJumpState::PlayerJumpState(
 
 	changeStateIdle(changeStateIdle),
 
+	getAnimeRatio(getAnimeRatio),
+
 	step(STEP::Start)
 {
 }
@@ -35,7 +43,7 @@ PlayerJumpState::PlayerJumpState(
 void PlayerJumpState::OwnStateConditionUpdate(void)
 {
 	// ジャンプキーのダウントリガーで遷移
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down) { OwnChangeState(); }
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerJump).down || isGrashopper) { OwnChangeState(); }
 }
 
 void PlayerJumpState::Enter(void)
@@ -44,24 +52,30 @@ void PlayerJumpState::Enter(void)
 	step = STEP::Start;
 
 	// ジャンプ開始アニメを再生
-	playAnimeJumpStart();
+	isGrashopper ? playAnimeJumpLoop() : playAnimeJumpStart();
 }
 
 void PlayerJumpState::Update(void)
 {
+
+	// アニメーションの再生割合を取得
+	const float animeRatio = getAnimeRatio();
 	switch (step) {
 
 	case PlayerJumpState::STEP::Start: {
 		// ジャンプ開始
 
 		// アニメーション終了
-		if (isAnimeEnd()) {
+		if (0.5f> animeRatio) {
 
 			// ジャンプ開始
-			motion.TryJump();
-
-			// 滞空アニメーションを再生
-			playAnimeJumpLoop();
+			if (!isGrashopper) {
+				motion.TryJump(); 
+				// 滞空アニメーションを再生
+				playAnimeJumpLoop();
+			}
+			else { isGrashopper = false; }
+			
 
 			// 次のステップへ
 			step = STEP::Loop;

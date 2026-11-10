@@ -17,6 +17,10 @@ Mannequin::Mannequin(const Vector3& pos, bool dynamicFlg)
 
 void Mannequin::Load(void)
 {
+
+	// PhysicsBody‚Ì¶¬
+	EnablePhysics();
+
 	// Ø’f—p‚ÌMeshCollider‚ð¶¬‚µ‚Ä“o˜^‚·‚é
 	CuttableActor::Load();
 
@@ -31,6 +35,9 @@ void Mannequin::Load(void)
 
 	// “–‚½‚è”»’è‚É‚æ‚é‰Ÿ‚µo‚µ‚ð—LŒø‚É‚·‚é
 	SetContactResponseEnabled(true);
+
+	// ’e«—Í‚ÌÝ’è
+	GetPhysicsBody()->SetRestitution(0.0f);
 
 }
 

@@ -69,6 +69,9 @@ void Jazz::Load(void)
 
 	// 重力を有効にする
 	GetPhysicsBody()->SetGravityEnabled(true);
+	// 弾性力の設定
+	GetPhysicsBody()->SetRestitution(0.0f);
+
 
 	// キャラクター用の物理挙動に設定する
 	GetPhysicsBody()->SetMode(PhysicsBody::MotionMode::Character);
@@ -97,7 +100,7 @@ void Jazz::Load(void)
 	// 慣性操作が効く速度の閾値を設定
 	groundMotionController->SetMomentumThreshold(40.0f);
 	// ジャンプ力を設定
-	groundMotionController->SetJumpSpeed(20.0f);
+	groundMotionController->SetJumpSpeed(30.0f);
 
 #pragma endregion
 
@@ -211,12 +214,13 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Jump,
 		new PlayerJumpState(
-			*groundMotionController,
+			*groundMotionController,isGrashpper,
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
 			std::bind(&Jazz::IsAnimeEnd, this),
-			[&]() { ChangeState(STATE::Idle); }
+			[&]() { ChangeState(STATE::Idle); },
+			[&]() {return GetAnimeRatio(); }
 		)
 	);
 

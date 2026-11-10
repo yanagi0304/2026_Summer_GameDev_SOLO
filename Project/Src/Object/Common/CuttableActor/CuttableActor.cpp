@@ -244,6 +244,10 @@ CuttableActor* CuttableActor::Cut(const CutPlane& worldPlane, int cutId)
 
 void CuttableActor::Launch(const Vector3& launchVelocity, const Vector3& axis, float speed)
 {
+
+	// •¨—‹““®‚Ì—LŒø‰»
+	EnablePhysics();
+
 	GetPhysicsBody()->AddAngularVelocity(launchVelocity);
 	spinAxis = axis;
 	spinSpeed = speed;

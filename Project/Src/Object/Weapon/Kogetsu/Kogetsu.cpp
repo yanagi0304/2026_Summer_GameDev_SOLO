@@ -38,6 +38,9 @@ void Kogetsu::Load(void)
 	attackColl->SetJudgeFlg(false);
 
 	AddCollider(attackColl);
+
+	// “–‚½‚è”»’è‚É‚æ‚é‰Ÿ‚µo‚µ‚ğ—LŒø‚É‚·‚é
+	SetContactResponseEnabled(false);
 	
 }
 

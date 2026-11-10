@@ -11,13 +11,17 @@ public:
 	PlayerJumpState(
 		GroundMotionController& motion,
 
+		bool& isGrashopper,
+
 		const std::function<void(void)>& playAnimeJumpStart,
 		const std::function<void(void)>& playAnimeJumpLoop,
 		const std::function<void(void)>& playAnimeStamp,
 
 		const std::function<bool(void)>& isAnimeEnd,
 
-		const std::function<void(void)>& changeStateIdle
+		const std::function<void(void)>& changeStateIdle,
+		
+		const std::function<float(void)>& getAnimeRatio
 	);
 
 	~PlayerJumpState()override = default;
@@ -37,6 +41,9 @@ private:
 	// 地上・空中の移動とジャンプを制御
 	GroundMotionController& motion;
 
+	//グラスホッパー使用確認フラグ
+	bool& isGrashopper;
+
 	// ジャンプ開始アニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeJumpStart;
 	// ジャンプ滞空アニメーションの再生関数のポインタ
@@ -49,6 +56,9 @@ private:
 
 	// 待機状態に戻る関数のポインタ
 	const std::function<void(void)> changeStateIdle;
+
+	// アニメーションの再生割合取得関数のポインタ
+	const std::function<float(void)> getAnimeRatio;
 
 #pragma endregion
 
