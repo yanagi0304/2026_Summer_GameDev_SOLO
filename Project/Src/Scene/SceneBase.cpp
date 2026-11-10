@@ -56,8 +56,6 @@ void SceneBase::Load(void)
 	// シーンごとに独立した当たり判定管理クラスを生成する
 	if (UseCollisionManager()) { collision = new CollisionManager(); }
 
-	if (UseTarget()) { target = new Target(); }
-
 	// 派生先の読み込み（後）
 	// Actorの生成はCollisionManager生成後に行う必要があるため、基本的にはここで行う
 	SubPostLoad();
@@ -209,8 +207,6 @@ void SceneBase::Draw(void)
 	SubUiDraw();
 
 	if (camera != nullptr) { camera->DrawDebug(); }
-
-	if (target != nullptr) { target->Draw(); }
 
 #pragma endregion
 }

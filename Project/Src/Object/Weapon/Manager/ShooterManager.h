@@ -1,105 +1,98 @@
-#pragma once
+ï»¿#pragma once
+
+#include <functional>
+#include <map>
+
 #include "../WeaponBase.h"
 
-#include <vector>
-#include <memory>
+#include "AsteroidSwarm.h"
+#include "Crosshair.h"
+#include "ShooterConfig.h"
+#include "State/ShooterStateBase.h"
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
-
-class Asteroid;
-
-enum class CUBE_STATE
-{
-	NONE,
-	CUBE,
-	SPLIT,
-	FIRE,
-};
 
 class ShooterManager
 	: public WeaponBase
 {
 public:
 
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	// ownerTrans: æŒã¡ä¸»ã®Transform / config: æ­¦å™¨ã®è¨­å®š / playAnime: çŠ¶æ…‹ãŒå¤‰ã‚ã£ãŸã¨ãã«å‘¼ã¶ã‚¢ãƒ‹ãƒ¡å†ç”Ÿé–¢æ•°
 	ShooterManager(
 		const Transform& ownerTrans,
-	
-		std::function<float(void)> animeRatio,
-		std::function<void(void)> playAnime
+		const ShooterConfig& config,
+		const std::function<void(void)>& playAnime
 	);
 
-	~ShooterManager() = default;
+	~ShooterManager() override = default;
 
-	void Load(void)override;
+	// èª­ã¿è¾¼ã¿
+	void Load(void) override;
 
+	// ã‚¨ã‚¤ãƒ ä¸­ã®ç™ºå°„æ–¹å‘ã‚’è¨ˆç®—ã™ã‚‹
+	std::optional<Vector3> CalcAimDir(void) const;
+
+	// ç¾åœ¨ã®çŠ¶æ…‹ã«åˆã£ãŸå¾…æ©Ÿã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®IDã‚’å–å¾—ã™ã‚‹
 	int GetIdleAnimeID(void) const override;
+
+	// æ”»æ’ƒã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®IDã‚’å–å¾—ã™ã‚‹
 	int GetAttackAnimeID(void) const override { return CHARACTER_ANIME::SLASH_A1; }
 
-	//ƒXƒe[ƒg‚ÌƒZƒbƒ^[
-	void SetState(const CUBE_STATE cubeState) { state = cubeState; }
+	// æ­¦å™¨ãŒé¸ã°ã‚ŒãŸã¨ã
+	void OnEquip(void) override;
 
-	//‘I‘ğ‚³‚ê‚½‚Æ‚«
-	void OnEquip(void)override;
-
-	void OnUnequip(void)override;
-
-	static constexpr int div = 27;
-
-	static constexpr int FIRE_INTERVAL = 3;
+	// æ­¦å™¨ãŒå¤–ã‚ŒãŸã¨ã
+	void OnUnequip(void) override;
 
 private:
 
 	void SubUpdate(void) override;
+	void SubDraw(void) override;
+	void SubRelease(void) override;
 
-	void SubDraw(void)override;
+	// æç”»ã‚¿ã‚¤ãƒ—ã¯å¸¸ã«UI
+	ACTOR_DRAW_TYPE DefaultDrawType(void) const override { return ACTOR_DRAW_TYPE::Ui; }
 
-	//ƒXƒe[ƒgØ‚è‘Ö‚¦
-	void ChangeState(void);
+	// çŠ¶æ…‹ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
+	void ChangeState(SHOOTER_STATE next);
 
-	//Šeó‘Ô‚ÌXV
-	void CubeUpdate();
-	void SpritUpdate();
-	void FireUpdate();
+	// å³æ‰‹ã®ä½ç½®ã‚’å–å¾—ã™ã‚‹
+	Vector3 GetHandPos(void) const;
 
-	//”­Ë‘¬“xAŒü‚«‚È‚Ç‚ğ”­Ë‘O‚ÉŒˆ‚ß‚é
-	void GetFire(void);
+	// ã‚¢ã‚¹ãƒ†ãƒ­ã‚¤ãƒ‰ç¾¤ã®ä¸­å¿ƒä½ç½®ã‚’å–å¾—ã™ã‚‹
+	Vector3 GetCenterPos(void) const;
 
-	//ƒGƒCƒ€“ü—Í
-	void AimInput(void);
-
-	//‹­§ƒY[ƒ€ƒAƒEƒg
-	void ZoomOut(void);
+	// ã‚¨ã‚¤ãƒ (ã‚ºãƒ¼ãƒ )ã®ã‚ªãƒ³ã‚ªãƒ•ã‚’è¨­å®šã™ã‚‹
+	void SetAiming(bool aim) const;
 
 private:
-	int divideNum_;
 
-	CUBE_STATE state;
-	Asteroid* shot[div];
+	// ä¸­å¿ƒä½ç½®ã®ã€æ‰‹ã‹ã‚‰ã®ãšã‚‰ã—é‡
+	static constexpr float CENTER_OFFSET_RIGHT = 80.0f;
 
-   int fireIndex_ = 0;
-   int fireTimer_ = 0;
+	// ä¸­å¿ƒä½ç½®ã®ã€æ‰‹ã‹ã‚‰ã®ãšã‚‰ã—é‡
+	static constexpr float CENTER_OFFSET_UP = 60.0f;
 
-   // ‰æ–Ê’†‰›‚ÌXÀ•W
-   int screenCenterX;
-   // ‰æ–Ê’†‰›‚ÌYÀ•W
-   int screenCenterY;
+	// ã‚¨ã‚¤ãƒ ä¸­ã«ç‹™ã†ç‚¹ã®ã€ã‚«ãƒ¡ãƒ©ã‹ã‚‰ã®è·é›¢
+	static constexpr float AIM_TARGET_DISTANCE = 3000.0f;
 
-   //”­ËŠp“x
-   Vector3 dir;
+	// æ­¦å™¨ã®è¨­å®š
+	ShooterConfig config_;
 
-#pragma region ó‚¯æ‚éŠÖ”
+	// çŠ¶æ…‹ãŒå¤‰ã‚ã£ãŸã¨ãã«å‘¼ã¶ã‚¢ãƒ‹ãƒ¡å†ç”Ÿé–¢æ•°
+	std::function<void(void)> playAnime_;
 
-   // ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶Š„‡‚ğæ“¾‚·‚éŠÖ”‚Ìƒ|ƒCƒ“ƒ^
-   std::function<float(void)> animeRatio;
+	// å¼¾ã®ç¾¤ã‚Œ
+	AsteroidSwarm swarm_;
 
-   //ó‘ÔØ‚è‘Ö‚¦‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ğæ“¾‚·‚éŠÖ”ƒ|ƒCƒ“ƒ^
-   std::function<void(void)> playAnime;
+	// ç”»é¢ä¸­å¤®ã®ç…§æº–
+	Crosshair crosshair_;
 
-#pragma endregion
+	// çŠ¶æ…‹ã®ä¸€è¦§
+	std::map<SHOOTER_STATE, ShooterStateBase*> states_;
 
-   // ‰Eè‚ÌˆÊ’u‚ğæ“¾‚·‚é(GetHandPos:ƒQƒbƒg ƒnƒ“ƒh ƒ|ƒX)
-   Vector3 GetHandPos(void) const;
-   // ƒAƒXƒeƒƒCƒhŒQ‚Ì’†SˆÊ’u‚ğæ“¾‚·‚é(GetCenterPos:ƒQƒbƒg ƒZƒ“ƒ^[ ƒ|ƒX)
-   Vector3 GetCenterPos(void) const;
+	// ç¾åœ¨ã®çŠ¶æ…‹
+	SHOOTER_STATE currentState_;
+
 };
-

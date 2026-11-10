@@ -1,9 +1,5 @@
 ﻿#include "ShooterManager.h"
 
-#include "../../../Utility/Utility.h"
-
-#include "../../../Application/Application.h"
-
 #include "../../../Manager/Input/InputManager.h"
 
 #include "../../../Manager/Camera/CurrentCamera.h"
@@ -11,304 +7,185 @@
 
 #include "../Asteroid/Asteroid.h"
 
+#include "State/ShooterIdleState.h"
+#include "State/ShooterCubeState.h"
+#include "State/ShooterSplitState.h"
+#include "State/ShooterFireState.h"
+
 ShooterManager::ShooterManager(
 	const Transform& ownerTrans,
-
-	std::function<float(void)> animeRate,
-	std::function<void(void)> playAnime
+	const ShooterConfig& config,
+	const std::function<void(void)>& playAnime
 ) :
 	WeaponBase(ownerTrans),
-	animeRatio(animeRate),
-	playAnime(playAnime),
-	screenCenterX(Application::SCREEN_SIZE_X_HALF),
-	screenCenterY(Application::SCREEN_SIZE_Y_HALF),
-	dir()
+
+	config_(config),
+	playAnime_(playAnime),
+
+	swarm_(),
+	crosshair_(),
+
+	states_(),
+	currentState_(SHOOTER_STATE::Idle)
 {
-	SetDrawType(ACTOR_DRAW_TYPE::Ui);
 }
 
 void ShooterManager::Load(void)
 {
-	for (int i = 0; i < div; i++)
+	// 弾を27発作って、群れにまとめる
+	for (int i = 0; i < AsteroidSwarm::BULLET_NUM; i++)
 	{
-		shot[i] = new Asteroid(dir);
-		AddChildActor(shot[i]);
-		shot[i]->SetIsActive(false);
+		Asteroid* bullet = new Asteroid(ownerTrans, config_);
+
+		AddChildActor(bullet);
+
+		bullet->Disappear();
+
+		swarm_.Add(bullet);
 	}
-	state = CUBE_STATE::NONE;
+
+	// 各状態を作る
+	states_.emplace(
+		SHOOTER_STATE::Idle,
+		new ShooterIdleState(swarm_)
+	);
+
+	states_.emplace(
+		SHOOTER_STATE::Cube,
+		new ShooterCubeState(
+			swarm_,
+			[this]() { return GetCenterPos(); }
+		)
+	);
+
+	states_.emplace(
+		SHOOTER_STATE::Split,
+		new ShooterSplitState(
+			ownerTrans,
+			swarm_,
+			[this]() { return GetCenterPos(); },
+			[this](bool aim) { SetAiming(aim); }
+		)
+	);
+
+	states_.emplace(
+		SHOOTER_STATE::Fire,
+		new ShooterFireState(ownerTrans, swarm_,
+			[this]() {return CalcAimDir(); })
+	);
+
+	currentState_ = SHOOTER_STATE::Idle;
+}
+
+std::optional<Vector3> ShooterManager::CalcAimDir(void) const
+{
+	// ズームキーを押している間だけ
+	if (!Input::GetIns().GetInfo(KEY_TYPE::CameraZoomIn).now) { return std::nullopt; }
+
+	//ショルダーカメラの時だけ
+	const ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
+	if (cam == nullptr) { return std::nullopt; }
+
+	//カメラが向いている方向
+	const Vector3 camForward = cam->GetRotation().Rotate(Vector3(0.0f, 0.0f, 1.0f));
+
+	//画面中央を狙う
+	const Vector3 aimPoint = cam->GetPos() + camForward * AIM_TARGET_DISTANCE;
+	const Vector3 dir = aimPoint - GetCenterPos();
+
+	if (dir.LengthSq() < 1.0e-6f) { return std::nullopt; }
+
+	return dir.Normalized();
 }
 
 int ShooterManager::GetIdleAnimeID(void) const
 {
-	switch (state)
-	{
-	case CUBE_STATE::NONE:
-		return CHARACTER_ANIME::ASTEROID_IDLE_R;
-		break;
-	case CUBE_STATE::CUBE:
-		return CHARACTER_ANIME::ASTEROID_CREATE_R;
-		break;
-	case CUBE_STATE::SPLIT:
-		return CHARACTER_ANIME::ASTEROID_CREATE_R;
-		break;
-	case CUBE_STATE::FIRE:
-		return CHARACTER_ANIME::ASTEROID_IDLE_R;
-		break;
-	}
+	// 状態を作る前は、待機のアニメーションを返す
+	const auto it = states_.find(currentState_);
+	if (it == states_.end()) { return CHARACTER_ANIME::ASTEROID_IDLE_R; }
+
+	return it->second->GetIdleAnimeID();
 }
 
 void ShooterManager::OnEquip(void)
 {
-	state = state = CUBE_STATE::NONE;
-	for (auto* s : shot)
-	{
-		s->SetIsActive(false);
-	}
+	// 待機状態から始める
+	if (!states_.empty()) { ChangeState(SHOOTER_STATE::Idle); }
 }
 
 void ShooterManager::OnUnequip(void)
 {
-	SetIsDraw(true);
-	for (auto* s : shot)
-	{
-		s->SetIsActive(false);
-	}
+	// 弾を消して、待機状態に戻す
+	if (!states_.empty()) { ChangeState(SHOOTER_STATE::Idle); }
 }
 
 void ShooterManager::SubUpdate(void)
 {
-	switch (state)
+	// 現在の状態を更新する
+	states_.at(currentState_)->Update();
+
+	// ボタンで次の状態へ進める
+	if (Input::GetIns().GetInfo(config_.advanceKey).down)
 	{
-	case CUBE_STATE::CUBE:
-		CubeUpdate();
-		break;
+		ChangeState(states_.at(currentState_)->NextState());
 
-	case CUBE_STATE::SPLIT:
-		SpritUpdate();
-		break;
-
-	case CUBE_STATE::FIRE:
-		FireUpdate();
-		break;
+		// 新しい状態に合ったアニメーションを再生する
+		playAnime_();
 	}
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMain).down) { ChangeState(); }
 }
 
 void ShooterManager::SubDraw(void)
 {
-	// 十字の腕の長さ(中心から端まで)
-	const int armLength = 20;
-
-	// 縁取り(黒)の太さと、本体(白)の太さ
-	const int outlineThickness = 4;
-	const int lineThickness = 2;
-
-	// 明るい背景でも暗い背景でも見えるよう、黒の縁取りを先に描く
-	DrawLine(screenCenterX - armLength - 1, screenCenterY, screenCenterX + armLength + 1, screenCenterY, 0x000000, outlineThickness);
-	DrawLine(screenCenterX, screenCenterY - armLength - 1, screenCenterX, screenCenterY + armLength + 1, 0x000000, outlineThickness);
-
-	// 白い十字を重ねて描く
-	DrawLine(screenCenterX - armLength, screenCenterY, screenCenterX + armLength, screenCenterY, 0xffffff, lineThickness);
-	DrawLine(screenCenterX, screenCenterY - armLength, screenCenterX, screenCenterY + armLength, 0xffffff, lineThickness);
+	crosshair_.Draw();
 }
 
-void ShooterManager::ChangeState(void)
+void ShooterManager::SubRelease(void)
 {
-	switch (state)
+	// 状態を解放する
+	for (auto& state : states_)
 	{
-	case CUBE_STATE::NONE:
-
-		// 状態をSPLITに変更する
-		state = CUBE_STATE::CUBE;
-		// 1つ目のアステロイドだけ有効にする
-		shot[0]->SetIsActive(true);
-	
-		break;
-	case CUBE_STATE::CUBE:
-
-		// 状態をSPLITに変更する
-		state = CUBE_STATE::SPLIT;
-
-		break;
-
-	case CUBE_STATE::SPLIT:
-
-		// 状態をFIREに変更する
-		state = CUBE_STATE::FIRE;
-		for (auto* s : shot) { s->SetFire(true); 
-		}
-		//カメラを元に戻す
-		ZoomOut();
-		GetFire();
-		break;
-
-	case CUBE_STATE::FIRE:
-
-		// 状態をCUBEに戻す
-		state = CUBE_STATE::CUBE;
-		for (auto* s : shot) { s->SetFire(false); s->ClearTrail(); }
-		// 1つ目のアステロイドだけ有効にする
-		shot[0]->SetIsActive(true);
-		// 残りのアステロイドを無効にする
-		for (int i = 1; i < div; ++i) { shot[i]->SetIsActive(false); }
-	
-		break;
+		delete state.second;
+		state.second = nullptr;
 	}
 
-	playAnime();
+	states_.clear();
 }
 
-void ShooterManager::CubeUpdate()
+void ShooterManager::ChangeState(SHOOTER_STATE next)
 {
+	// 今の状態の終了処理
+	const auto current = states_.find(currentState_);
+	if (current != states_.end()) { current->second->Exit(); }
 
-	// CubeUpdate の中身
-	Asteroid* asteroid = shot[0];
-	asteroid->SetIsActive(true);
-	asteroid->SetTrans(GetCenterPos(), asteroid->SIZE);
+	currentState_ = next;
+
+	// 次の状態の初期化処理
+	states_.at(currentState_)->Enter();
 }
 
-void ShooterManager::SpritUpdate()
-{
-	// 右手の位置を基準にするため、位置を取得
-	auto frameIndex =
-		MV1SearchFrame(
-			ownerTrans.model,
-			"mixamorig:RightHandIndex2"
-		);
-
-	Vector3 handPos =
-		MV1GetFramePosition(
-			ownerTrans.model,
-			frameIndex
-		);
-
-	Vector3 scale = 0.3f;
-
-	// オーナーの前方向
-	const Vector3 forward =
-		ownerTrans.VTrans(
-			Vector3(0.0f, 0.0f, 1.0f)
-		);
-
-	// オーナーの右方向
-	const Vector3 right =
-		ownerTrans.VTrans(
-			Vector3(1.0f, 0.0f, 0.0f)
-		);
-
-	Vector3 centerPos =
-		handPos +
-		right * 80.0f +
-		Vector3(0.0f, 60.0f, 0.0f);
-
-	// アステロイド分割の形
-	std::vector<Vector3> offsets;
-
-	static constexpr int SIZE = 3;
-	static constexpr float SPACE = 50.0f;
-
-	for (int z = 0; z < SIZE; z++)
-	{
-		for (int y = 0; y < SIZE; y++)
-		{
-			for (int x = 0; x < SIZE; x++)
-			{
-				Vector3 offset(
-					(x - (SIZE - 1) * 0.5f),
-					((SIZE - 1) * 0.5f - y),
-					(z - (SIZE - 1) * 0.5f)
-				);
-
-				offsets.emplace_back(offset);
-			}
-		}
-	}
-
-	// 必要なアステロイドの数だけ表示する
-	for (int i = 0; i < offsets.size(); ++i)
-	{
-		if (shot[i] == nullptr) { continue; }
-
-		Asteroid* asteroid = shot[i];
-
-		Vector3 offset =
-			right * (offsets[i].x * 25.0f) +
-			Vector3(0.0f, offsets[i].y * 25.0f, 0.0f) +
-			forward * (offsets[i].z * 25.0f);
-
-		asteroid->SetTrans(
-			centerPos + offset,
-			scale
-		);
-
-		asteroid->SetDir(forward);
-
-		asteroid->SetIsActive(true);
-	}
-
-	// 余ったアステロイドを非表示にする
-	for (int i = static_cast<int>(offsets.size()); i < div; ++i)
-	{
-		if (shot[i] == nullptr) { continue; }
-
-		Asteroid* asteroid = shot[i];
-
-		asteroid->SetIsActive(false);
-	}
-
-	//エイム
-	AimInput();
-}
-
-void ShooterManager::FireUpdate()
-{
-
-
-}
-
-void ShooterManager::GetFire(void)
-{
-	// オーナー(Jazz)の正面方向(+Z)
-	Vector3 forward = ownerTrans.VTrans(Vector3(0.0f, 0.0f, 1.0f));
-
-	// 上下(Y)は使わず水平方向だけにする
-	forward.y = 0.0f;
-
-	// 長さが0に近いときは、前回の向きのままにする
-	if (forward.LengthSq() > 0.000001f) { dir = forward.Normalized(); }
-}
-
-void ShooterManager::AimInput(void)
-{
-	bool zoom = Input::GetIns().GetInfo(KEY_TYPE::CameraZoomIn).now;
-
-	//ズームイン・ズームアウトさせる
-	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
-	if (cam != nullptr) { cam->SetAiming(zoom); }
-}
-
-void ShooterManager::ZoomOut(void)
-{
-	//ズームアウトさせる
-	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
-	if (cam != nullptr) { cam->SetAiming(false); }
-}
-
-// 右手の位置を取得する
-// モデルの行列はDraw時にしか更新されないため、先に今フレームの座標を反映する
 Vector3 ShooterManager::GetHandPos(void) const
 {
 	MV1SetMatrix(ownerTrans.model, ownerTrans.GetWorldMatrix());
 
 	const int frameIndex = MV1SearchFrame(ownerTrans.model, "mixamorig:RightHandIndex2");
 
+	// ボーンが見つからないときは、持ち主の座標で代用する
+	if (frameIndex < 0) { return ownerTrans.pos; }
+
 	return Vector3(MV1GetFramePosition(ownerTrans.model, frameIndex));
 }
 
-// アステロイド群の中心位置を取得する(手の右80、上60)
+// アステロイド群の中心位置を取得する
 Vector3 ShooterManager::GetCenterPos(void) const
 {
 	const Vector3 right = ownerTrans.VTrans(Vector3(1.0f, 0.0f, 0.0f));
 
-	return GetHandPos() + right * 80.0f + Vector3(0.0f, 60.0f, 0.0f);
+	return GetHandPos() + right * CENTER_OFFSET_RIGHT + Vector3(0.0f, CENTER_OFFSET_UP, 0.0f);
+}
+
+void ShooterManager::SetAiming(bool aim) const
+{
+	// ショルダーカメラのときだけ、ズームイン・ズームアウトさせる
+	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
+	if (cam != nullptr) { cam->SetAiming(aim); }
 }

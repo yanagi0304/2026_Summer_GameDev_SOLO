@@ -46,7 +46,7 @@ void GameScene::SubPostLoad(void)
 
 	mannequinManager = new MannequinManager();
 	AddActor(mannequinManager);
-	operatorObject = new Jazz([&]() {return target->GetTargetPos(); });
+	operatorObject = new Jazz();
 	AddActor(operatorObject);
 	AddActor(new StageTutrial);
 
@@ -99,8 +99,6 @@ void GameScene::SubPostUpdate(void)
 	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || CountMannequins() == 0) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
 	}
-
-	target->Update();
 }
 
 void GameScene::SubUiDraw(void)

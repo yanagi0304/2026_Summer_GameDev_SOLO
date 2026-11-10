@@ -1,69 +1,110 @@
-#pragma once
+﻿#pragma once
+
 #include <deque>
 
 #include "../WeaponBase.h"
 
+#include "../Manager/ShooterConfig.h"
+
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
 class Asteroid :
-    public WeaponBase
+	public WeaponBase
 {
 public:
 
-    const float SIZE = GetParameter("Init", "scale");
+	// 弾の状態
+	enum class STATE
+	{
+		// 手元で待機している
+		Hold,
 
-    Asteroid(const Vector3& vec);
-    ~Asteroid() override = default;
+		// 発射されて飛んでいる
+		Flying,
 
-    void Load(void) override;
+		// 命中して消えた
+		Dead,
+	};
 
-    int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
-    int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
+	// コンストラクタ
+	// ownerTrans: 持ち主(Jazz)のTransform / config: 弾の設定
+	Asteroid(const Transform& ownerTrans, const ShooterConfig& config);
 
-    void SetTrans(const Vector3 pos, const Vector3 scale) { trans.pos = pos; trans.scale = scale; }
+	~Asteroid() override = default;
 
-    void SetDir(const Vector3 dir) { direction_ = dir; }
+	// 読み込み
+	void Load(void) override;
 
-    Vector3 GetDir(void) const { return direction_; }
+	// 待機アニメーションのIDを取得する
+	int GetIdleAnimeID(void) const override { return CHARACTER_ANIME::SWORD_IDLE_R; }
 
-    float GetSize(void) const { return SIZE; }
+	// 攻撃アニメーションのIDを取得する
+	int GetAttackAnimeID(void) const override { return CHARACTER_ANIME::SLASH_A1; }
 
-    //���ˏ�
-    void SetFire(bool fire) { isFire = fire; }
-    bool IsFire(void) const { return isFire; }
+	// 元の大きさを取得する
+	float GetBaseScale(void) const { return baseScale_; }
 
-    //�O�Ղ�������
-    void ClearTrail(void) { trail.clear(); }
+	// 手元に出す
+	void Appear(void);
 
-    void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
+	// 消す
+	void Disappear(void);
 
-    //�I�΂ꂽ�Ƃ�
-    void OnEquip(void)override;
+	// 座標と大きさを設定する
+	void Place(const Vector3& pos, const Vector3& scale);
 
+	// 発射する
+	void Fire(const Vector3& dir);
+
+	// 手元の状態に戻す
+	void Recall(void);
+
+	// 現在の状態を取得する
+	STATE GetState(void) const { return state_; }
+
+	// 当たり判定の通知
+	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result) override;
 
 private:
 
-    void SubInit(void) override;
-    void SubUpdate(void) override;
-    void SubDraw(void) override;
-    void SubRelease(void) override;
+	void SubInit(void) override;
+	void SubUpdate(void) override;
+	void SubDraw(void) override;
+	void SubRelease(void) override;
+
+	// 動きをリセットする
+	void ResetMotion(void);
+
+	// 命中して消える
+	void Kill(void);
+
+	// 目標へ向きを寄せる
+	void Steer(const Vector3& targetPos);
 
 private:
 
-    Vector3 direction_;
-    bool isFire = false;
+	// 軌跡として覚えておく最大数
+	static constexpr int TRAIL_MAX = 10;
 
-    //�O�Օۊ�
-    static constexpr int TRAIL_MAX = 10;
+	// 飛行中の加速度
+	static constexpr float FIRE_ACCEL = 1.0f;
 
-    std::deque<Vector3> trail;
+	// 追尾の旋回の強さ
+	static constexpr float HOMING_TURN_RATE = 0.08f;
 
-#pragma region �󂯎��Q��
+	// 現在の状態
+	STATE state_;
 
-    //���˃x�N�g��
-    const Vector3& vec;
+	// 進行方向
+	Vector3 moveDir_;
 
-#pragma endregion
+	// 軌跡
+	std::deque<Vector3> trail_;
+
+	// 元の大きさ
+	float baseScale_;
+
+	// 弾の設定
+	ShooterConfig config_;
 
 };
-

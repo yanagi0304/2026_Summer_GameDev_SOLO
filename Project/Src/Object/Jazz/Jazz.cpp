@@ -39,19 +39,21 @@
 #include "../Common/Target/Target.h"
 #include "../../Manager/Camera/ShoulderCamera/ShoulderCamera.h"
 
-Jazz::Jazz(std::function<const Vector3& (void)> target) :
+Jazz::Jazz() :
 	CharacterBase("Data/Parameter/Character/Player/Wo-Chamolenium/"),
 
 	weaponTrans(),
+	prevPos(),
 
 	mainCurrentIndex(0),
 	subCurrentIndex(0),
 
 	trigger(nullptr),
 
-	target(target),
+	isGrashpper(false),
 
 	currentWeaponID(TriggerType::NONE),
+
 	isAim(false)
 {
 }
@@ -157,7 +159,7 @@ void Jazz::Load(void)
 	// 「アステロイド」生成
 	mainWeaponSet.emplace(TriggerType::ASTEROID, new ShooterManager(
 		trans,
-		[&]() { return GetAnimeRatio(); },
+		ShooterConfig::MakeAsteroid(),
 		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::ASTEROID));
@@ -180,7 +182,7 @@ void Jazz::Load(void)
 	// 「ハウンド」生成
 	subWeaponSet.emplace(TriggerType::HOUND, new ShooterManager(
 		trans,
-		[&]() { return GetAnimeRatio(); },
+		ShooterConfig::MakeHound(),
 		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(subWeaponSet.at(TriggerType::HOUND));

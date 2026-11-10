@@ -153,12 +153,6 @@ protected:
 	// スカイボックスを使用するかどうか
 	virtual bool UseSkyBox(void)const { return false; }
 
-	// ターゲットを使用するかどうか
-	virtual bool UseTarget(void)const { return true; }
-
-	//ターゲット管理
-	Target* target;
-
 private:
 
 	// 二重Load / 二重Releaseを防止する「状態」

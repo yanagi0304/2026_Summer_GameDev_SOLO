@@ -17,7 +17,7 @@ class Jazz : public CharacterBase
 {
 public:
 
-	Jazz(std::function<const Vector3&(void)> target);
+	Jazz();
 	~Jazz() override = default;
 
 	void Load(void)override;
@@ -143,7 +143,7 @@ private:
 
 #pragma region ó‚¯æ‚èQÆ
 
-	std::function<const Vector3& (void)> target;
+	
 
 #pragma endregion
 

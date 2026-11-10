@@ -28,6 +28,8 @@ void Grasshopper::Load(void)
 	SetIsDraw(false);
 
 	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
+
+	SetContactResponseEnabled(false);
 	
 }
 
@@ -41,7 +43,7 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 	const VECTOR localUp = VGet(0.0f, 1.0f, 0.0f);
 	const Vector3 launchDir = VNorm(VTransformSR(localUp, rotationMat));
 
-	// 飛ばす速度ベクトル(Velocity:ベロシティ=速度)
+	// 飛ばす速度ベクトル
 	const Vector3 launchVelocity = launchDir * 40.0f;
 	other.GetActor()->Launch(launchVelocity);
 }
