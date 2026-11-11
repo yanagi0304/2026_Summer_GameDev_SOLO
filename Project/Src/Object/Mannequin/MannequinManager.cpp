@@ -2,8 +2,9 @@
 
 #include "Mannequin.h"
 
-MannequinManager::MannequinManager()
-	:ActorBase("Data/Parameter/Mannequin/")
+MannequinManager::MannequinManager(const Vector3& targetPos)
+	:ActorBase("Data/Parameter/Mannequin/"),
+	targetPos(targetPos)
 {
 }
 
@@ -23,6 +24,6 @@ void MannequinManager::Load(void)
 		if (!IsParameterExist("Init", parameterDynamicFlg)) { break; }
 
 		// ‘¶İ‚·‚é‚È‚ç‚ÎA‚»‚ÌÀ•W‚É‚»‚Ì“G‚ğ¶¬
-		AddChildActor(new Mannequin(GetParameterToVector3("Init", parameterPos), GetParameterToBool("Init", parameterDynamicFlg)));
+		AddChildActor(new Mannequin(GetParameterToVector3("Init", parameterPos), GetParameterToBool("Init", parameterDynamicFlg), targetPos));
 	}
 }

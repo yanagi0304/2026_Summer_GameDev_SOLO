@@ -1,2 +1,4 @@
 scale,0.7
-modelOffset,15,16,-5
+HandOffset,15,16,-5
+SheathOffset,35,0,-50
+SheathRotationOffset,270,0,0

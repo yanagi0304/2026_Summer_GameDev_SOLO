@@ -12,7 +12,8 @@
 
 Kogetsu::Kogetsu()
 	:
-	WeaponBase(Transform(), "Data/Parameter/Weapon/Kogetsu/")
+	WeaponBase(Transform(), "Data/Parameter/Weapon/Kogetsu/"),
+	isSheathed(false)
 {
 }
 
@@ -20,7 +21,8 @@ Kogetsu::Kogetsu(const Transform& ownerTrans)
 	:
 	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Kogetsu/"),
 	attackColl(new CapsuleCollider(COLLIDER_TAG::Kogetsu,
-		BladeDirHand()* BLADE_START, BladeDirHand()* (BLADE_START + BLADE_LENGTH), BLADE_RADIUS))
+		BladeDirHand()* BLADE_START, BladeDirHand()* (BLADE_START + BLADE_LENGTH), BLADE_RADIUS)),
+	isSheathed(false)
 {
 }
 
@@ -79,88 +81,64 @@ void Kogetsu::SubInit(void)
 	trans.scale = Vector3(GetParameter("Init", "scale"));
 }
 
+namespace
+{
+	// 行列からスケールを取り除いた回転行列を返す(Rot:ロット=回転)
+	MATRIX GetRotationWithoutScale(const MATRIX& mat)
+	{
+		const VECTOR scale = MGetSize(mat);
+		return MMult(
+			MGetRotElem(mat),
+			MGetScale(VGet(1.0f / scale.x, 1.0f / scale.y, 1.0f / scale.z))
+		);
+	}
+}
+
+// 更新処理: 右手に追従し、刀身の軌跡を更新する
 void Kogetsu::SubUpdate(void)
 {
-	const int frameIndex =
-		MV1SearchFrame(
-			ownerTrans.model,
-			"mixamorig:RightHand"
-		);
+	// ボーンが見つからないときは何もしない
+	if (!FollowBone()) { return; }
 
-	if (frameIndex == -1)
-	{
-		return;
-	}
+	// 納刀中は斬撃を作らない
+	if (!isSheathed) { UpdateSlash(); }
+}
 
-	// 右手ボーンのワールド行列
-	MATRIX handMat =
-		MV1GetFrameLocalWorldMatrix(
-			ownerTrans.model,
-			frameIndex
-		);
+// 右手ボーンに合わせて、座標と回転を更新する(ボーンが無ければ false)
+bool Kogetsu::FollowBone(void)
+{
+	// 追従するボーン(Frame:フレーム=モデルのボーン)を探す
+	const char* boneName = isSheathed ? WAIST_BONE_NAME : HAND_BONE_NAME;
+	const int frameIndex = MV1SearchFrame(ownerTrans.model, boneName);
+	if (frameIndex == -1) { return false; }
 
+	// ボーンのワールド行列(DxLibの関数がconstなし参照を受けるので const を付けない)
+	MATRIX boneMat = MV1GetFrameLocalWorldMatrix(ownerTrans.model, frameIndex);
 
-	// ========================================
-	// 回転行列を取得
-	// ========================================
+	// スケールを除いた回転行列
+	const MATRIX boneRotationMat = GetRotationWithoutScale(boneMat);
 
-	const VECTOR handScale =
-		MGetSize(handMat);
-
-	MATRIX handRotationMat =
-		MGetRotElem(handMat);
-
-	// スケールを除去
-	handRotationMat =
-		MMult(
-			handRotationMat,
-			MGetScale(
-				VGet(
-					1.0f / handScale.x,
-					1.0f / handScale.y,
-					1.0f / handScale.z
-				)
-			)
-		);
-
-
-	// ========================================
-	// 座標
-	// ========================================
-
-	const Vector3 handPos =
-		Vector3(
-			MGetTranslateElem(handMat)
-		);
-
-	// OFFSETは「回転だけ」で変換する
-	const Vector3 offset =
-		Vector3(
-			VTransform(
-				OFFSET.ToVECTOR(),
-				handRotationMat
-			)
-		);
-
+	// 座標: ボーンの位置 + 回転だけで変換したずれ
+	const Vector3 offset = isSheathed ? SHEATH_OFFSET : HAND_OFFSET;
 	trans.pos =
-		handPos +
-		offset;
+		Vector3(MGetTranslateElem(boneMat)) +
+		Vector3(VTransform(offset.ToVECTOR(), boneRotationMat));
 
+	// 回転: ボーンの向き(納刀中は、さらに腰用の回転を加える)
+	const Quaternion boneRotation = Quaternion::FromMatrix(boneRotationMat);
+	trans.SetRotation(isSheathed ? boneRotation * SheathRotation() : boneRotation);
 
-	// ========================================
-	// 回転
-	// ========================================
+	return true;
+}
 
-	trans.SetRotation(
-		Quaternion::FromMatrix(
-			handRotationMat
-		)
-	);
-
-	// SubUpdate の最後に追加
+// 刀身の根元と先端から、斬撃の軌跡を更新する
+void Kogetsu::UpdateSlash(void)
+{
 	const Vector3 bladeDir = trans.VTrans(BladeDirHand());
-	slash_.Update(trans.pos + bladeDir * BLADE_START, trans.pos + bladeDir * (BLADE_START + BLADE_LENGTH));
-
+	slash_.Update(
+		trans.pos + bladeDir * BLADE_START,
+		trans.pos + bladeDir * (BLADE_START + BLADE_LENGTH)
+	);
 }
 
 void Kogetsu::SubDraw(void)

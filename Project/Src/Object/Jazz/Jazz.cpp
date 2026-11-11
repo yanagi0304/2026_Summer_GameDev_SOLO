@@ -106,6 +106,7 @@ void Jazz::Load(void)
 
 #pragma endregion
 
+#pragma region モデル設定
 	// モデルの読み込み
 	trans.LoadModel("Character/WoChamolenium/WoChamolenium");
 
@@ -205,10 +206,10 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Move,
 		new PlayerMoveState(
-			10.0f, 1.5f, 300,
+			10.0f, 2.0f, 300,
 			*groundMotionController,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
-			[&]() { AnimePlay(CHARACTER_ANIME::WALK); }
+			[&]() { AnimePlay(CHARACTER_ANIME::RUN); }
 		)
 	);
 
@@ -297,7 +298,8 @@ void Jazz::SubUpdate(void)
 
 	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down && CanWeaponChange()) { WeaponChange(); }
 
-
+	// 弧月を手に持つか腰に付けるかを更新
+	UpdateKogetsuSheath();
 
 	if (isAim) { AimRotate(); }
 }
@@ -306,7 +308,17 @@ bool Jazz::CanWeaponChange(void) const
 {
 	// 攻撃中などは不可。切り替えてよい状態だけを許可する
 	const STATE s = static_cast<STATE>(GetState());
-	return s == STATE::Idle || s == STATE::Move;
+	return s == STATE::Idle || s == STATE::Move || s == STATE::Jump;
+}
+
+void Jazz::UpdateKogetsuSheath(void)
+{
+	Kogetsu* kogetsu = dynamic_cast<Kogetsu*>(mainWeaponSet.at(TriggerType::KOGETSU));
+	if (kogetsu == nullptr) { return; }
+
+	// Idle と Kogetsu(攻撃)ステートのときだけ手に持つ
+	const STATE s = static_cast<STATE>(GetState());
+	kogetsu->SetSheathed(!(s == STATE::Idle || s == STATE::Kogetsu));
 }
 
 void Jazz::WeaponChange(TriggerType type)

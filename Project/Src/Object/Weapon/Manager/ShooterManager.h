@@ -81,7 +81,7 @@ private:
 	ShooterConfig config_;
 
 	// 状態が変わったときに呼ぶアニメ再生関数
-	std::function<void(void)> playAnime_;
+	std::function<void(void)> playAnime;
 
 	// 弾の群れ
 	AsteroidSwarm swarm_;

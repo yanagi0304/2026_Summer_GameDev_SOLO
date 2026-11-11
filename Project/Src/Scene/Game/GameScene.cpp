@@ -44,10 +44,11 @@ void GameScene::SubPostLoad(void)
 
 	//AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
-	mannequinManager = new MannequinManager();
-	AddActor(mannequinManager);
+	
 	operatorObject = new Jazz();
 	AddActor(operatorObject);
+	mannequinManager = new MannequinManager(operatorObject->GetTrans().pos);
+	AddActor(mannequinManager);
 	AddActor(new StageTutrial);
 
 	//int debugObjNum = 50;

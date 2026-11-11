@@ -24,7 +24,7 @@ void Asteroid::Load(void)
 
 	SetIsDraw(false);
 	SetJudgeFlg(false);
-	SetContactResponseEnabled(false);
+	SetContactResponseEnabled(true);
 
 	EnablePhysics();
 }

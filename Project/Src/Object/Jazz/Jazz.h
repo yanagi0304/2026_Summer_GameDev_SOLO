@@ -67,6 +67,8 @@ private:
 		0.5,	// Jumping
 		0.5,	// JumpEnd
 
+		0.5,	// Run
+
 	};
 
 	// アニメーションループ再生フラグテーブル
@@ -91,6 +93,8 @@ private:
 		true,	// Jumping
 		false,	// JumpEnd
 
+		true,	// Run
+
 	};
 
 #pragma endregion
@@ -102,6 +106,9 @@ private:
 
 	//武器切り替えできるか取得
 	bool CanWeaponChange(void) const;
+
+	// 状態に合わせて、弧月を手に持つか腰に付けるかを切り替える
+	void UpdateKogetsuSheath(void);
 	
 	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
 	void WeaponChange(TriggerType type = TriggerType::NONE);

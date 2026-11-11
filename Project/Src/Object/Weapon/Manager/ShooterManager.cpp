@@ -20,7 +20,7 @@ ShooterManager::ShooterManager(
 	WeaponBase(ownerTrans),
 
 	config_(config),
-	playAnime_(playAnime),
+	playAnime(playAnime),
 
 	swarm_(),
 	crosshair_(),
@@ -130,7 +130,7 @@ void ShooterManager::SubUpdate(void)
 		ChangeState(states_.at(currentState_)->NextState());
 
 		// 新しい状態に合ったアニメーションを再生する
-		playAnime_();
+		if (playAnime) { playAnime(); }
 	}
 }
 
@@ -169,8 +169,8 @@ Vector3 ShooterManager::GetHandPos(void) const
 
 	const int frameIndex = MV1SearchFrame(ownerTrans.model, "mixamorig:RightHandIndex2");
 
-	// ボーンが見つからないときは、持ち主の座標で代用する
-	if (frameIndex < 0) { return ownerTrans.pos; }
+	// ボーンが見つからないときは、持ち主の座標から手の位置あたりを代用する
+	if (frameIndex < 0) { return ownerTrans.pos + ownerTrans.rotation.Rotate(Vector3(80.0f, 160.0f, 0.0f)); }
 
 	return Vector3(MV1GetFramePosition(ownerTrans.model, frameIndex));
 }

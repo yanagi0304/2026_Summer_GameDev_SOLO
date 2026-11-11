@@ -5,6 +5,8 @@
 
 #include "../../Common/MeshSlicer/SlashTracker.h"
 
+#include "../../../Utility/Utility.h"
+
 class CapsuleCollider;
 
 class Kogetsu :
@@ -29,12 +31,21 @@ public:
 
     void OnEquip(void)override;
 
+    //納刀中かどうかの設定
+    void SetSheathed(bool sheathed) { isSheathed = sheathed; }
+
 private:
 
     void SubInit(void) override;
     void SubUpdate(void) override;
     void SubDraw(void) override;
 	void SubRelease(void) override;
+
+    // 右手ボーンに合わせて、座標と回転を更新する(ボーンが無ければ false)
+    bool FollowBone(void);
+
+    // 刀身の根元と先端から、斬撃の軌跡(Slash:スラッシュ=斬る)を更新する
+    void UpdateSlash(void);
 
 private:
 
@@ -49,9 +60,25 @@ private:
     SlashTracker slash_;
     int cutId_ = -1;
 
-    const Vector3 OFFSET = GetParameterToVector3("Init", "modelOffset");
+    // 手に持つときの、手のボーンからのずらし量
+    const Vector3 HAND_OFFSET = GetParameterToVector3("Init", "HandOffset");
+    // 腰に付けるときの、腰のボーンからのずらし量
+    const Vector3 SHEATH_OFFSET = GetParameterToVector3("Init", "SheathOffset");
+    // 腰に付けるときの追加回転(Z軸まわり、度数)
+    const Vector3 SHEATH_ROTATION_OFFSET = GetParameter("Init", "SheathRotationOffset");
 
     MATRIX weaponMatrix_;
+
+	//納刀中かどうかのフラグ
+    bool isSheathed;
+
+    // 手に持つときのボーン名
+    static constexpr const char* HAND_BONE_NAME = "mixamorig:RightHand";
+    // 腰に付けるときのボーン名
+    static constexpr const char* WAIST_BONE_NAME = "mixamorig:Hips";
+
+    // 腰に付けるときの追加回転
+    Quaternion SheathRotation(void) const { return Quaternion::FromRotationY(Deg2Rad(SHEATH_ROTATION_OFFSET.x)); }
 
 };
 
