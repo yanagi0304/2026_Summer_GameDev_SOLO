@@ -17,10 +17,6 @@ void StageTutrial::Load(void)
 	SetContactResponseEnabled(true);
 
 	AddCollider(new MeshCollider(COLLIDER_TAG::Stage));
-	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "2")));
-	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "3")));
-	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "4")));
-	//ColliderCreate(new BoxCollider(COLLIDER_TAG::STAGE, GetParameterToVector3("Collider", "5")));
 }
 
 void StageTutrial::SubInit(void)

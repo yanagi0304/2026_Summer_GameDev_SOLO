@@ -261,10 +261,10 @@ void CuttableActor::Launch(const Vector3& launchVelocity, const Vector3& axis, f
 
 float CuttableActor::GetRemainRate(void) const
 {
-	// 基準が無い（モデルから読み込んでいない）ときは、切られていない扱いにする
+	// 基準が無いときは、切られていない扱いにする
 	if (originalArea <= 0.0f) { return 1.0f; }
 
-	// 1.0を超えないようにしてから返す（計算誤差で少し超えることがあるため）
+	// 1.0を超えないようにしてから返す
 	return (std::min)(1.0f, mesh.SurfaceArea() / originalArea);
 }
 
@@ -275,7 +275,7 @@ void CuttableActor::StartVanish(void)
 
 	launchScale = trans.scale;
 
-	// 縮み始めの時間から始める（その場でスッと縮む）
+	// 縮み始めの時間から始める
 	flyTime = SHRINK_START_TIME;
 
 	spinSpeed = 0.0f;

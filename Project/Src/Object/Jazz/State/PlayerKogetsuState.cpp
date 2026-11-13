@@ -153,7 +153,7 @@ void PlayerKogetsuState::NextCombo(void)
 		step = STEP::Startup;
 		break;
 	case PlayerKogetsuState::COMBO_STEP::A3:
-		STEP::Recovery;
+		step = STEP::Recovery;
 		break;
 	default:
 		break;

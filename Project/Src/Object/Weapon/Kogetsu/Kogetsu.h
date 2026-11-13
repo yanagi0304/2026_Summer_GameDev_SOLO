@@ -34,6 +34,9 @@ public:
     //納刀中かどうかの設定
     void SetSheathed(bool sheathed) { isSheathed = sheathed; }
 
+    //デフォルト描画タイプの設定
+    ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
 private:
 
     void SubInit(void) override;
