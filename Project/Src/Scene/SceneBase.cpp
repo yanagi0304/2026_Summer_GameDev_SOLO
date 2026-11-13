@@ -208,6 +208,9 @@ void SceneBase::Draw(void)
 
 	if (camera != nullptr) { camera->DrawDebug(); }
 
+	// Collision stats (shown when debug draw is ON)
+	if (collision != nullptr) { collision->DrawCheckLog(); }
+
 #pragma endregion
 }
 

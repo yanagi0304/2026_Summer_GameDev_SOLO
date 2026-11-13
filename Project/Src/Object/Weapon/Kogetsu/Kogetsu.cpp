@@ -10,6 +10,8 @@
 
 #include "../../Common/CuttableActor/CuttableActor.h"
 
+#include "../../Common/Shader/RimLightShader.h"
+
 Kogetsu::Kogetsu()
 	:
 	WeaponBase(Transform(), "Data/Parameter/Weapon/Kogetsu/"),
@@ -44,6 +46,8 @@ void Kogetsu::Load(void)
 	// 当たり判定による押し出しを有効にする
 	SetContactResponseEnabled(false);
 	
+	// シェーダーを差し替える
+	CreateShader(new RimLightShader(SHADER_VERTEX_TYPE::Frame1));
 }
 
 void Kogetsu::On(void)

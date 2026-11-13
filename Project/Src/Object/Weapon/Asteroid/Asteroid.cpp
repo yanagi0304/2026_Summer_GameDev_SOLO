@@ -18,7 +18,15 @@ Asteroid::Asteroid(const Transform& ownerTrans, const ShooterConfig& config) :
 
 void Asteroid::Load(void)
 {
-	trans.LoadModel("Weapon/Asteroid");
+	static int sourceModel = -1;
+	if (sourceModel < 0) {
+		// 複製元は非同期読み込み中だと使えないため、ここだけ同期で読む
+		const int prevAsync = GetUseASyncLoadFlag();
+		SetUseASyncLoadFlag(FALSE);
+		sourceModel = MV1LoadModel("Data/Model/Weapon/Asteroid.mv1");
+		SetUseASyncLoadFlag(prevAsync);
+	}
+	trans.Duplicate(sourceModel);
 
 	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
 
