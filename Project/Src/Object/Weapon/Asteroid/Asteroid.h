@@ -65,6 +65,9 @@ public:
 	// 当たり判定の通知
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result) override;
 
+	//デフォルト描画タイプの設定
+	ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
 private:
 
 	void SubInit(void) override;

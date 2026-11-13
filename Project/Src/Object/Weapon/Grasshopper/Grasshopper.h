@@ -20,6 +20,9 @@ public:
 
     void OnEquip(void)override;
 
+    //デフォルト描画タイプの設定
+    ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
 private:
 
     //武器生成

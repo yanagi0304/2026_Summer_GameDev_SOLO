@@ -26,7 +26,6 @@ void Shield::Load(void)
 void Shield::SubInit(void)
 {
 	trans.scale = Vector3(GetParameter("Init", "scale"));
-	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
 }
 
 void Shield::SubUpdate(void)

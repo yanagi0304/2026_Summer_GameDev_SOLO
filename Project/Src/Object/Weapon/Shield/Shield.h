@@ -16,6 +16,9 @@ public:
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_TO_SHILD_L; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
+    //デフォルト描画タイプの設定
+    ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
 private:
 
     void SubInit(void) override;

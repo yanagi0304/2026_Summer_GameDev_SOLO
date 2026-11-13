@@ -27,8 +27,6 @@ void Grasshopper::Load(void)
 	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	SetIsDraw(false);
 
-	SetDrawType(ACTOR_DRAW_TYPE::Alpha);
-
 	SetContactResponseEnabled(false);
 	
 }
