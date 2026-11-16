@@ -5,6 +5,32 @@
 #include "../../Common/Collider/BoxCollider.h"
 #include "../../../Manager/TimeScale/TimeScale.h"
 
+static int glowGraph = -1;
+
+static int MakeGlowGraph(void)
+{
+	const int size = 128;
+	const int soft = MakeARGB8ColorSoftImage(size, size);
+
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x < size; x++) {
+			// 中心からの距離(0=中心, 1=端)
+			const float dx = (x - size * 0.5f) / (size * 0.5f);
+			const float dy = (y - size * 0.5f) / (size * 0.5f);
+			const float d = (std::min)(1.0f, std::sqrt(dx * dx + dy * dy));
+
+			// 中心が明るく、外側へなめらかに消える
+			const float a = std::pow(1.0f - d, 2.0f);
+
+			DrawPixelSoftImage(soft, x, y, 255, 255, 255, static_cast<int>(a * 255));
+		}
+	}
+
+	const int graph = CreateGraphFromSoftImage(soft);
+	DeleteSoftImage(soft);
+	return graph;
+}
+
 Asteroid::Asteroid(const Transform& ownerTrans, const ShooterConfig& config) :
 	WeaponBase(ownerTrans, config.parameterPath),
 
@@ -26,6 +52,10 @@ void Asteroid::Load(void)
 		sourceModel = MV1LoadModel("Data/Model/Weapon/Asteroid.mv1");
 		SetUseASyncLoadFlag(prevAsync);
 	}
+
+	
+	if (glowGraph < 0) { glowGraph = MakeGlowGraph(); }
+
 	trans.Duplicate(sourceModel);
 
 	AddCollider(new BoxCollider(COLLIDER_TAG::Asteroid, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
@@ -123,6 +153,18 @@ void Asteroid::SubUpdate(void)
 
 void Asteroid::SubDraw(void)
 {
+	// ---- グロー ----
+	SetWriteZBufferFlag(FALSE);                  // 深度は書かない
+	SetDrawBlendMode(DX_BLENDMODE_ADD, 255);     // 加算(強さ 0〜255)
+	SetDrawBright(150, 255, 210);                // ミントグリーンに着色
+
+	const float size = 80.0f;     // 立方体より大きく(倍率は調整)
+	DrawBillboard3D(trans.pos.ToVECTOR(), 0.5f, 0.5f, size, 0.0f, glowGraph, TRUE);
+
+	SetDrawBright(255, 255, 255);                // 元に戻す
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	SetWriteZBufferFlag(TRUE);
+
 	if (trail_.size() < 2) { return; }
 
 	// 加算合成

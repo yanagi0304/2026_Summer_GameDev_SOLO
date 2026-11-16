@@ -655,6 +655,8 @@ void CollisionManager::BuildChunks(void)
 
             // ˆÚ“®‚·‚éƒRƒ‰ƒCƒ_[‚Í–ˆƒtƒŒ[ƒ€“o˜^
             if (collider->GetMobility() == COLLIDER_MOBILITY::Movable) {
+				// ”»’è‚ªƒIƒt‚É‚È‚Á‚Ä‚¢‚éê‡‚Í“o˜^‚µ‚È‚¢
+				if (!collider->GetJudgeFlg()) { continue; }
                 RegisterToChunks(group.dynamicChunks, collider);
                 continue;
             }
