@@ -12,6 +12,8 @@
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
+class SmokeBurst;
+
 class ShooterManager
 	: public WeaponBase
 {
@@ -66,6 +68,9 @@ private:
 	// エイム(ズーム)のオンオフを設定する
 	void SetAiming(bool aim) const;
 
+	// 煙の生成
+	void EmitSmoke(const Vector3& pos, const Vector3& normal);
+
 private:
 
 	// 中心位置の、手からのずらし量
@@ -76,6 +81,9 @@ private:
 
 	// エイム中に狙う点の、カメラからの距離
 	static constexpr float AIM_TARGET_DISTANCE = 3000.0f;
+
+	//スモークの生成量
+	static constexpr int SMOKE_BURST_NUM = 6;
 
 	// 武器の設定
 	ShooterConfig config_;
@@ -95,4 +103,8 @@ private:
 	// 現在の状態
 	SHOOTER_STATE currentState_;
 
+	// 煙
+	std::vector<SmokeBurst*> smokes;
+	//煙の発生回数
+	int nextSmoke;
 };

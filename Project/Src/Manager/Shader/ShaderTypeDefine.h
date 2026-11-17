@@ -25,6 +25,9 @@ enum class VERTEX_SHADER_TYPE
 
     // スカイボックス
     SkyBox,
+
+    //煙エフェクト
+    SmokeBurst,
 };
 
 // ピクセルシェーダーの種類
@@ -41,7 +44,7 @@ enum class PIXEL_SHADER_TYPE
 
 #pragma region ポストエフェクト
 
-	// グレースケールポストエフェクト
+    // グレースケールポストエフェクト
     GrayScale,
 
     // ブラウン管ポストエフェクト
@@ -50,8 +53,8 @@ enum class PIXEL_SHADER_TYPE
     // 集中線ポストエフェクト
     FocusLines,
 
-	// 水中ポストエフェクト
-	UnderWater,
+    // 水中ポストエフェクト
+    UnderWater,
 
     // ゴゴゴゴ…エフェクト
     Menacing,
@@ -60,6 +63,14 @@ enum class PIXEL_SHADER_TYPE
 
     // スカイボックス
     SkyBox,
+
+#pragma region ゲームエフェクト
+
+    //煙エフェクト
+    SmokeBurst,
+
+#pragma endregion
+
 };
 
 // 頂点タイプ

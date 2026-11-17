@@ -1,5 +1,7 @@
 #include "Shield.h"
 
+#include "../../Common/Collider/BoxCollider.h"
+
 Shield::Shield()
 	: WeaponBase(Transform(), "Data/Parameter/Weapon/Shield/")
 {
@@ -20,6 +22,8 @@ void Shield::Load(void)
 	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	SetContactResponseEnabled(false);
 	SetIsDraw(false);
+
+	AddCollider(new BoxCollider(COLLIDER_TAG::Shield, GetParameterToVector3("Collider", "Size"), Vector3(0.0f, 0.0f, 0.0f)));
 
 }
 

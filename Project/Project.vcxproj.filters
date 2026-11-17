@@ -93,6 +93,8 @@
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterFireState.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterIdleState.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterSplitState.cpp" />
+    <ClCompile Include="Src\Object\Common\Shader\SmokeBurstShader.cpp" />
+    <ClCompile Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -218,6 +220,8 @@
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterIdleState.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterSplitState.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterStateBase.h" />
+    <ClInclude Include="Src\Object\Common\Shader\SmokeBurstShader.h" />
+    <ClInclude Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />
@@ -288,5 +292,7 @@
     <FxCompile Include="Src\Shader\Default\DefaultVS_NMap8Frame.hlsl" />
     <FxCompile Include="Src\Shader\SkyBox\SkyBoxPS.hlsl" />
     <FxCompile Include="Src\Shader\SkyBox\SkyBoxVS.hlsl" />
+    <FxCompile Include="Src\Shader\SmokeBurst\SmokeBurstPS.hlsl" />
+    <FxCompile Include="Src\Shader\SmokeBurst\SmokeBurstVS.hlsl" />
   </ItemGroup>
 </Project>

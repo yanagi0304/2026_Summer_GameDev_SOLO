@@ -12,6 +12,8 @@
 #include "State/ShooterSplitState.h"
 #include "State/ShooterFireState.h"
 
+#include "../../Common/Effect/SmokeBurst/SmokeBurst.h"
+
 ShooterManager::ShooterManager(
 	const Transform& ownerTrans,
 	const ShooterConfig& config,
@@ -26,7 +28,10 @@ ShooterManager::ShooterManager(
 	crosshair_(),
 
 	states_(),
-	currentState_(SHOOTER_STATE::Idle)
+	currentState_(SHOOTER_STATE::Idle),
+
+	smokes(),
+	nextSmoke(0)
 {
 }
 
@@ -41,7 +46,17 @@ void ShooterManager::Load(void)
 
 		bullet->Disappear();
 
+		bullet->SetHitCallback([this](const Vector3& pos, const Vector3& normal) { EmitSmoke(pos, normal); });
+
 		swarm_.Add(bullet);
+	}
+
+	// 煙を作る
+	for (int i = 0; i < SMOKE_BURST_NUM; i++)
+	{
+		SmokeBurst* smoke = new SmokeBurst();
+		AddChildActor(smoke);
+		smokes.push_back(smoke);
 	}
 
 	// 各状態を作る
@@ -188,4 +203,10 @@ void ShooterManager::SetAiming(bool aim) const
 	// ショルダーカメラのときだけ、ズームイン・ズームアウトさせる
 	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
 	if (cam != nullptr) { cam->SetAiming(aim); }
+}
+
+void ShooterManager::EmitSmoke(const Vector3& pos, const Vector3& normal)
+{
+	smokes[nextSmoke]->Emit(pos, normal);
+	nextSmoke = (nextSmoke + 1) % smokes.size();
 }

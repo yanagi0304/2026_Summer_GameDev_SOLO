@@ -30,6 +30,8 @@ enum class COLLIDER_TAG
 
 	Kogetsu,
 
+	Shield,
+
 	Enemy,
 
 	Stage,

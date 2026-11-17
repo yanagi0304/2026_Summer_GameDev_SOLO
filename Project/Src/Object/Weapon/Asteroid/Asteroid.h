@@ -8,6 +8,8 @@
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
+class SmokeBurst;
+
 class Asteroid :
 	public WeaponBase
 {
@@ -42,7 +44,7 @@ public:
 	int GetAttackAnimeID(void) const override { return CHARACTER_ANIME::SLASH_A1; }
 
 	// 元の大きさを取得する
-	float GetBaseScale(void) const { return baseScale_; }
+	float GetBaseScale(void) const { return baseScale; }
 
 	// 手元に出す
 	void Appear(void);
@@ -67,6 +69,9 @@ public:
 
 	//デフォルト描画タイプの設定
 	ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
+	// 命中時のコールバック関数を設定する
+	void SetHitCallback(const std::function<void(const Vector3&, const Vector3&)>& cb) { onHit = cb; }
 
 private:
 
@@ -105,9 +110,12 @@ private:
 	std::deque<Vector3> trail_;
 
 	// 元の大きさ
-	float baseScale_;
+	float baseScale;
 
 	// 弾の設定
-	ShooterConfig config_;
+	ShooterConfig config;
+
+	// 命中時のコールバック関数
+	std::function<void(const Vector3&, const Vector3&)> onHit;
 
 };

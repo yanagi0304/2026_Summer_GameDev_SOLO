@@ -129,6 +129,18 @@ void GroundMotionController::ApplyInput(const Vector3& inputDirection, float tim
     body.SetVelocity(v);
 }
 
+void GroundMotionController::FaceDirection(const Vector3& inputDirection, float timeScale)
+{
+    Vector3 input(inputDirection.x, 0.0f, inputDirection.z);
+
+    if (transform && input.LengthSq() > 0.0001f) {
+        const float angle = atan2f(input.x, input.z);
+        transform->SetRotation(Quaternion::Slerp(
+            transform->rotation, Quaternion::FromRotationY(angle),
+            0.25f * timeScale));
+    }
+}
+
 // ‰ñ”ğ‚ÌuŠÔ“I‚È‰Á‘¬i’Êí‚ÌˆÚ“®“ü—Í‚Æ‚Í“Æ—§j
 void GroundMotionController::ApplyRollingImpulse(const Vector3& impulse)
 {

@@ -77,4 +77,7 @@ private:
 
 	// 現在ステップ
 	STEP step;
+
+	//移動制御時間
+	float limitTime;
 };

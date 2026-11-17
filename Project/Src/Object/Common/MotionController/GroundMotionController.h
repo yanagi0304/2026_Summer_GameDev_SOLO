@@ -50,6 +50,9 @@ public:
 
     void SetTransform(Transform* value) { transform = value; }
 
+    // 入力方向に応じて向きを更新
+    void FaceDirection(const Vector3& inputDirection, float timeScale = TimeScale::Get());
+
     // 回避時に速度を付与。接地中のみY成分も加算（通常移動の速度上限は適用しない）
     void ApplyRollingImpulse(const Vector3& impulse);
 

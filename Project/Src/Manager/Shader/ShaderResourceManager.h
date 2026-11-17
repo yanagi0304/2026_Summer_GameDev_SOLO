@@ -135,6 +135,12 @@ private:
 			VERTEX_SHADER_TYPE::SkyBox,
 			"SkyBoxVS"
 		},
+
+		// 煙エフェクト
+		{
+			VERTEX_SHADER_TYPE::SmokeBurst,
+			"SmokeBurstVS"
+		},
 	};
 
 	// 頂点シェーダー
@@ -194,6 +200,16 @@ private:
 			PIXEL_SHADER_TYPE::SkyBox,
 			"SkyBoxPS"
 		},
+
+		#pragma region エフェクト
+
+		// 煙エフェクト
+		{
+			PIXEL_SHADER_TYPE::SmokeBurst,
+			"SmokeBurstPS"
+		},
+
+		#pragma endregion
 
 	};
 

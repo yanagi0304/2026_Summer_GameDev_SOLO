@@ -11,6 +11,8 @@
 #include "../Manager/Shader/ShaderResourceManager.h"
 #include "../Scene/SceneManager.h"
 
+
+
 Application* Application::ins = nullptr;
 
 // コンストラクタ

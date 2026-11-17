@@ -6,6 +6,7 @@
 #include "../../../Manager/Camera/CurrentCamera.h"
 
 #include "../../Common/MotionController/GroundMotionController.h"
+#include "../../../Utility/Utility.h"
 
 PlayerJumpState::PlayerJumpState(
 	GroundMotionController& motion,
@@ -36,7 +37,9 @@ PlayerJumpState::PlayerJumpState(
 
 	getAnimeRatio(getAnimeRatio),
 
-	step(STEP::Start)
+	step(STEP::Start),
+
+	limitTime(0.0f)
 {
 }
 
@@ -52,7 +55,11 @@ void PlayerJumpState::Enter(void)
 	step = STEP::Start;
 
 	// ジャンプ開始アニメを再生
+	//グラスホッパー使用時の移動制限
 	isGrashopper ? playAnimeJumpLoop() : playAnimeJumpStart();
+
+	
+	
 }
 
 void PlayerJumpState::Update(void)
@@ -66,16 +73,14 @@ void PlayerJumpState::Update(void)
 		// ジャンプ開始
 
 		// アニメーション終了
-		if (0.5f> animeRatio) {
+		if (0.5f > animeRatio) {
 
 			// ジャンプ開始
 			if (!isGrashopper) {
-				motion.TryJump(); 
+				motion.TryJump();
 				// 滞空アニメーションを再生
 				playAnimeJumpLoop();
 			}
-			else { isGrashopper = false; }
-			
 
 			// 次のステップへ
 			step = STEP::Loop;
@@ -85,11 +90,12 @@ void PlayerJumpState::Update(void)
 	}
 
 	case PlayerJumpState::STEP::Loop: {
+
 		// 滞空
+		// ジャンプ開始
 
 		// コントローラーの入力を取得
 		Vector3 vec = Input::GetIns().GetLeftStickVec(false).ToVector3XZInvertY();
-
 		// 入力がなければ次にキーボードの入力を取得
 		if (vec == 0.0f) {
 			if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMoveRight).now) { vec.x++; }
@@ -100,23 +106,33 @@ void PlayerJumpState::Update(void)
 		}
 
 		// 最終的に入力があれば移動させる
-		if (vec != 0.0f) {
+		if (vec != 0.0f && !isGrashopper) {
 
 			// 移動方向をカメラで回転させる
 			vec.TransMatOwn(MGetRotY(CurrentCamera::Get().GetRotation().GetYaw()));
-
 			// 移動
 			motion.ApplyInput(vec);
 		}
+		else
+		{
+			// 移動方向をカメラで回転させる
+			vec.TransMatOwn(MGetRotY(CurrentCamera::Get().GetRotation().GetYaw()));
+			// 移動
+			motion.FaceDirection(vec);
+		}
+		
 
 		// 着地
 		if (motion.IsGrounded()) {
+
+			isGrashopper = false;
 
 			// 着地のアニメーションを再生
 			playAnimeStamp();
 
 			// 次のステップへ
 			step = STEP::Stamp;
+
 		}
 
 		break;
@@ -139,4 +155,5 @@ void PlayerJumpState::Update(void)
 	}
 
 	}
+
 }

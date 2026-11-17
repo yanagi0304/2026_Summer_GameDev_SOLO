@@ -37,8 +37,8 @@ Asteroid::Asteroid(const Transform& ownerTrans, const ShooterConfig& config) :
 	state_(STATE::Hold),
 	moveDir_(Vector3::Zonly(1.0f)),
 	trail_(),
-	baseScale_(GetParameter("Init", "scale")),
-	config_(config)
+	baseScale(GetParameter("Init", "scale")),
+	config(config)
 {
 }
 
@@ -53,7 +53,6 @@ void Asteroid::Load(void)
 		SetUseASyncLoadFlag(prevAsync);
 	}
 
-	
 	if (glowGraph < 0) { glowGraph = MakeGlowGraph(); }
 
 	trans.Duplicate(sourceModel);
@@ -65,6 +64,7 @@ void Asteroid::Load(void)
 	SetContactResponseEnabled(true);
 
 	EnablePhysics();
+
 }
 
 void Asteroid::Appear(void)
@@ -119,14 +119,19 @@ void Asteroid::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const
 	// 飛んでいる間だけ反応する
 	if (state_ != STATE::Flying) { return; }
 
-	if (other.GetTag() != COLLIDER_TAG::Stage) { return; }
+	const COLLIDER_TAG tag = other.GetTag();
+
+	// ステージか盾以外には反応しない
+	if (tag != COLLIDER_TAG::Stage && tag != COLLIDER_TAG::Shield) { return; }
+
+	if (onHit) { onHit(result.point, result.normal); }
 
 	Kill();
 }
 
 void Asteroid::SubInit(void)
 {
-	trans.scale = Vector3(baseScale_);
+	trans.scale = Vector3(baseScale);
 }
 
 void Asteroid::SubUpdate(void)
@@ -139,9 +144,9 @@ void Asteroid::SubUpdate(void)
 	if (static_cast<int>(trail_.size()) > TRAIL_MAX) { trail_.pop_back(); }
 
 	// 追尾弾なら、ロックオン中の目標へ向きを寄せる
-	if (config_.getLockOnPos) {
+	if (config.getLockOnPos) {
 
-		const std::optional<Vector3> lockOnPos = config_.getLockOnPos();
+		const std::optional<Vector3> lockOnPos = config.getLockOnPos();
 
 		if (lockOnPos.has_value()) { Steer(lockOnPos.value()); }
 	}
@@ -153,17 +158,17 @@ void Asteroid::SubUpdate(void)
 
 void Asteroid::SubDraw(void)
 {
-	// ---- グロー ----
-	SetWriteZBufferFlag(FALSE);                  // 深度は書かない
-	SetDrawBlendMode(DX_BLENDMODE_ADD, 255);     // 加算(強さ 0〜255)
-	SetDrawBright(150, 255, 210);                // ミントグリーンに着色
+	//// ---- グロー ----
+	//SetWriteZBufferFlag(FALSE);                  // 深度は書かない
+	//SetDrawBlendMode(DX_BLENDMODE_ADD, 255);     // 加算(強さ 0〜255)
+	//SetDrawBright(150, 255, 210);                // ミントグリーンに着色
 
-	const float size = 80.0f;     // 立方体より大きく(倍率は調整)
-	DrawBillboard3D(trans.pos.ToVECTOR(), 0.5f, 0.5f, size, 0.0f, glowGraph, TRUE);
+	//const float size = 80.0f;     // 立方体より大きく(倍率は調整)
+	//DrawBillboard3D(trans.pos.ToVECTOR(), 0.5f, 0.5f, size, 0.0f, glowGraph, TRUE);
 
-	SetDrawBright(255, 255, 255);                // 元に戻す
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	SetWriteZBufferFlag(TRUE);
+	//SetDrawBright(255, 255, 255);                // 元に戻す
+	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	//SetWriteZBufferFlag(TRUE);
 
 	if (trail_.size() < 2) { return; }
 
