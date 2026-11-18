@@ -25,6 +25,7 @@ enum class COLLIDER_TAG
 	PlayerKickDownAttack,
 
 	Asteroid,
+	EnemyAsteroid,
 
 	Grasshopper,
 
@@ -35,6 +36,8 @@ enum class COLLIDER_TAG
 	Enemy,
 
 	Stage,
+
+	Mannequin,
 
 	DebugObject,
 

@@ -8,13 +8,6 @@ class TriggerUI : public ActorBase
 {
 public:
 
-	const float SIZE_X = 499;
-	const float SIZE_Y = 325;
-
-	static constexpr float OFFSET = 20.0f;
-
-public:
-
 	TriggerUI(const int& mainCurrentIndex_, const int& subCurrentIndex_);
 	~TriggerUI() = default;
 
@@ -27,9 +20,14 @@ public:
 
 private:
 
+	const float SIZE_X = 499;
+	const float SIZE_Y = 325;
+
+	static constexpr float OFFSET = 20.0f;
+
 	std::vector<TriggerType> mainTrig_;
 	std::vector<TriggerType> subTrig_;
-	std::map< TriggerType, int> icon_;	//武器アイコン
+	std::map< TriggerType, int> icon;	//武器アイコン
 	TriggerType currentTrig_;
 
 	//画像ハンドル
@@ -48,6 +46,8 @@ private:
 	const int& subCurrentIndex_;
 
 	ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Ui; }
+
+
 
 };
 

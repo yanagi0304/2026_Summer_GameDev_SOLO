@@ -8,7 +8,7 @@ StageTutrial::StageTutrial():
 
 void StageTutrial::Load(void)
 {
-	trans.LoadModel("Stage/demoStage");
+	trans.LoadModel("Stage/Stage1");
 
 	// 動的オブジェクトとしての処理を無効にする
 	SetColliderMobility(COLLIDER_MOBILITY::Static);
@@ -21,5 +21,6 @@ void StageTutrial::Load(void)
 
 void StageTutrial::SubInit(void)
 {
-	trans.scale = GetParameterToVector3("Init", "1");
+	trans.scale = GetParameterToVector3("Init", "Scale");
+	trans.pos = GetParameterToVector3("Init", "InitPos");
 }

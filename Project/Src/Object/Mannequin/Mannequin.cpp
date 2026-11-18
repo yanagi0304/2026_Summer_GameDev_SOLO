@@ -11,7 +11,7 @@
 #include "../../Manager/Camera/CurrentCamera.h"
 
 Mannequin::Mannequin(const Vector3& pos, bool AttackFlg, const Vector3& targetPos)
-	:CuttableActor(COLLIDER_TAG::DebugObject, true, "Data/Parameter/Mannequin/"),
+	:CuttableActor(COLLIDER_TAG::Mannequin, true, "Data/Parameter/Mannequin/"),
 	targetPos(targetPos)
 {
 	//à íuèÓïÒÇê›íË
@@ -84,7 +84,7 @@ void Mannequin::SubUpdate(void)
 void Mannequin::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
 	if (other.GetTag() != COLLIDER_TAG::Asteroid) { return; }
-	//StartVanish();
+	StartVanish();
 }
 
 void Mannequin::TargetLookAt(void)

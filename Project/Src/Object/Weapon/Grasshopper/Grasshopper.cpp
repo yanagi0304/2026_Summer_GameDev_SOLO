@@ -44,6 +44,10 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 	// 飛ばす速度ベクトル
 	const Vector3 launchVelocity = launchDir * 40.0f;
 	other.GetActor()->Launch(launchVelocity);
+
+	// 真上に飛んだ時は操作を可能にする
+	const bool isStraightUp = launchDir.y > 0.99f;
+	isGrashpper = !isStraightUp;
 }
 
 void Grasshopper::OnEquip(void)

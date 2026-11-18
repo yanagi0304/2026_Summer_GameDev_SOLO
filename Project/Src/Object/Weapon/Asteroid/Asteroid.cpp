@@ -122,7 +122,7 @@ void Asteroid::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const
 	const COLLIDER_TAG tag = other.GetTag();
 
 	// ステージか盾以外には反応しない
-	if (tag != COLLIDER_TAG::Stage && tag != COLLIDER_TAG::Shield) { return; }
+	if (tag != COLLIDER_TAG::Stage && tag != COLLIDER_TAG::Shield && tag != COLLIDER_TAG::Mannequin) { return; }
 
 	if (onHit) { onHit(result.point, result.normal); }
 

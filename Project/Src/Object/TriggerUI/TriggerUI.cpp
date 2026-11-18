@@ -25,10 +25,10 @@ void TriggerUI::Load()
 	int optionIcon = LoadGraph("Data/Image/TriggerUI/Option.png");
 
 	//武器アイコンの読み込み
-	icon_.emplace(TriggerType::KOGETSU, LoadGraph("Data/Image/TriggerUI/Kogetsu.png"));
-	icon_.emplace(TriggerType::GRASS_HOPPER, optionIcon);
-	icon_.emplace(TriggerType::SHIELD, LoadGraph("Data/Image/TriggerUI/Shield.png"));
-	icon_.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
+	icon.emplace(TriggerType::KOGETSU, LoadGraph("Data/Image/TriggerUI/Kogetsu.png"));
+	icon.emplace(TriggerType::GRASS_HOPPER, optionIcon);
+	icon.emplace(TriggerType::SHIELD, LoadGraph("Data/Image/TriggerUI/Shield.png"));
+	icon.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
 
 	// このアクターは「UI」として描画する
 	SetDrawType(ACTOR_DRAW_TYPE::Ui);
@@ -71,8 +71,8 @@ void TriggerUI::SubDraw()
 	{
 		DrawFormatString(363-84, 600 + (i*50), 0xffffff, TriggerToString(mainTrig_[i]));
 		//アイコンを表示
-		auto it = icon_.find(mainTrig_[i]);
-		if (it != icon_.end() && it->second != -1)
+		auto it = icon.find(mainTrig_[i]);
+		if (it != icon.end() && it->second != -1)
 		{
 			DrawRotaGraph(479, 606 + (i * 50), 1.0f, 0.0f, it->second, false);
 		}
@@ -83,8 +83,8 @@ void TriggerUI::SubDraw()
 	{
 		DrawFormatString(116 - 84, 600 + (i * 50), 0xffffff, TriggerToString(subTrig_[i]));
 		//アイコンを表示
-		auto it = icon_.find(subTrig_[i]);
-		if (it != icon_.end() && it->second != -1)
+		auto it = icon.find(subTrig_[i]);
+		if (it != icon.end() && it->second != -1)
 		{
 			DrawRotaGraph(232, 606 + (i * 50), 1.0f, 0.0f, it->second, false);
 		}
@@ -99,12 +99,12 @@ void TriggerUI::SubRelease()
 {
 	// 同じハンドルを二重に解放しないよう、重複を除いて解放する
 	std::set<int> released;
-	for (auto& pair : icon_) {
+	for (auto& pair : icon) {
 		if (released.insert(pair.second).second) {
 			DeleteGraph(pair.second);
 		}
 	}
-	icon_.clear();
+	icon.clear();
 }
 
 const char* TriggerUI::TriggerToString(TriggerType trigger)
