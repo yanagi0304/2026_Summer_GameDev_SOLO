@@ -29,6 +29,7 @@ void TriggerUI::Load()
 	icon.emplace(TriggerType::GRASS_HOPPER, optionIcon);
 	icon.emplace(TriggerType::SHIELD, LoadGraph("Data/Image/TriggerUI/Shield.png"));
 	icon.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
+	icon.emplace(TriggerType::HOUND, LoadGraph("Data/Image/TriggerUI/Hound.png"));
 
 	// このアクターは「UI」として描画する
 	SetDrawType(ACTOR_DRAW_TYPE::Ui);

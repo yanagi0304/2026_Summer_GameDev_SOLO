@@ -28,7 +28,7 @@ void Mannequin::Load(void)
 	// 切断用のMeshColliderを生成して登録する
 	CuttableActor::Load();
 
-	trans.LoadModel("Mannequin/mannequin");
+	trans.LoadModel("Mannequin/mannequinCut");
 
 	// モデルの形とテクスチャをCuttableActorへ取り込む
 	// （位置・向き・大きさはこのアクターのtransで決まる）
