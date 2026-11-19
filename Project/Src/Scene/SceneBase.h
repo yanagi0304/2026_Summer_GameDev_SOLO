@@ -17,7 +17,6 @@ class PostEffectBase;
 
 class SkyBox;
 
-class Target;
 
 class SceneBase
 {

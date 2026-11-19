@@ -1,0 +1,21 @@
+#include "EnemyIdleState.h"
+
+EnemyIdleState::EnemyIdleState(
+	std::function<bool(void)> shouldChase,
+	std::function<void(void)> playAnimeIdle
+) :
+	shouldChase(shouldChase),
+	playAnimeIdle(playAnimeIdle)
+{
+}
+
+void EnemyIdleState::OwnStateConditionUpdate(void)
+{
+	// í«ê’Ç∑ÇÈóùóRÇ™Ç»Ç≠Ç»Ç¡ÇΩÇÁë“ã@Ç…ñﬂÇÈ
+	if (!shouldChase()) { OwnChangeState(); }
+}
+
+void EnemyIdleState::Enter(void)
+{
+	playAnimeIdle();
+}

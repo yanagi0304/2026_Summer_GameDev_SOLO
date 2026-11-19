@@ -4,6 +4,10 @@
 
 #include "../../Object/Common/MeshSlicer/CutMesh.h"
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
+#include "../../Object/Enemy/Navigation/NavGrid.h"
+#include "../../Object/Enemy/Navigation/AStar.h"
+
+class Enemy;
 
 class GameScene : public SceneBase
 {
@@ -23,6 +27,9 @@ private:
 
 	// 更新
 	void SubPostUpdate(void)override;
+
+	// 描画(メイン処理の後)
+	void SubPostDraw(void)override;
 
 	// UI描画
 	void SubUiDraw(void)override;
@@ -47,6 +54,18 @@ private:
 
 	CuttableActor* box_; 
 	bool prevC_;
+
+	// ---- 経路探索デバッグ(F3で表示切り替え) ----
+	// グリッドを作り、デバッグ用の敵を1体出す
+	void NavDebugInit(void);
+	void NavDebugUpdate(void);
+	void NavDebugDraw(void) const;
+
+	NavGrid navGrid;
+	AStar navAStar;
+	Enemy* debugEnemy = nullptr;	// シーンが所有する(ここでは参照のみ)
+	bool navShow = false;
+	bool navKeyPrev = false;
 
 
 };

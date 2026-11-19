@@ -18,7 +18,6 @@
 
 #include "../Object/Common/SkyBox/SkyBox.h"
 
-#include "../Object/Common/Target/Target.h"
 
 SceneBase::SceneBase(void) :
 

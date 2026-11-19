@@ -36,7 +36,6 @@
 #include "State/PlayerMoveState.h"
 #include "State/PlayerKogetsuState.h"
 
-#include "../Common/Target/Target.h"
 #include "../../Manager/Camera/ShoulderCamera/ShoulderCamera.h"
 
 Jazz::Jazz() :

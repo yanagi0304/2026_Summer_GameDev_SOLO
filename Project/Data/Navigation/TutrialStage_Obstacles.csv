@@ -1,0 +1,9 @@
+# Enemy navigation obstacles (buildings) for TutrialStage. Unit: cm, world coordinates.
+# One box per line:  centerX,centerY,centerZ, halfX,halfY,halfZ, rotYDeg
+#   halfX/Y/Z = half of the box size on each axis.  rotYDeg = rotation around Y axis (same direction as Unity's eulerAngles.y). Optional.
+# Lines starting with # and blank lines are ignored.
+# While this file has no boxes, GameScene uses 3 placeholder buildings instead.
+# NOTE: do not put this file under Data/Parameter/. ParameterLoad reads every .csv there with std::stof and would throw on these comments.
+# Example (a 20m x 10m x 20m building at x=3000, z=0, standing on y=0):
+# 3000,500,0, 1000,500,1000, 0
+
