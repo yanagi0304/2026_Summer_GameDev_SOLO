@@ -51,12 +51,12 @@ void Mannequin::Load(void)
 #pragma region 武器の生成
 	// 「アステロイド」生成
 
-	weapon = new ShooterManager(
-		trans,
-		ShooterConfig::MakeHound([this]() -> std::optional<Vector3> {return targetPos+Vector3::Yonly(200.0f); }),
-		[&]() {std::nullopt; });
+	//weapon = new ShooterManager(
+	//	trans,
+	//	ShooterConfig::MakeHound([this]() -> std::optional<Vector3> {return targetPos+Vector3::Yonly(200.0f); }),
+	//	[&]() {std::nullopt; });
 
-	AddChildActor(weapon);
+	//AddChildActor(weapon);
 #pragma endregion
 
 }
@@ -64,7 +64,7 @@ void Mannequin::Load(void)
 void Mannequin::SubInit(void)
 {
 	trans.scale = GetParameter("Init", "Scale");
-	weapon->SetIsActive(true);
+	//weapon->SetIsActive(true);
 }
 
 void Mannequin::SubUpdate(void)
@@ -72,7 +72,7 @@ void Mannequin::SubUpdate(void)
 
 	// 消えたら処理を止める
 	//子アクターの処理も止める
-	if (IsVanished()) { weapon->SetIsActive(false); return; }
+	//if (IsVanished()) { weapon->SetIsActive(false); return; }
 
 	// 切断された破片としての処理を先に行う
 	CuttableActor::SubUpdate();
