@@ -5,37 +5,59 @@
 
 namespace
 {
-	// 法線のYがこれ以上なら、坂・床(歩いて上れる面)とみなす
-	constexpr float FLOOR_NORMAL_Y = 0.7f;
-
-	// 壁の面から、段差の上面を調べる位置までの距離(面のすぐ奥)
-	constexpr float PAST_FACE = 8.0f;
-
-	// 同じ面とみなす距離の差(面取りされた縁石のように、少し傾いた面も同じ面として追えるようにする)
-	constexpr float FACE_TOLERANCE = 8.0f;
-
-	// 足元の面が、これより水平に近ければ、緩い坂とみなして物理に任せる(法線のY)
-	constexpr float SLOPE_FACE_NORMAL_Y = 0.85f;
-
-	// 面の高さを二分探索する回数
-	constexpr int FACE_SEARCH_ITERATIONS = 6;
+	// 背の高い壁の判定: 登れる高さを少し超えた位置で、障害物と同じ面(ほぼ同じ距離)に当たるか
+	constexpr float TALL_WALL_PROBE_MARGIN = 8.0f;
+	constexpr float SAME_FACE_TOLERANCE = 8.0f;
 }
 
-float ComputeStepRise(const Vector3& pos, const Vector3& moveDirection, float speed, const StepClimbParams& params, const StepRayFunc& ray, StepClimbDebug* debug)
+float ComputeForcedLift(const Vector3& pos, const Vector3& inputDirection, float intendedSpeed, float progress,
+	const StepClimbParams& params, const StepRayFunc& ray, StepClimbState& state, StepClimbDebug* debug)
 {
 	// 結果を記録しながら返す
 	float clearance = -1.0f;
-	const auto finish = [debug, &clearance](StepClimbResult result, float wallDistance, float rise)
+	const auto finish = [&](StepClimbResult result, float wallDistance)
 	{
-		if (debug) { debug->result = result; debug->wallDistance = wallDistance; debug->rise = rise; debug->groundClearance = clearance; }
+		if (debug)
+		{
+			debug->result = result;
+			debug->groundClearance = clearance;
+			debug->wallDistance = wallDistance;
+			debug->lifted = state.lifted;
+			debug->progress = progress;
+		}
 	};
 
-	// ほとんど動いていなければ、登る必要はない
-	if (speed < 0.5f) { finish(StepClimbResult::NotMoving, 0.0f, 0.0f); return 0.0f; }
-
-	Vector3 dir(moveDirection.x, 0.0f, moveDirection.z);
-	if (dir.LengthSq() < 1.0e-6f) { finish(StepClimbResult::NotMoving, 0.0f, 0.0f); return 0.0f; }
+	// 1) 入力して、目標の速度で進もうとしているか
+	Vector3 dir(inputDirection.x, 0.0f, inputDirection.z);
+	if (intendedSpeed < 0.5f || dir.LengthSq() < 1.0e-6f)
+	{
+		state.Reset();
+		finish(StepClimbResult::NotPressing, 0.0f);
+		return 0.0f;
+	}
 	dir = dir.Normalized();
+
+	// 2) 前へ進めているか。進めていれば、登る必要はない(押しつけが終わったので、状態を戻す)
+	if (progress >= intendedSpeed * params.progressRatio)
+	{
+		state.Reset();
+		finish(StepClimbResult::Progressing, 0.0f);
+		return 0.0f;
+	}
+
+	// 進めていない状態が、数フレーム続いた時だけ持ち上げる(加速中の一瞬を、押しつけと間違えない)
+	if (++state.blockedFrames < params.blockedFramesRequired)
+	{
+		finish(StepClimbResult::NotBlockedYet, 0.0f);
+		return 0.0f;
+	}
+
+	// 1回の押しつけで持ち上げられる合計に、上限がある(壁や急な坂を、延々と登り続けないため)
+	if (state.lifted >= params.maxHeight - 0.01f)
+	{
+		finish(StepClimbResult::LimitReached, 0.0f);
+		return 0.0f;
+	}
 
 	// 判定を行う時だけ、記録したレイを入れ替える(止まっている間は、直前の分が残る)
 	if (debug) { debug->probes.clear(); }
@@ -56,73 +78,49 @@ float ComputeStepRise(const Vector3& pos, const Vector3& moveDirection, float sp
 		return result;
 	};
 
-	// 1フレームで進む距離より少し先まで見る
-	// (壁に斜めから近づく時は、壁までの距離が、真正面より長くなるので、半径の1.6倍まで見る)
-	const float reach = params.radius * 1.6f + (std::max)(speed * 2.0f, 15.0f);
-
-	// 1) 地面にいるか。足元(Transform)は、地面から少し浮いていることがあるので、直下の地面を調べる
-	//    接地フラグは使わない(段差に押しつけて歩くと、角に押し上げられて、フラグが外れる)
-	const StepRayHit self = trace(0, Vector3(pos.x, pos.y + 20.0f, pos.z), Vector3(0.0f, -1.0f, 0.0f), 20.0f + params.maxGroundClearance + 30.0f);
+	// 3) 地面にいるか(直下のレイ)。持ち上げ始めは地面の近くから。持ち上げ中は、持ち上げた分だけ離れていてよい
+	//    足元(Transform)は、地面から少し浮いていることがあるので、直下の地面を調べる
+	const float allowedClearance = params.maxGroundClearance + state.lifted;
+	const StepRayHit self = trace(0, Vector3(pos.x, pos.y + 20.0f, pos.z), Vector3(0.0f, -1.0f, 0.0f), 20.0f + allowedClearance + 30.0f);
 	if (self.hit) { clearance = pos.y - self.point.y; }
-	if (!self.hit || clearance > params.maxGroundClearance)
+	if (!self.hit || clearance > allowedClearance)
 	{
-		finish(StepClimbResult::NotGrounded, 0.0f, 0.0f);
+		finish(StepClimbResult::NotGrounded, 0.0f);
 		return 0.0f;
 	}
 	const float groundNow = self.point.y;
 
-	// 2) 進行方向に壁(縁石)があるか。低い高さから順に飛ばして、最初に当たった高さを面とする
-	//    縁石の下が空いている形状では、低い高さのレイは、面の下をくぐり抜けてしまうため
+	// 1フレームで進む距離より少し先まで見る(壁に斜めから近づく時は、距離が長くなるので、半径の1.6倍まで見る)
+	const float reach = params.radius * 1.6f + (std::max)(intendedSpeed * 2.0f, 15.0f);
+
+	// 4) 前方にステージの障害物があるか。低い高さから順に飛ばして、最初に当たった面を障害物とする
+	//    (敵や他のキャラに止められている時に、乗り越えてしまわないため。縁石の下が空いた形状にも対応する)
 	StepRayHit low;
-	float lowHeight = 0.0f;
 	for (int i = 0; i < params.probeCount && i < 5; ++i)
 	{
 		const float h = params.probeHeights[i];
 		if (h >= params.maxHeight) { break; }
 		const StepRayHit r = trace(1, Vector3(pos.x, groundNow + h, pos.z), dir, reach);
-		if (r.hit) { low = r; lowHeight = h; break; }
+		if (r.hit) { low = r; break; }
 	}
-	if (!low.hit) { finish(StepClimbResult::NoWallAhead, 0.0f, 0.0f); return 0.0f; }
-
-	// 当たった面が緩い坂なら、物理に任せる(急な面取りの縁石は、段差として扱う)
-	if (std::abs(low.normal.y) >= SLOPE_FACE_NORMAL_Y) { finish(StepClimbResult::SlopeAhead, low.distance, 0.0f); return 0.0f; }
-
-	// 3) 壁の面が、どの高さまで続くかを調べる
-	//    指定の高さで、低いレイと同じ面(ほぼ同じ距離)に当たるか
-	const auto onSameFace = [&](float height)
+	if (!low.hit)
 	{
-		const StepRayHit r = trace(2, Vector3(pos.x, groundNow + height, pos.z), dir, reach);
-		return r.hit && std::abs(r.distance - low.distance) <= FACE_TOLERANCE;
-	};
-
-	// 登れる高さを少し超えた位置にも同じ面が続いていれば、背の高い壁なので登れない
-	const float limit = params.maxHeight + PAST_FACE;
-	if (onSameFace(limit)) { finish(StepClimbResult::WallTooTall, low.distance, 0.0f); return 0.0f; }
-
-	// 面が続く一番高い位置を、二分探索で求める(上面の探索を、面のすぐ上から始めるため)
-	// 高い位置から降ろすと、縁石の上の庇や張り出しに先に当たってしまう
-	float lo = lowHeight;
-	float hi = limit;
-	for (int i = 0; i < FACE_SEARCH_ITERATIONS; ++i)
-	{
-		const float mid = (lo + hi) * 0.5f;
-		if (onSameFace(mid)) { lo = mid; } else { hi = mid; }
+		finish(StepClimbResult::NoStageObstacle, 0.0f);
+		return 0.0f;
 	}
-	const float faceTop = hi;   // 面が終わっている高さ(の上限)
 
-	// 4) 壁のすぐ奥で、面のすぐ上から下へレイを飛ばして、段差の上面の高さを調べる
-	const Vector3 ahead = pos + dir * (low.distance + PAST_FACE);
-	const float startHeight = faceTop + 2.0f;
-	const StepRayHit top = trace(3, Vector3(ahead.x, groundNow + startHeight, ahead.z), Vector3(0.0f, -1.0f, 0.0f), startHeight + 15.0f);
-	if (!top.hit || std::abs(top.normal.y) < FLOOR_NORMAL_Y) { finish(StepClimbResult::NoTopSurface, low.distance, 0.0f); return 0.0f; }
+	// 5) 背の高い壁なら登らない(登れる高さを少し超えた位置にも、同じ面が続いている)
+	//    縁石の後ろに壁があっても、面の距離が違えば、同じ壁とはみなさない
+	const StepRayHit high = trace(2, Vector3(pos.x, groundNow + params.maxHeight + TALL_WALL_PROBE_MARGIN, pos.z), dir, reach);
+	if (high.hit && std::abs(high.distance - low.distance) <= SAME_FACE_TOLERANCE)
+	{
+		finish(StepClimbResult::WallTooTall, low.distance);
+		return 0.0f;
+	}
 
-	const float rise = top.point.y - groundNow;
-	if (rise < params.minHeight || rise > params.maxHeight) { finish(StepClimbResult::RiseOutOfRange, low.distance, rise); return 0.0f; }
-
-	// 5) 段差の上に立った時、頭上に天井や張り出しがないか
-	const StepRayHit ceiling = trace(4, Vector3(ahead.x, top.point.y + 2.0f, ahead.z), Vector3(0.0f, 1.0f, 0.0f), params.bodyHeight);
-	if (ceiling.hit) { finish(StepClimbResult::Ceiling, low.distance, rise); return 0.0f; }
-
-	finish(StepClimbResult::Climbed, low.distance, rise);
-	return rise;
+	// 6) 少しだけ持ち上げる。進めるようになるまで、毎フレーム繰り返される
+	const float lift = (std::min)(params.liftPerFrame, params.maxHeight - state.lifted);
+	state.lifted += lift;
+	finish(StepClimbResult::Lifting, low.distance);
+	return lift;
 }

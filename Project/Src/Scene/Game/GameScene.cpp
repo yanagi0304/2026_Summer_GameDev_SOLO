@@ -169,16 +169,22 @@ void GameScene::SubUiDraw(void)
 		// プレイヤーの段差判定の結果(なぜ登れた/登れないか)
 		if (const CharacterBase* player = dynamic_cast<const CharacterBase*>(operatorObject))
 		{
-			static const char* const NAMES[] = { "Disabled", "NotGrounded", "NotMoving", "NoWallAhead", "SlopeAhead", "WallTooTall", "NoTopSurface", "RiseOutOfRange", "Ceiling", "Climbed" };
+			static const char* const NAMES[] = { "Disabled", "NotPressing", "Progressing", "NotBlockedYet", "NotGrounded", "NoStageObstacle", "WallTooTall", "LimitReached", "Lifting" };
 			static StepClimbDebug lastEvent;
 			const StepClimbDebug& sd = player->GetStepClimbDebug();
 
-			// 動いていない・空中・壁なしは入れ替わりが速いので、それ以外の結果だけ残す
-			if (sd.result != StepClimbResult::NotMoving && sd.result != StepClimbResult::NotGrounded && sd.result != StepClimbResult::NoWallAhead) { lastEvent = sd; }
+			// 押していない・進めている・まだ数フレーム・空中は、入れ替わりが速いので、それ以外の結果だけ残す
+			if (sd.result != StepClimbResult::NotPressing && sd.result != StepClimbResult::Progressing && sd.result != StepClimbResult::NotBlockedYet && sd.result != StepClimbResult::NotGrounded) { lastEvent = sd; }
 
-			DrawFormatString(0, 200, 0xffffff, "Step now : %s  wallDist=%.0f  rise=%.0f  y=%.1f  clearance=%.1f", NAMES[static_cast<int>(sd.result)], sd.wallDistance, sd.rise, player->GetTrans().pos.y, sd.groundClearance);
-			DrawFormatString(0, 220, 0xffff00, "Step last: %s  wallDist=%.0f  rise=%.0f", NAMES[static_cast<int>(lastEvent.result)], lastEvent.wallDistance, lastEvent.rise);
+			DrawFormatString(0, 200, 0xffffff, "Step now : %s  wallDist=%.0f  lifted=%.0f  progress=%.1f  y=%.1f  clearance=%.1f", NAMES[static_cast<int>(sd.result)], sd.wallDistance, sd.lifted, sd.progress, player->GetTrans().pos.y, sd.groundClearance);
+			DrawFormatString(0, 220, 0xffff00, "Step last: %s  wallDist=%.0f  lifted=%.0f", NAMES[static_cast<int>(lastEvent.result)], lastEvent.wallDistance, lastEvent.lifted);
 			DrawFormatString(0, 280, 0xffffff, "Grounded: flag=%d  nearGround(used for jump)=%d", player->GetGroundFlag() ? 1 : 0, player->IsGroundedLoose() ? 1 : 0);
+			// 速度(1フレームあたり)。滑り落ちているかを見るため: 入力なしで地面にいるのに、水平の速度が0にならなければ滑っている
+			if (const PhysicsBody* body = player->GetPhysicsBody())
+			{
+				const Vector3 v = body->GetVelocity();
+				DrawFormatString(0, 300, 0xffffff, "Vel: horizontal=%.2f  vertical=%.2f", std::sqrt(v.x * v.x + v.z * v.z), v.y);
+			}
 		}
 
 		// ステージへのレイの実測値(段差の高さと、レイが機能しているかを調べるため)
@@ -315,7 +321,7 @@ void GameScene::NavDebugDraw(void) const
 
 	if (enemyManager) { enemyManager->DrawDebug(); }
 
-	// プレイヤーの段差判定のレイ(足元の地面=黄、足元の壁=水色、壁の高さの探索=青、段差の上面=緑、頭上=紫。当たった点は赤)
+	// プレイヤーの段差判定のレイ(直下の地面=黄、前方の障害物=水色、背の高い壁の判定=青。当たった点は赤)
 	if (const CharacterBase* player = dynamic_cast<const CharacterBase*>(operatorObject))
 	{
 		static const unsigned int COLORS[5] = { 0xffff00, 0x00ffff, 0x4060ff, 0x00ff00, 0xff00ff };

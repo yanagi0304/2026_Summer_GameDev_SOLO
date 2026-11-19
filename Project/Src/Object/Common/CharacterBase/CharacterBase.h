@@ -51,6 +51,11 @@ private:
 	StepClimbParams stepClimb;
 	bool stepClimbEnabled;
 	StepClimbDebug stepClimbDebug;
+	StepClimbState stepClimbState;
+
+	// 前のフレームの位置(入力した向きに、実際にどれだけ進めたかを求めるため)
+	Vector3 stepLastPos;
+	bool stepLastPosValid;
 
 	// 地面にいるか(接地フラグ、または、直下の地面が近い)。ジャンプや移動の加速に使う
 	bool groundedLoose;
@@ -58,7 +63,7 @@ private:
 	// groundedLooseを更新する。状態の更新より前に呼ぶ
 	void UpdateGroundedLoose(void);
 
-	// 進行方向の低い段差を登る(持ち上げる)。接地中で、動いている時だけ働く
+	// 押しているのに前へ進めていない間、少しずつ持ち上げる(縁石・段差・坂を登る)
 	void UpdateStepClimb(void);
 
 	// キャラクターベース固有の更新処理
@@ -107,10 +112,10 @@ protected:
 
 #pragma region 段差の自動登り
 
-	// 段差を自動で登る設定。初期設定で有効(最大50cm、コライダー半径40cm)
-	// 進行方向の低い段差(縁石・階段など)を、持ち上げて登る。プレイヤーも敵も同じ処理で登れる
+	// 段差・斜面を自動で登る設定。初期設定で有効(最大50cm、コライダー半径40cm)
+	// 移動の入力をしているのに、前へ進めていない間、少しずつ持ち上げて登る。プレイヤーも敵も同じ処理で登れる
 	// ナビゲーションの「乗り越えられる段差(NavGrid::Config::stepHeight)」と、maxHeightをそろえること
-	void SetStepClimb(bool enabled, float maxHeight = 50.0f, float radius = 40.0f, float bodyHeight = 180.0f);
+	void SetStepClimb(bool enabled, float maxHeight = 50.0f, float radius = 40.0f);
 
 public:
 

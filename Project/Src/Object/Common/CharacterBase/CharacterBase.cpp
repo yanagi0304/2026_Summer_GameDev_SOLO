@@ -24,6 +24,9 @@ CharacterBase::CharacterBase() :
 
 	stepClimb(),
 	stepClimbEnabled(true),
+	stepClimbState(),
+	stepLastPos(0.0f),
+	stepLastPosValid(false),
 	groundedLoose(false),
 
 	anime(nullptr)
@@ -40,6 +43,9 @@ CharacterBase::CharacterBase(const std::string& parameterPath):
 
 	stepClimb(),
 	stepClimbEnabled(true),
+	stepClimbState(),
+	stepLastPos(0.0f),
+	stepLastPosValid(false),
 	groundedLoose(false),
 
 	anime(nullptr)
@@ -157,16 +163,22 @@ void CharacterBase::UpdateGroundedLoose(void)
 		groundedLoose = true;
 	}
 }
-void CharacterBase::SetStepClimb(bool enabled, float maxHeight, float radius, float bodyHeight)
+void CharacterBase::SetStepClimb(bool enabled, float maxHeight, float radius)
 {
 	stepClimbEnabled = enabled;
 	stepClimb.maxHeight = maxHeight;
 	stepClimb.radius = radius;
-	stepClimb.bodyHeight = bodyHeight;
+	stepClimbState.Reset();
 }
 
 void CharacterBase::UpdateStepClimb(void)
 {
+	// 前のフレームの位置を取り出して、今の位置を覚える(早期returnする場合も、毎フレーム更新する)
+	const Vector3 lastPos = stepLastPos;
+	const bool hadLastPos = stepLastPosValid;
+	stepLastPos = trans.pos;
+	stepLastPosValid = true;
+
 	// 物理が有効なキャラクターだけが対象。地面にいるかは、判定の中で直下のレイで調べる
 	// (接地フラグは、縁石に押しつけて歩くと、角に押し上げられて外れるので使わない)
 	if (!stepClimbEnabled) { stepClimbDebug.result = StepClimbResult::Disabled; return; }
@@ -175,29 +187,37 @@ void CharacterBase::UpdateStepClimb(void)
 	if (body == nullptr || body->IsFrozen() || body->GetMode() != PhysicsBody::MotionMode::Character) { return; }
 	if (!CurrentCollisionManager::Exists()) { return; }
 
-	// 進む向き: 入力があれば入力の向き。縁石に斜めに押しつけて、物理に縁石に沿って滑らされている時は、
-	// 速度の向きが縁石と平行になって壁に当たらないので、進みたい向き(入力)で判定する
-	const Vector3 velocity = body->GetVelocity();
-	Vector3 moveDirection(velocity.x, 0.0f, velocity.z);
-	float speed = std::sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+	// 入力の向き(移動制御が、直近のApplyInputで受け取ったもの)。入力がなければ、押しつけていないので登らない
 	Vector3 input(0.0f);
-	if (motionController != nullptr && motionController->TakeLastInput(input))
+	if (motionController == nullptr || !motionController->TakeLastInput(input))
 	{
-		input.y = 0.0f;
-		if (input.LengthSq() > 0.01f)
-		{
-			moveDirection = input;
-			speed = (std::max)(speed, 3.0f);   // 壁に止められて速度が小さくても、押しつけている間は判定する
-		}
+		stepClimbState.Reset();
+		stepClimbDebug.result = StepClimbResult::NotPressing;
+		return;
 	}
-	if (speed < 0.5f) { stepClimbDebug.result = StepClimbResult::NotMoving; return; }
+	input.y = 0.0f;
+
+	// 目標の移動速度と、入力した向きに実際に進めた距離
+	const float intendedSpeed = (input.LengthSq() > 0.01f) ? motionController->GetCruiseSpeed() : 0.0f;
+	float progress = 0.0f;
+	if (hadLastPos && input.LengthSq() > 1.0e-6f)
+	{
+		const Vector3 moved = trans.pos - lastPos;
+		progress = (std::max)(0.0f, moved.x * input.Normalized().x + moved.z * input.Normalized().z);
+	}
+	else
+	{
+		// 前のフレームの位置がない(出現直後など)時は、進めているものとして扱う
+		progress = intendedSpeed;
+	}
 
 	// ジャンプの出だしなど、上へ向かっている間は登らない
+	const Vector3 velocity = body->GetVelocity();
 	if (velocity.y > 10.0f) { stepClimbDebug.result = StepClimbResult::NotGrounded; return; }
 
-	// ステージだけを対象にしたレイで、進行方向の低い壁(段差)の上面の高さを調べる
+	// ステージだけを対象にしたレイで、前方の障害物と、背の高い壁かを調べる
 	CollisionManager& collision = CurrentCollisionManager::Get();
-	const float rise = ComputeStepRise(trans.pos, moveDirection, speed, stepClimb,
+	const float lift = ComputeForcedLift(trans.pos, input, intendedSpeed, progress, stepClimb,
 		[&collision](const Vector3& origin, const Vector3& direction, float maxDistance)
 		{
 			StepRayHit result;
@@ -210,23 +230,17 @@ void CharacterBase::UpdateStepClimb(void)
 				result.normal = hit.normal;
 			}
 			return result;
-		}, &stepClimbDebug);
-	if (rise <= 0.0f) { return; }
+		}, stepClimbState, &stepClimbDebug);
+	if (lift <= 0.0f) { return; }
 
-	// 段差の高さだけ持ち上げる。落下速度は0にして、持ち上げた分がすぐ戻らないようにする
-	trans.pos.y += rise;
+	// 少し持ち上げる。落下速度は0にして、持ち上げた分がすぐ戻らないようにする
+	trans.pos.y += lift;
 
-	// 壁に押しつけている間は、物理が壁へ向かう速度を毎フレーム打ち消していて、速度がほぼ0になっている。
-	// そのままだと、持ち上げた後に加速し直すまで止まって見えるので、入力の向きへ、通常の移動速度まで引き上げる
-	Vector3 horizontal(velocity.x, 0.0f, velocity.z);
-	const float cruise = (motionController != nullptr) ? motionController->GetCruiseSpeed() : 0.0f;
-	if (moveDirection.LengthSq() > 1.0e-6f)
-	{
-		horizontal = moveDirection.Normalized() * (std::max)(speed, cruise);
-	}
-	body->SetVelocity(Vector3(horizontal.x, (std::max)(velocity.y, 0.0f), horizontal.z));
+	// 壁に押しつけている間は、物理が壁へ向かう速度を毎フレーム打ち消している。
+	// 持ち上げが終わって進めるようになった時に、止まらず進めるよう、入力の向きへ通常の移動速度を与えておく
+	const Vector3 forward = input.Normalized() * (std::max)(intendedSpeed, std::sqrt(velocity.x * velocity.x + velocity.z * velocity.z));
+	body->SetVelocity(Vector3(forward.x, (std::max)(velocity.y, 0.0f), forward.z));
 }
-
 #pragma endregion
 void CharacterBase::AddMotionController(MotionControllerBase* controller)
 {
