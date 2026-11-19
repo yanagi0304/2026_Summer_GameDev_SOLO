@@ -50,7 +50,7 @@ void NavManager::Update(void)
 		queue.pop_front();
 
 		std::vector<PathPoint> path;
-		const bool found = astar.FindPath(grid, request.start, request.goal, path);
+		const bool found = astar.FindPath(grid, request.start, request.goal, path, options);
 		if (request.callback) { request.callback(found, path); }
 
 		++lastProcessed;

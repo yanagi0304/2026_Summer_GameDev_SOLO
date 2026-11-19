@@ -33,7 +33,11 @@ public:
 		int snapRadius = 8;
 
 		// 展開するノード数の上限(広いマップで1回の探索が重くなりすぎないように)
-		int maxExpandedNodes = 20000;
+		int maxExpandedNodes = 200000;
+
+		// ヒューリスティックの重み。1.0で最短経路。大きくすると、探索するセルが減って速くなる代わりに、
+		// 経路が最短よりやや遠回りになることがある(1.5なら最大で1.5倍まで)。敵の追跡には十分
+		float heuristicWeight = 1.0f;
 
 		// 経路上の不要な中間点を、直線で歩ける限り取り除く
 		bool smooth = true;

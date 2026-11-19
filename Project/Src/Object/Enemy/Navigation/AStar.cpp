@@ -90,7 +90,7 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 		gCost[startIdx] = 0.0f;
 		parent[startIdx] = -1;
 		openStamp[startIdx] = stamp;
-		open.emplace(Heuristic(startCell->x, startCell->y, goalCell->x, goalCell->y), startIdx);
+		open.emplace(Heuristic(startCell->x, startCell->y, goalCell->x, goalCell->y) * options.heuristicWeight, startIdx);
 
 		bool found = false;
 		int expanded = 0;
@@ -137,7 +137,7 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 					openStamp[next] = stamp;
 					gCost[next] = newCost;
 					parent[next] = current;
-					open.emplace(newCost + Heuristic(nx, ny, goalCell->x, goalCell->y), next);
+					open.emplace(newCost + Heuristic(nx, ny, goalCell->x, goalCell->y) * options.heuristicWeight, next);
 				}
 			}
 		}

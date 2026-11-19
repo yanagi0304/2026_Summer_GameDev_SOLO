@@ -215,7 +215,9 @@ void GameScene::NavDebugInit(void)
 	cfg.minPos = minPos;
 	cfg.maxPos = maxPos;
 	cfg.floorY = playerPos.y;   // 床は平らな前提で、プレイヤーの足元の高さを床とする
-	cfg.cellSize = (std::max)((std::max)(sizeX, sizeZ) / 100.0f, 100.0f);   // 最大100x100セル
+	// セルは100cm。壁の余白がセルの半分強なので、幅2m以上の通路は通れる
+	// ステージが極端に大きい場合だけ、セルを大きくして最大400x400セルに収める
+	cfg.cellSize = (std::max)((std::max)(sizeX, sizeZ) / 400.0f, 100.0f);
 	cfg.agentRadius = 45.0f;
 	cfg.agentHeight = 220.0f;
 	cfg.stepHeight = 30.0f;

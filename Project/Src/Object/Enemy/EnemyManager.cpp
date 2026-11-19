@@ -139,9 +139,9 @@ bool EnemyManager::PickSpawnPos(Vector3& out)
 		const Vector2I cell(distX(rng), distY(rng));
 		if (!grid.IsWalkable(cell)) { continue; }
 
-		// 床は平らな前提で、高さは目標に合わせる(少し浮かせて、重力で床に落とす)
+		// 高さはそのセルの床に合わせる(少し浮かせて、重力で床に落とす)
 		Vector3 pos = grid.CellToWorld(cell);
-		pos.y = targetPos->y + 5.0f;
+		pos.y += 20.0f;
 
 		// 目標からの距離
 		const float dx = pos.x - targetPos->x;

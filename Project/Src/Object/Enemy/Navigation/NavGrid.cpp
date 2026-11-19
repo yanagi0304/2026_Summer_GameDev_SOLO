@@ -115,7 +115,12 @@ void NavGrid::Build(const Config& cfg)
 	walkable.assign(static_cast<size_t>(width) * height, 1);
 	floorHeights.assign(static_cast<size_t>(width) * height, config.floorY);
 	opaque.assign(static_cast<size_t>(width) * height, 0);
+	floorMinY = floorMaxY = config.floorY;
 
+	// 床の高さを、ステージのメッシュから求める(坂道や歩道の段差に合わせる)
+	BuildFloors();
+
+	// 壁などの判定は、セルごとの床の高さを基準にする
 	for (const ObstacleBox& box : obstacles)
 	{
 		Rasterize(box);
@@ -130,15 +135,137 @@ void NavGrid::Build(const Config& cfg)
 	if (config.keepOnlyReachable) { RestrictToReachable(config.reachableSeed); }
 }
 
+void NavGrid::BuildFloors(void)
+{
+	const float cs = config.cellSize;
+	const size_t cellCount = walkable.size();
+
+	// 各セルの中心の真下/真上にある、床とみなせる面の高さを集める
+	std::vector<std::vector<float>> candidates(cellCount);
+	bool any = false;
+
+	for (const ObstacleTriangle& tri : triangles)
+	{
+		const Vector3* p = tri.p;
+
+		// 水平に近い面を床とみなす(向きは、メッシュの巻き方向に依存しないよう符号を見ない)
+		const Vector3 normal = (p[1] - p[0]).Cross(p[2] - p[0]);
+		const float normalLength = normal.Length();
+		if (normalLength < 1.0e-6f) { continue; }
+		if (std::abs(normal.y) / normalLength < WALL_NORMAL_Y_MAX) { continue; }
+
+		const int x0 = (std::max)(0, static_cast<int>(std::floor(((std::min)(p[0].x, (std::min)(p[1].x, p[2].x)) - config.minPos.x) / cs)));
+		const int x1 = (std::min)(width - 1, static_cast<int>(std::floor(((std::max)(p[0].x, (std::max)(p[1].x, p[2].x)) - config.minPos.x) / cs)));
+		const int y0 = (std::max)(0, static_cast<int>(std::floor(((std::min)(p[0].z, (std::min)(p[1].z, p[2].z)) - config.minPos.z) / cs)));
+		const int y1 = (std::min)(height - 1, static_cast<int>(std::floor(((std::max)(p[0].z, (std::max)(p[1].z, p[2].z)) - config.minPos.z) / cs)));
+
+		for (int y = y0; y <= y1; ++y)
+		{
+			for (int x = x0; x <= x1; ++x)
+			{
+				const float cx = config.minPos.x + (x + 0.5f) * cs;
+				const float cz = config.minPos.z + (y + 0.5f) * cs;
+
+				// セルの中心が三角形の内側にある時だけ、その面の高さを候補にする
+				if (DistancePointTriangle(cx, cz, p) > 0.0f) { continue; }
+
+				const float h = p[0].y - (normal.x * (cx - p[0].x) + normal.z * (cz - p[0].z)) / normal.y;
+				candidates[Index(x, y)].push_back(h);
+				any = true;
+			}
+		}
+	}
+
+	// 床の面がなければ、基準の高さの平らな床のままにする(ボックスだけで障害物を作った場合など)
+	if (!any) { return; }
+
+	// 出発点のすぐ近くで、出発点の高さに近い床のセルを探す
+	// 近くに床がなければ(床のメッシュがない場合など)、平らな床のままにする
+	const Vector2I seedCell = WorldToCell(config.reachableSeed);
+	bool found = false;
+	Vector2I startCell(0, 0);
+	float startHeight = config.floorY;
+	float bestScore = 1.0e30f;
+	const int searchRadius = 3;
+	for (int dy = -searchRadius; dy <= searchRadius; ++dy)
+	{
+		for (int dx = -searchRadius; dx <= searchRadius; ++dx)
+		{
+			const Vector2I cell(seedCell.x + dx, seedCell.y + dy);
+			if (!InBounds(cell)) { continue; }
+			for (float h : candidates[Index(cell.x, cell.y)])
+			{
+				// 出発点の高さから離れすぎた面(屋根の上など)は出発点にしない
+				if (std::abs(h - config.reachableSeed.y) > 200.0f) { continue; }
+				// 距離を優先し、高さの違いも少し効かせる(別の階の床を選ばないように)
+				const float score = static_cast<float>(dx * dx + dy * dy) * cs * cs + std::abs(h - config.reachableSeed.y) * 10.0f;
+				if (score < bestScore) { bestScore = score; startCell = cell; startHeight = h; found = true; }
+			}
+		}
+	}
+	if (!found) { return; }
+
+	// 出発点から隣へ広げながら、セルごとの床の高さを決める
+	std::vector<uint8_t> assigned(cellCount, 0);
+	std::vector<int> queue;
+	queue.reserve(cellCount);
+	queue.push_back(Index(startCell.x, startCell.y));
+	assigned[queue.back()] = 1;
+	floorHeights[queue.back()] = startHeight;
+
+	const int dxs[4] = { 1, -1, 0, 0 };
+	const int dys[4] = { 0, 0, 1, -1 };
+	for (size_t head = 0; head < queue.size(); ++head)
+	{
+		const int current = queue[head];
+		const int cx = current % width;
+		const int cy = current / width;
+		const float currentHeight = floorHeights[current];
+
+		for (int d = 0; d < 4; ++d)
+		{
+			const int nx = cx + dxs[d];
+			const int ny = cy + dys[d];
+			if (nx < 0 || ny < 0 || nx >= width || ny >= height) { continue; }
+			const int next = Index(nx, ny);
+			if (assigned[next]) { continue; }
+
+			const std::vector<float>& cand = candidates[next];
+			float chosen = currentHeight;
+			if (!cand.empty())
+			{
+				// 今の床の高さに一番近い面を選ぶ。高さが離れすぎていれば(崖・屋根の上)、歩けない
+				float best = cand[0];
+				for (float h : cand) { if (std::abs(h - currentHeight) < std::abs(best - currentHeight)) { best = h; } }
+				if (std::abs(best - currentHeight) > config.maxFloorStep) { continue; }
+				chosen = best;
+			}
+			// 床の面がないセルは、手前の床の高さを引き継ぐ
+
+			assigned[next] = 1;
+			floorHeights[next] = chosen;
+			queue.push_back(next);
+		}
+	}
+
+	// 床に辿り着けなかったセルは歩行不可にする
+	floorMinY = 1.0e30f;
+	floorMaxY = -1.0e30f;
+	for (size_t i = 0; i < cellCount; ++i)
+	{
+		if (!assigned[i]) { walkable[i] = 0; continue; }
+		floorMinY = (std::min)(floorMinY, floorHeights[i]);
+		floorMaxY = (std::max)(floorMaxY, floorHeights[i]);
+	}
+}
+
 void NavGrid::Rasterize(const ObstacleBox& box)
 {
-	// 敵の体がぶつかる高さの範囲と重ならない障害物は無視する
-	// (低い段差、頭上の張り出しなど)
 	const float bottom = box.center.y - box.halfSize.y;
 	const float top = box.center.y + box.halfSize.y;
-	const float bodyMin = config.floorY + config.stepHeight;
-	const float bodyMax = config.floorY + config.agentHeight;
-	if (top <= bodyMin || bottom >= bodyMax) { return; }
+
+	// どのセルの床から見ても、体の高さと重ならない障害物は無視する(低い段差、頭上の張り出しなど)
+	if (top <= floorMinY + config.stepHeight || bottom >= floorMaxY + config.agentHeight) { return; }
 
 	const float rad = box.rotYDeg * (DX_PI_F / 180.0f);
 	const float c = std::cos(rad);
@@ -161,6 +288,10 @@ void NavGrid::Rasterize(const ObstacleBox& box)
 	{
 		for (int x = x0; x <= x1; ++x)
 		{
+			// そのセルの床から見て、体の高さと重なる障害物だけが通行を妨げる
+			const float floorY = floorHeights[Index(x, y)];
+			if (top <= floorY + config.stepHeight || bottom >= floorY + config.agentHeight) { continue; }
+
 			// セル中心をボックスのローカル座標(XZ)へ
 			const float dx = config.minPos.x + (x + 0.5f) * cs - box.center.x;
 			const float dz = config.minPos.z + (y + 0.5f) * cs - box.center.z;
@@ -191,17 +322,14 @@ void NavGrid::RasterizeTriangle(const ObstacleTriangle& tri)
 	const float yMin = (std::min)(p[0].y, (std::min)(p[1].y, p[2].y));
 	const float yMax = (std::max)(p[0].y, (std::max)(p[1].y, p[2].y));
 
-	// 敵の体の高さと重なれば、通行を妨げる
-	const bool blocksBody = (yMax > config.floorY + config.stepHeight) && (yMin < config.floorY + config.agentHeight);
+	// どのセルの床から見ても、体の高さ・目の高さと重ならない面は無視する
+	if (yMax <= floorMinY + config.stepHeight || yMin >= floorMaxY + config.agentHeight) { return; }
 
-	// 目の高さ(身長の半分?9割)と重なれば、視線を遮る
-	const bool blocksSight = (yMax > config.floorY + config.agentHeight * 0.5f) && (yMin < config.floorY + config.agentHeight * 0.9f);
-
-	if (!blocksBody && !blocksSight) { return; }
-
-	// セルの中心で判定するので、薄い壁を取りこぼさないよう、半径はセルの大きさに合わせて大きめにとる
+	// セルの中心で判定する。隣のセルとの間に壁があっても気づけるよう、余白はセルの半分より少し大きくとる
+	// (これより小さいと、セルの境目ぴったりにある壁を、すり抜ける経路ができてしまう)
+	// 逆に、これ以上大きくすると通路が不必要に塞がるので、必要最小限にしている
 	const float cs = config.cellSize;
-	const float bodyRadius = (std::max)(config.agentRadius, cs * 0.6f);
+	const float bodyRadius = (std::max)(config.agentRadius, cs * 0.5f + 0.5f);
 	const float sightRadius = cs * 0.5f;
 	const float reach = (std::max)(bodyRadius, sightRadius);
 
@@ -219,6 +347,12 @@ void NavGrid::RasterizeTriangle(const ObstacleTriangle& tri)
 	{
 		for (int x = x0; x <= x1; ++x)
 		{
+			// そのセルの床から見て、体の高さと重なれば通行を妨げ、目の高さ(身長の半分から9割)と重なれば視線を遮る
+			const float floorY = floorHeights[Index(x, y)];
+			const bool blocksBody = (yMax > floorY + config.stepHeight) && (yMin < floorY + config.agentHeight);
+			const bool blocksSight = (yMax > floorY + config.agentHeight * 0.5f) && (yMin < floorY + config.agentHeight * 0.9f);
+			if (!blocksBody && !blocksSight) { continue; }
+
 			const float cx = config.minPos.x + (x + 0.5f) * cs;
 			const float cz = config.minPos.z + (y + 0.5f) * cs;
 			const float d = DistancePointTriangle(cx, cz, p);
@@ -228,7 +362,6 @@ void NavGrid::RasterizeTriangle(const ObstacleTriangle& tri)
 		}
 	}
 }
-
 void NavGrid::RestrictToReachable(const Vector3& seed)
 {
 	// 出発点が壁の中なら、近くの歩けるセルから始める
@@ -456,7 +589,8 @@ void NavGrid::DrawDebug(bool showWalkable) const
 	{
 		for (int x = 0; x < width; ++x)
 		{
-			const float h = floorHeights[Index(x, y)] + 2.0f;
+			// 縁石や歩道の盛り上がりに隠れて見えなくならないよう、床より少し高い位置に描く
+			const float h = floorHeights[Index(x, y)] + 60.0f;
 			const float x0 = config.minPos.x + x * cs;
 			const float z0 = config.minPos.z + y * cs;
 

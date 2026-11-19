@@ -37,6 +37,10 @@ public:
 		// 乗り越えられる段差(これより低い障害物は無視する)
 		float stepHeight = 30.0f;
 
+		// 隣のセルとの床の高さの差がこれ以内なら歩ける(坂道・歩道の段差)。これより大きいと崖や屋根とみなして歩行不可
+		// ステージのメッシュ(AddObstacleTriangle)を登録した時だけ使われる
+		float maxFloorStep = 60.0f;
+
 		// trueなら、reachableSeedから歩いて行けないセル(建物の内部、囲まれた場所)を歩行不可にする
 		bool keepOnlyReachable = false;
 		Vector3 reachableSeed = Vector3(0.0f, 0.0f, 0.0f);
@@ -117,6 +121,9 @@ private:
 		Vector3 p[3];
 	};
 
+	// ステージのメッシュ(上向きの面)から、セルごとの床の高さを求める。メッシュがなければ平らな床のまま
+	void BuildFloors(void);
+
 	// 1つのボックスを歩行可否に反映
 	void Rasterize(const ObstacleBox& box);
 
@@ -140,6 +147,10 @@ private:
 
 	// セルごとの床の高さ
 	std::vector<float> floorHeights;
+
+	// 床の高さの最小・最大(壁の三角形を、床から遠い高さにあるものとして素早く除外するため)
+	float floorMinY = 0.0f;
+	float floorMaxY = 0.0f;
 
 	// 1=視線を遮る壁がある(三角形から生成。敵が壁越しに見えないようにするため)
 	std::vector<uint8_t> opaque;

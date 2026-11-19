@@ -34,6 +34,9 @@ public:
 	// 順番待ちの先頭から、1フレームの上限まで探索して結果を返す
 	void Update(void);
 
+	// 探索の設定(ヒューリスティックの重みなど)
+	void SetOptions(const AStar::Options& value) { options = value; }
+
 	// 1フレームに処理する探索の最大件数
 	void SetBudget(int value) { budgetPerFrame = (value > 0) ? value : 1; }
 
@@ -46,6 +49,13 @@ public:
 
 private:
 
+	static AStar::Options MakeDefaultOptions(void)
+	{
+		AStar::Options o;
+		o.heuristicWeight = 1.5f;
+		return o;
+	}
+
 	struct Request
 	{
 		const void* owner;
@@ -56,6 +66,9 @@ private:
 
 	const NavGrid& grid;
 	AStar astar;
+
+	// 敵の追跡には、最短でなくてよいので探索が速くなる重みを使う(1.5で、経路は最大2%ほど遠回りになる程度)
+	AStar::Options options = MakeDefaultOptions();
 	std::deque<Request> queue;
 	int budgetPerFrame;
 
