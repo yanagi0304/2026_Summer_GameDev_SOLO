@@ -800,6 +800,9 @@ void CollisionManager::CheckPairOnce(ColliderBase* a, ColliderBase* b)
 	// 同じアクターに紐づいているコライダー同士も判定しない
 	if (a->GetActor() == b->GetActor()) { return; }
 
+	// Asteroid bullets never collide with each other (27 bullets overlap in a cube formation)
+	if (a->GetTag() == COLLIDER_TAG::Asteroid && b->GetTag() == COLLIDER_TAG::Asteroid) { return; }
+
 	// 判定候補の数を記録（同一ペアの重複を含む）
 	checkStats.pairCandidates++;
 
@@ -3175,11 +3178,11 @@ bool CollisionManager::RaycastImpl(const Vector3& origin, const Vector3& directi
 	for (int i = 0; i < (int)COLLIDER_GROUP::Max; i++) {
 
 		if (i == (int)COLLIDER_GROUP::Player) { continue; }
+		// ステージだけを調べる場合は、それ以外のグループを飛ばす
+		if (stageOnly && i != (int)COLLIDER_GROUP::Stage) { continue; }
 
         for (ColliderBase* collider : groupColliders[i].colliders) {
             if (!collider || !collider->GetJudgeFlg()) { continue; }
-		// ステージだけを調べる場合は、それ以外のグループを飛ばす
-		if (stageOnly && i != (int)COLLIDER_GROUP::Stage) { continue; }
 			if (
 				collider->GetTag() == COLLIDER_TAG::CameraLine ||
 				collider->GetTag() == COLLIDER_TAG::CameraPoint
@@ -3304,9 +3307,6 @@ bool CollisionManager::RaycastImpl(const Vector3& origin, const Vector3& directi
     return result.IsHit();
 }
 
-#pragma endregion
-
-#pragma region デバッグ描画
 bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result)
 {
 	return RaycastImpl(origin, direction, maxDistance, result, false);
@@ -3317,6 +3317,9 @@ bool CollisionManager::RaycastStage(const Vector3& origin, const Vector3& direct
 	return RaycastImpl(origin, direction, maxDistance, result, true);
 }
 
+#pragma endregion
+
+#pragma region デバッグ描画
 
 // チャンクのグリッド線描画
 void CollisionManager::DrawChunkGrid(const Vector3& cameraPos) const
