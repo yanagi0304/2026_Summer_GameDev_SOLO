@@ -116,8 +116,9 @@ void GameScene::SubPostUpdate(void)
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::Title);
 	}
 
-	// 決定
-	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || CountMannequins() == 0) {
+	// ゲームクリア: 全ウェーブの敵を倒したら(右Shiftは確認用の強制クリア)
+	const bool allEnemiesDefeated = enemyManager && enemyManager->GetWave().IsFinished();
+	if (CheckHitKey(KEY_INPUT_RSHIFT) == 1 || allEnemiesDefeated) {
 		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameClear);
 	}
 }
