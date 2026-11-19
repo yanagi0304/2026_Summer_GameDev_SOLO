@@ -81,6 +81,9 @@
     <ClCompile Include="Src\Object\Weapon\Hound\Hound.cpp" />
     <ClCompile Include="Src\Object\Enemy\Navigation\NavGrid.cpp" />
     <ClCompile Include="Src\Object\Enemy\Navigation\AStar.cpp" />
+    <ClCompile Include="Src\Object\Enemy\Navigation\NavManager.cpp" />
+    <ClCompile Include="Src\Object\Enemy\WaveController.cpp" />
+    <ClCompile Include="Src\Object\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Src\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyIdleState.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyChaseState.cpp" />
@@ -209,6 +212,9 @@
     <ClInclude Include="Src\Object\Weapon\Hound\Hound.h" />
     <ClInclude Include="Src\Object\Enemy\Navigation\NavGrid.h" />
     <ClInclude Include="Src\Object\Enemy\Navigation\AStar.h" />
+    <ClInclude Include="Src\Object\Enemy\Navigation\NavManager.h" />
+    <ClInclude Include="Src\Object\Enemy\WaveController.h" />
+    <ClInclude Include="Src\Object\Enemy\EnemyManager.h" />
     <ClInclude Include="Src\Object\Enemy\Enemy.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyIdleState.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyChaseState.h" />

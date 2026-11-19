@@ -36,6 +36,10 @@ public:
 
 		// 乗り越えられる段差(これより低い障害物は無視する)
 		float stepHeight = 30.0f;
+
+		// trueなら、reachableSeedから歩いて行けないセル(建物の内部、囲まれた場所)を歩行不可にする
+		bool keepOnlyReachable = false;
+		Vector3 reachableSeed = Vector3(0.0f, 0.0f, 0.0f);
 	};
 
 	NavGrid(void) = default;
@@ -45,6 +49,9 @@ public:
 	// center: 中心 / halfSize: 各軸の半分の大きさ / rotYDeg: Y軸回転(度。Unityのeulers.yと同じ向き)
 	void AddObstacleBox(const Vector3& center, const Vector3& halfSize, float rotYDeg = 0.0f);
 
+	// 三角形を障害物として登録する(ステージのメッシュなど。Build前に呼ぶ)
+	// 壁のように立っていて、敵の体の高さと重なる三角形だけが障害物になる(床や屋根は無視される)
+	void AddObstacleTriangle(const Vector3& a, const Vector3& b, const Vector3& c);
 	// 障害物ボックスをCSVファイルから読み込んで登録する(Build前に呼ぶ)
 	// 1行1ボックス: centerX,centerY,centerZ,halfX,halfY,halfZ,rotYDeg
 	// 空行と、#で始まる行は無視する。読めた行数を返し、ファイルが開けなければ-1を返す
@@ -58,6 +65,9 @@ public:
 	// ---- 問い合わせ ----
 
 	bool IsBuilt(void) const { return !walkable.empty(); }
+
+	// 歩行可能なセルの数(デバッグ表示用)
+	int CountWalkable(void) const;
 	int GetWidth(void) const { return width; }
 	int GetHeight(void) const { return height; }
 	float GetCellSize(void) const { return config.cellSize; }
@@ -101,8 +111,20 @@ private:
 		float rotYDeg;
 	};
 
+	// 三角形(障害物の候補)
+	struct ObstacleTriangle
+	{
+		Vector3 p[3];
+	};
+
 	// 1つのボックスを歩行可否に反映
 	void Rasterize(const ObstacleBox& box);
+
+	// 1つの三角形を歩行可否と視線の遮蔽に反映
+	void RasterizeTriangle(const ObstacleTriangle& tri);
+
+	// 指定位置から歩いて行けないセルを、歩行不可にする
+	void RestrictToReachable(const Vector3& seed);
 
 	int Index(int x, int y) const { return y * width + x; }
 
@@ -111,10 +133,14 @@ private:
 	int height = 0;
 
 	std::vector<ObstacleBox> obstacles;
+	std::vector<ObstacleTriangle> triangles;
 
 	// 1=歩ける 0=通れない
 	std::vector<uint8_t> walkable;
 
 	// セルごとの床の高さ
 	std::vector<float> floorHeights;
+
+	// 1=視線を遮る壁がある(三角形から生成。敵が壁越しに見えないようにするため)
+	std::vector<uint8_t> opaque;
 };

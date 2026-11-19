@@ -301,7 +301,9 @@ void SceneBase::AddActor(ActorBase* newActor)
 		newActor->Init();
 
 		// 当たり判定管理クラスのチャンクを再構築する
-		if (collision != nullptr) { collision->InitBuildChunks(); }
+		// 動くActorなら、動くコライダー用のチャンクは毎フレーム作り直されるので、
+		// ステージのメッシュなど静的なチャンクまで全部作り直す必要はない(重いので静的なActorの時だけ)
+		if (collision != nullptr && newActor->GetColliderMobility() == COLLIDER_MOBILITY::Static) { collision->InitBuildChunks(); }
 	}
 
 	// Actorをシーンの所有リストへ追加する

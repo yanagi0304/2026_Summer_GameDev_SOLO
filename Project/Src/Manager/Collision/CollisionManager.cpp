@@ -3383,6 +3383,12 @@ void CollisionManager::DrawCheckLog(void) const
 
 void CollisionManager::Remove(const std::vector<ColliderBase*>& targets)
 {
+	// 静的なコライダーを外す場合だけ、静的なチャンクの作り直しが必要になる
+	bool removedStatic = false;
+	for (ColliderBase* t : targets) {
+		if (t && t->GetMobility() == COLLIDER_MOBILITY::Static) { removedStatic = true; }
+	}
+
 	for (ColliderGroupData& group : groupColliders) {
 		for (ColliderBase* t : targets) {
 			group.colliders.erase(
@@ -3392,5 +3398,7 @@ void CollisionManager::Remove(const std::vector<ColliderBase*>& targets)
 	}
 
 	// チャンクは外したコライダーのポインタを持っているので、作り直す
-	InitBuildChunks();
+	// 動くコライダーだけなら、動く分の登録を作り直すだけでよい(静的なチャンクは構成が変わらなければ再利用される)
+	if (removedStatic) { InitBuildChunks(); }
+	else { BuildChunks(); }
 }

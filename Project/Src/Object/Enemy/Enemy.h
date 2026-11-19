@@ -9,6 +9,7 @@
 #include "Navigation/AStar.h"
 
 class NavGrid;
+class NavManager;
 class EnemyChaseState;
 
 // 敵
@@ -19,17 +20,19 @@ class Enemy : public CharacterBase
 {
 public:
 
-	// 経路探索の共有情報(グリッドとA*は全員で1つを使い回す)
+	// 経路探索の共有情報(グリッドと探索の窓口は全員で1つを使い回す)
 	struct NavContext
 	{
 		const NavGrid* grid;
-		AStar* astar;
+		NavManager* manager;
 	};
 
 	/// <param name="nav">経路探索の共有情報</param>
 	/// <param name="targetPos">追う目標の座標(参照先は敵より長く生きていること)</param>
 	/// <param name="spawnPos">出現位置</param>
-	Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos);
+	/// <param name="baseModel">複製元のモデルハンドル(-1ならファイルから読み込む。毎回の読み込みは重いので、複製を使う)</param>
+	/// <param name="peers">同じ場にいる敵の一覧(互いに離れるために使う。自分も含んでよい)</param>
+	Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel = -1);
 
 	~Enemy()override = default;
 
@@ -40,6 +43,16 @@ public:
 
 	// 追跡中か
 	bool IsChasing(void)const;
+
+	// 倒された状態にする(実際の撤去はEnemyManagerが行う。攻撃のダメージ処理から呼ぶ想定)
+	void Defeat(void) { defeated = true; }
+	bool IsDefeated(void)const { return defeated; }
+
+	// 現在位置
+	Vector3 GetPos(void)const { return trans.pos; }
+
+	// 直近のモデル準備(読み込み or 複製)にかかった時間(ミリ秒。計測用)
+	static double GetLastModelLoadMs(void) { return lastModelLoadMs; }
 
 	// デバッグ描画(視線の向き、状態、経路)
 	void DrawDebug(void)const;
@@ -111,6 +124,9 @@ private:
 	// 追う目標の座標(見えていれば現在位置、見えなければ最後に見た位置)
 	Vector3 GetChaseGoal(void)const;
 
+	// 近くにいる他の敵から離れる向き(長さ0?1)
+	Vector3 ComputeSeparation(void)const;
+
 	// 経路探索の共有情報
 	const NavContext nav;
 
@@ -119,6 +135,17 @@ private:
 
 	// 出現位置
 	const Vector3 spawnPos;
+
+	// 同じ場にいる敵の一覧(参照のみ)
+	const std::vector<Enemy*>* peers;
+
+	// 複製元のモデル(-1なら読み込む)
+	const int baseModel;
+
+	static inline double lastModelLoadMs = 0.0;
+
+	// 倒されたか
+	bool defeated;
 
 	// 追跡状態(CharacterBaseが所有する。デバッグ表示用に保持)
 	EnemyChaseState* chaseState;

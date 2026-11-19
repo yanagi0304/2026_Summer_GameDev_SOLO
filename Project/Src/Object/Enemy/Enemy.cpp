@@ -1,5 +1,6 @@
 #include "Enemy.h"
 
+#include <chrono>
 #include <cmath>
 
 #include "../../pch.h"
@@ -14,6 +15,7 @@
 #include "../Common/AnimationController/AnimationController.h"
 
 #include "Navigation/NavGrid.h"
+#include "Navigation/NavManager.h"
 #include "State/EnemyIdleState.h"
 #include "State/EnemyChaseState.h"
 
@@ -33,17 +35,23 @@ namespace
 	// 見失ってから、最後に見た位置を探し続けるフレーム数
 	constexpr float LOSE_SIGHT_FRAMES = 180.0f;
 
+	// 他の敵から離れ始める距離(コライダーの直径80より少し大きい)
+	constexpr float SEPARATION_RADIUS = 130.0f;
+
 	// 目の高さ / 目標を狙う高さ(足元からの高さ)
 	constexpr float EYE_HEIGHT = 160.0f;
 	constexpr float TARGET_AIM_HEIGHT = 120.0f;
 }
 
-Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos) :
+Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel) :
 	CharacterBase(),
 
 	nav(nav),
 	targetPos(targetPos),
 	spawnPos(spawnPos),
+	peers(peers),
+	baseModel(baseModel),
+	defeated(false),
 
 	chaseState(nullptr),
 
@@ -85,8 +93,11 @@ void Enemy::Load(void)
 
 #pragma region モデル設定
 
-	// 仮のモデル(プレイヤーと同じ)
-	trans.LoadModel("Character/WoChamolenium/WoChamolenium");
+	// 仮のモデル(プレイヤーと同じ)。複製元があれば複製する(ファイルからの読み込みは重い)
+	const auto modelStart = std::chrono::high_resolution_clock::now();
+	if (baseModel >= 0) { ModelDuplicate(baseModel); }
+	else { trans.LoadModel("Character/WoChamolenium/WoChamolenium"); }
+	lastModelLoadMs = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - modelStart).count();
 	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
 #pragma endregion
@@ -128,11 +139,11 @@ void Enemy::Load(void)
 	chaseState = new EnemyChaseState(
 		EnemyChaseState::Params(),
 		*motion,
-		*nav.grid,
-		*nav.astar,
+		*nav.manager,
 		[this]() { return trans.pos; },
 		[this]() { return GetChaseGoal(); },
 		[this]() { return ShouldChase(); },
+		[this]() { return ComputeSeparation(); },
 		[this]() { AnimePlay(CHARACTER_ANIME::WALK); }
 	);
 	AddState(STATE::Chase, chaseState);
@@ -222,6 +233,41 @@ Vector3 Enemy::GetChaseGoal(void)const
 {
 	if (canSeeTarget && targetPos != nullptr) { return *targetPos; }
 	return lastKnownPos;
+}
+
+Vector3 Enemy::ComputeSeparation(void)const
+{
+	Vector3 push(0.0f, 0.0f, 0.0f);
+	if (peers == nullptr) { return push; }
+
+	for (const Enemy* other : *peers)
+	{
+		if (other == this || other->IsDefeated()) { continue; }
+
+		// 水平方向だけで見る
+		const float dx = trans.pos.x - other->trans.pos.x;
+		const float dz = trans.pos.z - other->trans.pos.z;
+		const float dist = std::sqrt(dx * dx + dz * dz);
+		if (dist >= SEPARATION_RADIUS) { continue; }
+
+		// 近いほど強く、相手から遠ざかる向きへ
+		const float strength = (SEPARATION_RADIUS - dist) / SEPARATION_RADIUS;
+		if (dist > 1.0e-3f)
+		{
+			push.x += dx / dist * strength;
+			push.z += dz / dist * strength;
+		}
+		else
+		{
+			// 完全に重なっている時は、向きが決まらないので適当な方向へ
+			push.x += strength;
+		}
+	}
+
+	// 長さは最大1にする
+	const float length = push.Length();
+	if (length > 1.0f) { push = push / length; }
+	return push;
 }
 
 void Enemy::DrawDebug(void)const

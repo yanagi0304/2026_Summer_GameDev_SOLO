@@ -5,6 +5,50 @@
 #include <fstream>
 #include <sstream>
 
+namespace
+{
+	// 点と線分の距離(XZ平面)
+	float DistancePointSegment(float px, float pz, float ax, float az, float bx, float bz)
+	{
+		const float abx = bx - ax;
+		const float abz = bz - az;
+		const float lenSq = abx * abx + abz * abz;
+		float t = 0.0f;
+		if (lenSq > 1.0e-9f)
+		{
+			t = ((px - ax) * abx + (pz - az) * abz) / lenSq;
+			t = (std::max)(0.0f, (std::min)(1.0f, t));
+		}
+		const float cx = ax + abx * t - px;
+		const float cz = az + abz * t - pz;
+		return std::sqrt(cx * cx + cz * cz);
+	}
+
+	// 点と三角形の距離(XZ平面。三角形の内側なら0。つぶれた三角形(壁の真横から見た線)にも使える)
+	float DistancePointTriangle(float px, float pz, const Vector3 p[3])
+	{
+		// 内側判定(符号がそろっていれば内側)
+		const auto side = [](float px, float pz, const Vector3& a, const Vector3& b)
+		{
+			return (b.x - a.x) * (pz - a.z) - (b.z - a.z) * (px - a.x);
+		};
+		const float s0 = side(px, pz, p[0], p[1]);
+		const float s1 = side(px, pz, p[1], p[2]);
+		const float s2 = side(px, pz, p[2], p[0]);
+		const bool hasNeg = (s0 < 0.0f) || (s1 < 0.0f) || (s2 < 0.0f);
+		const bool hasPos = (s0 > 0.0f) || (s1 > 0.0f) || (s2 > 0.0f);
+		if (!(hasNeg && hasPos)) { return 0.0f; }
+
+		const float d0 = DistancePointSegment(px, pz, p[0].x, p[0].z, p[1].x, p[1].z);
+		const float d1 = DistancePointSegment(px, pz, p[1].x, p[1].z, p[2].x, p[2].z);
+		const float d2 = DistancePointSegment(px, pz, p[2].x, p[2].z, p[0].x, p[0].z);
+		return (std::min)(d0, (std::min)(d1, d2));
+	}
+
+	// これより水平に近い面(法線のYが大きい面)は、床・屋根・坂とみなして障害物にしない
+	constexpr float WALL_NORMAL_Y_MAX = 0.7f;
+}
+
 void NavGrid::AddObstacleBox(const Vector3& center, const Vector3& halfSize, float rotYDeg)
 {
 	obstacles.push_back({ center, halfSize.Abs(), rotYDeg });
@@ -38,9 +82,15 @@ int NavGrid::LoadObstaclesCsv(const std::string& path)
 
 	return count;
 }
+void NavGrid::AddObstacleTriangle(const Vector3& a, const Vector3& b, const Vector3& c)
+{
+	triangles.push_back({ { a, b, c } });
+}
+
 void NavGrid::ClearObstacles(void)
 {
 	obstacles.clear();
+	triangles.clear();
 }
 
 void NavGrid::Build(const Config& cfg)
@@ -57,17 +107,27 @@ void NavGrid::Build(const Config& cfg)
 		width = height = 0;
 		walkable.clear();
 		floorHeights.clear();
+		opaque.clear();
 		return;
 	}
 
 	// 全セル歩行可能・床は基準高さで初期化
 	walkable.assign(static_cast<size_t>(width) * height, 1);
 	floorHeights.assign(static_cast<size_t>(width) * height, config.floorY);
+	opaque.assign(static_cast<size_t>(width) * height, 0);
 
 	for (const ObstacleBox& box : obstacles)
 	{
 		Rasterize(box);
 	}
+
+	for (const ObstacleTriangle& tri : triangles)
+	{
+		RasterizeTriangle(tri);
+	}
+
+	// 建物の内部など、歩いて行けない場所を歩行不可にする
+	if (config.keepOnlyReachable) { RestrictToReachable(config.reachableSeed); }
 }
 
 void NavGrid::Rasterize(const ObstacleBox& box)
@@ -116,6 +176,104 @@ void NavGrid::Rasterize(const ObstacleBox& box)
 			}
 		}
 	}
+}
+
+void NavGrid::RasterizeTriangle(const ObstacleTriangle& tri)
+{
+	const Vector3* p = tri.p;
+
+	// 立っている面(壁)だけを対象にする
+	const Vector3 normal = (p[1] - p[0]).Cross(p[2] - p[0]);
+	const float normalLength = normal.Length();
+	if (normalLength < 1.0e-6f) { return; }
+	if (std::abs(normal.y) / normalLength >= WALL_NORMAL_Y_MAX) { return; }
+
+	const float yMin = (std::min)(p[0].y, (std::min)(p[1].y, p[2].y));
+	const float yMax = (std::max)(p[0].y, (std::max)(p[1].y, p[2].y));
+
+	// 敵の体の高さと重なれば、通行を妨げる
+	const bool blocksBody = (yMax > config.floorY + config.stepHeight) && (yMin < config.floorY + config.agentHeight);
+
+	// 目の高さ(身長の半分?9割)と重なれば、視線を遮る
+	const bool blocksSight = (yMax > config.floorY + config.agentHeight * 0.5f) && (yMin < config.floorY + config.agentHeight * 0.9f);
+
+	if (!blocksBody && !blocksSight) { return; }
+
+	// セルの中心で判定するので、薄い壁を取りこぼさないよう、半径はセルの大きさに合わせて大きめにとる
+	const float cs = config.cellSize;
+	const float bodyRadius = (std::max)(config.agentRadius, cs * 0.6f);
+	const float sightRadius = cs * 0.5f;
+	const float reach = (std::max)(bodyRadius, sightRadius);
+
+	const float minX = (std::min)(p[0].x, (std::min)(p[1].x, p[2].x)) - reach;
+	const float maxX = (std::max)(p[0].x, (std::max)(p[1].x, p[2].x)) + reach;
+	const float minZ = (std::min)(p[0].z, (std::min)(p[1].z, p[2].z)) - reach;
+	const float maxZ = (std::max)(p[0].z, (std::max)(p[1].z, p[2].z)) + reach;
+
+	const int x0 = (std::max)(0, static_cast<int>(std::floor((minX - config.minPos.x) / cs)));
+	const int x1 = (std::min)(width - 1, static_cast<int>(std::floor((maxX - config.minPos.x) / cs)));
+	const int y0 = (std::max)(0, static_cast<int>(std::floor((minZ - config.minPos.z) / cs)));
+	const int y1 = (std::min)(height - 1, static_cast<int>(std::floor((maxZ - config.minPos.z) / cs)));
+
+	for (int y = y0; y <= y1; ++y)
+	{
+		for (int x = x0; x <= x1; ++x)
+		{
+			const float cx = config.minPos.x + (x + 0.5f) * cs;
+			const float cz = config.minPos.z + (y + 0.5f) * cs;
+			const float d = DistancePointTriangle(cx, cz, p);
+
+			if (blocksBody && d <= bodyRadius) { walkable[Index(x, y)] = 0; }
+			if (blocksSight && d <= sightRadius) { opaque[Index(x, y)] = 1; }
+		}
+	}
+}
+
+void NavGrid::RestrictToReachable(const Vector3& seed)
+{
+	// 出発点が壁の中なら、近くの歩けるセルから始める
+	const std::optional<Vector2I> start = FindNearestWalkable(WorldToCell(seed), 20);
+	if (!start) { return; }
+
+	// 4方向に広げながら、行けるセルに印を付ける
+	std::vector<uint8_t> reached(walkable.size(), 0);
+	std::vector<int> stack;
+	stack.push_back(Index(start->x, start->y));
+	reached[stack.back()] = 1;
+
+	while (!stack.empty())
+	{
+		const int current = stack.back();
+		stack.pop_back();
+		const int cx = current % width;
+		const int cy = current / width;
+
+		const int dx[4] = { 1, -1, 0, 0 };
+		const int dy[4] = { 0, 0, 1, -1 };
+		for (int d = 0; d < 4; ++d)
+		{
+			const int nx = cx + dx[d];
+			const int ny = cy + dy[d];
+			if (!IsWalkable(nx, ny)) { continue; }
+			const int next = Index(nx, ny);
+			if (reached[next]) { continue; }
+			reached[next] = 1;
+			stack.push_back(next);
+		}
+	}
+
+	// 行けなかったセルは歩行不可にする
+	for (size_t i = 0; i < walkable.size(); ++i)
+	{
+		if (!reached[i]) { walkable[i] = 0; }
+	}
+}
+
+int NavGrid::CountWalkable(void) const
+{
+	int count = 0;
+	for (uint8_t w : walkable) { count += (w != 0) ? 1 : 0; }
+	return count;
 }
 
 bool NavGrid::InBounds(const Vector2I& cell) const
@@ -262,8 +420,30 @@ bool NavGrid::HasLineOfSight(const Vector3& from, const Vector3& to) const
 		if (hit) { return false; }
 	}
 
+	// 三角形(ステージの壁)由来の遮蔽。両端の足元のセルは、壁の近くに立っていても見えるよう調べない
+	if (!opaque.empty())
+	{
+		const Vector2I fromCell = WorldToCell(from);
+		const Vector2I toCell = WorldToCell(to);
+
+		const float dx = to.x - from.x;
+		const float dz = to.z - from.z;
+		const float length = std::sqrt(dx * dx + dz * dz);
+		const int count = (std::max)(1, static_cast<int>(std::ceil(length / (config.cellSize * 0.5f))));
+
+		for (int i = 0; i <= count; ++i)
+		{
+			const float t = static_cast<float>(i) / static_cast<float>(count);
+			const Vector2I cell = WorldToCell(Vector3(from.x + dx * t, 0.0f, from.z + dz * t));
+			if (cell == fromCell || cell == toCell) { continue; }
+			if (!InBounds(cell)) { continue; }
+			if (opaque[Index(cell.x, cell.y)] != 0) { return false; }
+		}
+	}
+
 	return true;
 }
+
 void NavGrid::DrawDebug(bool showWalkable) const
 {
 	if (!IsBuilt()) { return; }

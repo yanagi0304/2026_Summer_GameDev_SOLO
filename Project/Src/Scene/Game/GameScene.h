@@ -1,13 +1,15 @@
 #pragma once
 
-#include"../SceneBase.h"
+#include <memory>
+
+#include "../SceneBase.h"
 
 #include "../../Object/Common/MeshSlicer/CutMesh.h"
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
 #include "../../Object/Enemy/Navigation/NavGrid.h"
 #include "../../Object/Enemy/Navigation/AStar.h"
-
-class Enemy;
+#include "../../Object/Enemy/Navigation/NavManager.h"
+#include "../../Object/Enemy/EnemyManager.h"
 
 class GameScene : public SceneBase
 {
@@ -56,16 +58,17 @@ private:
 	bool prevC_;
 
 	// ---- 経路探索デバッグ(F3で表示切り替え) ----
-	// グリッドを作り、デバッグ用の敵を1体出す
+	// グリッドを作り、敵の出現(ウェーブ)を管理する
 	void NavDebugInit(void);
 	void NavDebugUpdate(void);
 	void NavDebugDraw(void) const;
 
 	NavGrid navGrid;
-	AStar navAStar;
-	Enemy* debugEnemy = nullptr;	// シーンが所有する(ここでは参照のみ)
+	NavManager navManager{ navGrid };	// 経路探索の窓口(1フレームの探索数を制限する)
+	std::unique_ptr<EnemyManager> enemyManager;
 	bool navShow = false;
 	bool navKeyPrev = false;
+	bool defeatKeyPrev = false;
 
 
 };

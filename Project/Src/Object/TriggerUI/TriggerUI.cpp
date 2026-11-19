@@ -92,7 +92,7 @@ void TriggerUI::SubDraw()
 
 	}
 
-	DrawFormatString(0, 100, 0xffffff, "%d,%d", x, y);
+	//DrawFormatString(0, 100, 0xffffff, "%d,%d", x, y);
 
 }
 

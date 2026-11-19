@@ -1,36 +1,52 @@
 #include "EnemyChaseState.h"
 
 #include <cmath>
+#include <random>
 #include <utility>
 
 #include "../../../Manager/TimeScale/TimeScale.h"
 
 #include "../../Common/MotionController/GroundMotionController.h"
 
-#include "../Navigation/NavGrid.h"
+#include "../Navigation/NavManager.h"
+
+namespace
+{
+	// Ä’Tõ‚Ìƒ^ƒCƒ~ƒ“ƒO‚ğ‚¸‚ç‚·‚½‚ß‚Ì—”(‘Sˆõ‚ª“¯‚¶ƒtƒŒ[ƒ€‚É’Tõ‚ğˆË—Š‚µ‚È‚¢‚æ‚¤‚É)
+	float RandomFrames(float maxFrames)
+	{
+		static std::mt19937 rng{ std::random_device{}() };
+		return std::uniform_real_distribution<float>(0.0f, maxFrames)(rng);
+	}
+}
 
 EnemyChaseState::EnemyChaseState(
 	const Params& params,
 	GroundMotionController& motion,
-	const NavGrid& grid,
-	AStar& astar,
+	NavManager& nav,
 	std::function<Vector3(void)> getPos,
 	std::function<Vector3(void)> getGoal,
 	std::function<bool(void)> shouldChase,
+	std::function<Vector3(void)> getSeparation,
 	std::function<void(void)> playAnimeWalk
 ) :
 	params(params),
 	motion(motion),
-	grid(grid),
-	astar(astar),
+	nav(nav),
 	getPos(getPos),
 	getGoal(getGoal),
 	shouldChase(shouldChase),
+	getSeparation(getSeparation),
 	playAnimeWalk(playAnimeWalk),
 	path(),
 	pathIndex(0),
 	repathTimer(0.0f)
 {
+}
+
+EnemyChaseState::~EnemyChaseState()
+{
+	nav.Cancel(this);
 }
 
 void EnemyChaseState::OwnStateConditionUpdate(void)
@@ -44,7 +60,7 @@ void EnemyChaseState::Enter(void)
 	motion.SetMoveSpeed(params.moveSpeed);
 	playAnimeWalk();
 
-	// “ü‚Á‚½‚ç‚·‚®’Tõ‚·‚é
+	// “ü‚Á‚½‚ç‚·‚®’Tõ‚ğˆË—Š‚·‚é
 	path.clear();
 	pathIndex = 0;
 	repathTimer = 0.0f;
@@ -55,16 +71,23 @@ void EnemyChaseState::Update(void)
 	const Vector3 pos = getPos();
 	const Vector3 goal = getGoal();
 
-	// ˆê’èŠÔŠu‚ÅŒo˜H‚ğ’Tõ‚µ’¼‚·
+	// ˆê’èŠÔŠu‚ÅŒo˜H‚Ì’Tõ‚ğˆË—Š‚·‚é(Œ‹‰Ê‚ª“Í‚­‚Ü‚Å‚ÍA¡‚ÌŒo˜H‚Å•à‚«‘±‚¯‚é)
 	repathTimer -= TimeScale::Get();
 	if (repathTimer <= 0.0f)
 	{
-		Repath(pos, goal);
-		repathTimer = params.repathFrames;
+		RequestRepath(pos, goal);
+		repathTimer = params.repathFrames + RandomFrames(params.repathFrames * 0.5f);
 	}
 
-	// –Ú•W‚É\•ª‹ß‚¯‚ê‚Î‚»‚êˆÈã‹ß‚Ã‚©‚È‚¢
-	if (DistanceXZ(pos, goal) < params.stopDistance) { return; }
+	// ü‚è‚Ì“G‚©‚ç—£‚ê‚éŒü‚«
+	const Vector3 separation = getSeparation() * params.separationWeight;
+
+	// –Ú•W‚É\•ª‹ß‚¯‚ê‚Î‚»‚êˆÈã‹ß‚Ã‚©‚¸Aü‚è‚Ì“G‚Æd‚È‚ç‚È‚¢‚æ‚¤‚ÉL‚ª‚é‚¾‚¯‚É‚·‚é
+	if (DistanceXZ(pos, goal) < params.stopDistance)
+	{
+		if (separation.LengthSq() > 1.0e-4f) { motion.ApplyInput(separation * 0.5f); }
+		return;
+	}
 
 	// ’…‚¢‚½“_‚Í”ò‚Î‚µ‚ÄAŸ‚ÉŒü‚©‚¤“_‚ğŒˆ‚ß‚é
 	while (pathIndex < path.size() && DistanceXZ(pos, path[pathIndex].pos) < params.arriveDistance)
@@ -78,11 +101,16 @@ void EnemyChaseState::Update(void)
 	dir.y = 0.0f;
 	if (dir.LengthSq() < 1.0e-6f) { return; }
 
+	// is•ûŒü‚ÉAü‚è‚Ì“G‚©‚ç—£‚ê‚éŒü‚«‚ğ‘«‚·
+	dir = dir.Normalized() + separation;
+	if (dir.LengthSq() < 1.0e-6f) { return; }
+
 	motion.ApplyInput(dir.Normalized());
 }
 
 void EnemyChaseState::Exit(void)
 {
+	nav.Cancel(this);
 	path.clear();
 	pathIndex = 0;
 }
@@ -94,17 +122,20 @@ float EnemyChaseState::DistanceXZ(const Vector3& a, const Vector3& b)
 	return std::sqrt(dx * dx + dz * dz);
 }
 
-void EnemyChaseState::Repath(const Vector3& pos, const Vector3& goal)
+void EnemyChaseState::RequestRepath(const Vector3& pos, const Vector3& goal)
 {
-	std::vector<PathPoint> newPath;
-	if (astar.FindPath(grid, pos, goal, newPath))
-	{
-		path = std::move(newPath);
-	}
-	else
-	{
-		// ’Tõ‚É¸”s‚µ‚½‚ç—§‚¿~‚Ü‚é(‰®ã‚È‚ÇA’nã‚©‚ç“Í‚©‚È‚¢êŠ‚É‚¢‚éê‡‚È‚Ç)
-		path.clear();
-	}
-	pathIndex = 0;
+	nav.RequestPath(this, pos, goal,
+		[this](bool found, std::vector<PathPoint>& newPath)
+		{
+			if (found)
+			{
+				path = std::move(newPath);
+			}
+			else
+			{
+				// ’Tõ‚É¸”s‚µ‚½‚ç—§‚¿~‚Ü‚é(‰®ã‚È‚ÇA’nã‚©‚ç“Í‚©‚È‚¢êŠ‚É‚¢‚éê‡‚È‚Ç)
+				path.clear();
+			}
+			pathIndex = 0;
+		});
 }
