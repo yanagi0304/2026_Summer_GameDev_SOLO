@@ -30,6 +30,9 @@ void GroundMotionController::Update(float timeScale)
 // 移動入力に応じて水平方向の速度を更新
 void GroundMotionController::ApplyInput(const Vector3& inputDirection, float timeScale)
 {
+    // 段差を登る判定のために、入力の向きを記録する(物理停止中などで処理しない場合も記録する)
+    RecordInput(inputDirection);
+
     if (!physicsBody) return;
     PhysicsBody& body = *physicsBody;
     // 物理停止中・時間停止中は処理しない

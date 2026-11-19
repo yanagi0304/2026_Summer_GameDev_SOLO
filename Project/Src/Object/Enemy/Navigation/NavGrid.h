@@ -66,6 +66,16 @@ public:
 	// 登録された障害物からグリッドを構築
 	void Build(const Config& config);
 
+	// Buildの各段階にかかった時間(ミリ秒。デバッグ表示用)
+	struct BuildTimings
+	{
+		double floorsMs = 0.0;
+		double obstaclesMs = 0.0;
+		double reachableMs = 0.0;
+		double nearestMs = 0.0;
+	};
+	const BuildTimings& GetBuildTimings(void) const { return buildTimings; }
+
 	// ---- 問い合わせ ----
 
 	bool IsBuilt(void) const { return !walkable.empty(); }
@@ -127,6 +137,9 @@ private:
 	// 1つのボックスを歩行可否に反映
 	void Rasterize(const ObstacleBox& box);
 
+	// 全セルについて、一番近い歩けるセルの表を作る(目標が屋上や建物の中でも、近くの歩ける場所を一瞬で引ける)
+	void BuildNearestWalkable(void);
+
 	// 1つの三角形を歩行可否と視線の遮蔽に反映
 	void RasterizeTriangle(const ObstacleTriangle& tri);
 
@@ -138,6 +151,8 @@ private:
 	Config config;
 	int width = 0;
 	int height = 0;
+
+	BuildTimings buildTimings;
 
 	std::vector<ObstacleBox> obstacles;
 	std::vector<ObstacleTriangle> triangles;
@@ -151,6 +166,9 @@ private:
 	// 床の高さの最小・最大(壁の三角形を、床から遠い高さにあるものとして素早く除外するため)
 	float floorMinY = 0.0f;
 	float floorMaxY = 0.0f;
+
+	// セルごとの「一番近い歩けるセル」の番号(歩けるセルがなければ-1)
+	std::vector<int> nearestWalkableIdx;
 
 	// 1=視線を遮る壁がある(三角形から生成。敵が壁越しに見えないようにするため)
 	std::vector<uint8_t> opaque;

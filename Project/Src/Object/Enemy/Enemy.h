@@ -57,6 +57,8 @@ public:
 	// デバッグ描画(視線の向き、状態、経路)
 	void DrawDebug(void)const;
 
+	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
+
 private:
 
 	// 状態定義

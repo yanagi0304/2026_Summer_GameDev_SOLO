@@ -83,7 +83,7 @@ void Enemy::Load(void)
 	GroundMotionController* motion = new GroundMotionController();
 	AddMotionController(motion);
 	motion->SetTransform(&trans);
-	motion->SetGroundedSource(&isGround);
+	motion->SetGroundedSource(GroundedFlag());
 	motion->SetGroundAcceleration(3.0f);
 	motion->SetAirAcceleration(3.0f);
 	motion->SetMomentumSteering(0.2f);
@@ -304,4 +304,12 @@ void Enemy::DrawDebug(void)const
 			prev = path[i].pos;
 		}
 	}
+}
+
+void Enemy::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
+{
+	if (other.GetTag() != COLLIDER_TAG::Asteroid) { return; }
+
+	Defeat();
+
 }

@@ -91,7 +91,7 @@ void Jazz::Load(void)
 	// モデル制御情報を設定
 	groundMotionController->SetTransform(&trans);
 	// 接地判定の参照先を設定
-	groundMotionController->SetGroundedSource(&isGround);
+	groundMotionController->SetGroundedSource(GroundedFlag());
 	// 接地時の加速度を設定
 	groundMotionController->SetGroundAcceleration(3.0f);
 	// 空中時の加速度を設定

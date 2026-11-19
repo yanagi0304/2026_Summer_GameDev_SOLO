@@ -49,6 +49,7 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 	std::vector<PathPoint>& outPath, const Options& options)
 {
 	outPath.clear();
+	lastPathPartial = false;
 
 	if (!grid.IsBuilt()) { return false; }
 
@@ -56,23 +57,27 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 	const Vector2I rawStart = grid.WorldToCell(start);
 	const Vector2I rawGoal = grid.WorldToCell(goal);
 	const auto startCell = grid.FindNearestWalkable(rawStart, options.snapRadius);
-	const auto goalCell = grid.FindNearestWalkable(rawGoal, options.snapRadius);
-	if (!startCell || !goalCell) { return false; }
+	const auto goalCell = grid.FindNearestWalkable(rawGoal, options.goalSnapRadius);
+	// 開始が見つからなければ探索できない。目標の近くに歩けるセルがなくても(屋上など)、近づける所までは探索する
+	if (!startCell) { return false; }
 
 	const int width = grid.GetWidth();
 	const int height = grid.GetHeight();
 	PrepareBuffers(static_cast<size_t>(width) * height);
 
 	const int startIdx = startCell->y * width + startCell->x;
-	const int goalIdx = goalCell->y * width + goalCell->x;
+	const int goalIdx = goalCell ? (goalCell->y * width + goalCell->x) : -1;
 
 	// 目標の位置: 目標が歩けるセルならその座標のまま、補正した場合はセル中心
-	Vector3 goalPos = grid.CellToWorld(*goalCell);
-	if (*goalCell == rawGoal)
+	Vector3 goalPos = goalCell ? grid.CellToWorld(*goalCell) : start;
+	if (goalCell && *goalCell == rawGoal)
 	{
 		goalPos.x = goal.x;
 		goalPos.z = goal.z;
 	}
+
+	// 探索で向かう先(セル)
+	const Vector2I target = goalCell ? *goalCell : rawGoal;
 
 	std::vector<Vector3> points;
 	points.push_back(start);
@@ -90,10 +95,14 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 		gCost[startIdx] = 0.0f;
 		parent[startIdx] = -1;
 		openStamp[startIdx] = stamp;
-		open.emplace(Heuristic(startCell->x, startCell->y, goalCell->x, goalCell->y) * options.heuristicWeight, startIdx);
+		open.emplace(Heuristic(startCell->x, startCell->y, target.x, target.y) * options.heuristicWeight, startIdx);
 
 		bool found = false;
 		int expanded = 0;
+
+		// 目標に着けなかった時のために、目標(元の位置)に一番近づいたセルを覚えておく
+		int bestIdx = startIdx;
+		float bestH = Heuristic(startCell->x, startCell->y, rawGoal.x, rawGoal.y);
 
 		while (!open.empty())
 		{
@@ -103,6 +112,9 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 			// 同じセルが複数回積まれることがあるので、処理済みは飛ばす
 			if (closedStamp[current] == stamp) { continue; }
 			closedStamp[current] = stamp;
+
+			const float h = Heuristic(current % width, current / width, rawGoal.x, rawGoal.y);
+			if (h < bestH) { bestH = h; bestIdx = current; }
 
 			if (current == goalIdx)
 			{
@@ -137,16 +149,24 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 					openStamp[next] = stamp;
 					gCost[next] = newCost;
 					parent[next] = current;
-					open.emplace(newCost + Heuristic(nx, ny, goalCell->x, goalCell->y) * options.heuristicWeight, next);
+					open.emplace(newCost + Heuristic(nx, ny, target.x, target.y) * options.heuristicWeight, next);
 				}
 			}
 		}
 
-		if (!found) { return false; }
+		int endIdx = goalIdx;
+		if (!found)
+		{
+			// 目標に着けない(屋上や囲われた場所など)時は、行ける範囲で一番近づける所まで向かう
+			// 1歩も近づけないなら失敗にする
+			if (!options.allowPartial || bestIdx == startIdx) { return false; }
+			endIdx = bestIdx;
+			lastPathPartial = true;
+		}
 
 		// ---- 経路復元(目標 → 開始) ----
 		std::vector<int> cells;
-		for (int i = goalIdx; i != -1; i = parent[i])
+		for (int i = endIdx; i != -1; i = parent[i])
 		{
 			cells.push_back(i);
 		}
@@ -157,7 +177,8 @@ bool AStar::FindPath(const NavGrid& grid, const Vector3& start, const Vector3& g
 		{
 			points.push_back(grid.CellToWorld(Vector2I(cells[i] % width, cells[i] / width)));
 		}
-		points.push_back(goalPos);
+		// 目標に着けた時は実際の位置、着けなかった時は一番近づけたセルの中心を、最後の点にする
+		points.push_back(found ? goalPos : grid.CellToWorld(Vector2I(endIdx % width, endIdx / width)));
 	}
 
 	// ---- スムージング ----

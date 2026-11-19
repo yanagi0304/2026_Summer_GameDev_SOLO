@@ -48,6 +48,9 @@ public:
     // 移動入力に応じて水平方向の速度を更新
     void ApplyInput(const Vector3& inputDirection, float timeScale = TimeScale::Get()) override;
 
+    // 今の目標の移動速度(SetMoveSpeedで設定した値)
+    float GetCruiseSpeed(void) const override { return moveSpeed; }
+
     void SetTransform(Transform* value) { transform = value; }
 
     // 入力方向に応じて向きを更新

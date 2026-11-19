@@ -147,6 +147,10 @@ public:
 	bool Raycast(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result);
 	RaycastHit Raycast(const Vector3& origin, const Vector3& direction, float maxDistance);
 
+	// ステージ(COLLIDER_GROUP::Stage)だけを対象にしたレイキャスト。自分や敵のコライダーに当たらず、床・壁だけを調べたい時に使う
+	// メッシュはBVHで絞り込むので、大きなステージでも毎フレーム呼べる
+	bool RaycastStage(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result);
+
 	// チャンク描画
 	void DrawChunkGrid(const Vector3& cameraPos) const;
 
@@ -185,6 +189,12 @@ private:
 	// clearのみで再利用し、判定ごとのメモリ確保を抑える
 	std::vector<unsigned int> meshQueryBufferA;
 	std::vector<unsigned int> meshQueryBufferB;
+
+	// レイキャスト用の三角形候補の作業バッファ
+	std::vector<unsigned int> raycastTriangleBuffer;
+
+	// レイキャストの実体(stageOnlyがtrueならステージのグループだけを対象にする)
+	bool RaycastImpl(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result, bool stageOnly);
 
 
 #pragma region 判定の振り分け

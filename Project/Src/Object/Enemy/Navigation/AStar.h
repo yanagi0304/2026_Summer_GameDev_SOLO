@@ -32,12 +32,20 @@ public:
 		// 開始・目標がセル外/壁の中の時に、最寄りの歩行可能セルを探す範囲(セル数)
 		int snapRadius = 8;
 
+		// 目標が壁の中・屋上などの時に、近くの歩けるセルへ補正する範囲(セル数)。
+		// 大きくしても、グリッドが一番近いセルの表を持っているので重くならない
+		int goalSnapRadius = 1000;
+
 		// 展開するノード数の上限(広いマップで1回の探索が重くなりすぎないように)
-		int maxExpandedNodes = 200000;
+		int maxExpandedNodes = 10000;
 
 		// ヒューリスティックの重み。1.0で最短経路。大きくすると、探索するセルが減って速くなる代わりに、
 		// 経路が最短よりやや遠回りになることがある(1.5なら最大で1.5倍まで)。敵の追跡には十分
 		float heuristicWeight = 1.0f;
+
+		// 目標に着けない時(屋上、囲われた場所、探索の上限など)に、行ける範囲で目標に一番近づける所までの経路を返す
+		// falseにすると、着けない時は失敗(false)を返す
+		bool allowPartial = true;
 
 		// 経路上の不要な中間点を、直線で歩ける限り取り除く
 		bool smooth = true;
@@ -55,6 +63,9 @@ public:
 		return FindPath(grid, start, goal, outPath, Options());
 	}
 
+	// 直近の探索が、目標に着けず「一番近づける所まで」の経路だったか(allowPartialの結果)
+	bool WasLastPathPartial(void)const { return lastPathPartial; }
+
 private:
 
 	// 作業用バッファを探索ごとに初期化しなくて済むよう、世代番号で有効かを判断する
@@ -65,4 +76,6 @@ private:
 	std::vector<uint32_t> openStamp;
 	std::vector<uint32_t> closedStamp;
 	uint32_t stamp = 0;
+
+	bool lastPathPartial = false;
 };

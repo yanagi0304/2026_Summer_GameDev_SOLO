@@ -13,6 +13,9 @@ public:
 		if (collision == nullptr) { throw std::runtime_error("当たり判定管理クラスが存在しない状態でCurrentCollisionManagerへの参照がありました"); }
 		return *collision;
 	}
+	// 当たり判定管理クラスが存在するか(Getは存在しないと例外を投げるので、無くても動く処理で先に確認する)
+	static bool Exists(void) { return collision != nullptr; }
+
 	// 設定
 	static void Set(CollisionManager* currentCollisionManager) { collision = currentCollisionManager; }
 

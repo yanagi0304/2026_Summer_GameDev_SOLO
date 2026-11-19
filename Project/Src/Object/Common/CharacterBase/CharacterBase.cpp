@@ -1,5 +1,7 @@
 #include "CharacterBase.h"
 
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 #include "../../../Application/Application.h"
@@ -8,6 +10,7 @@
 
 #include "../MotionController/MotionControllerBase.h"
 #include "../../../Manager/TimeScale/TimeScale.h"
+#include "../../../Manager/Collision/CurrentCollisionManager.h"
 
 #include "../AnimationController/AnimationController.h"
 
@@ -18,6 +21,10 @@ CharacterBase::CharacterBase() :
 	stateMap(),
 
 	motionController(nullptr),
+
+	stepClimb(),
+	stepClimbEnabled(true),
+	groundedLoose(false),
 
 	anime(nullptr)
 {
@@ -31,12 +38,19 @@ CharacterBase::CharacterBase(const std::string& parameterPath):
 
 	motionController(nullptr),
 
+	stepClimb(),
+	stepClimbEnabled(true),
+	groundedLoose(false),
+
 	anime(nullptr)
 {
 }
 
 void CharacterBase::BaseUpdate(void)
 {
+	// ジャンプや移動の加速に使う接地判定を、状態の更新より前に更新する
+	UpdateGroundedLoose();
+
 	// ステートの更新
 	if (!stateMap.empty()) {
 		stateMap.at(state)->OtherStateConditionsUpdate();
@@ -48,6 +62,9 @@ void CharacterBase::BaseUpdate(void)
 	if (motionController != nullptr) {
 		motionController->Update(TimeScale::Get());
 	}
+
+	// 段差を登る(速度が決まった後、PhysicsBodyのStepで移動する前に行う)
+	UpdateStepClimb();
 
 	// アニメーション更新
 	if (anime) {
@@ -116,6 +133,101 @@ CharacterStateBase& CharacterBase::GetStateIns(int state)
 
 #pragma endregion
 
+#pragma region 段差の自動登り
+
+void CharacterBase::UpdateGroundedLoose(void)
+{
+	groundedLoose = isGround;
+	if (groundedLoose) { return; }
+
+	// 接地フラグが立っていなくても、直下の地面がすぐ近くなら、地面にいるとみなす
+	// (縁石の角に斜めに押し上げられた時など、地面の近くでフラグが外れてもジャンプできるようにする)
+	PhysicsBody* body = GetPhysicsBody();
+	if (body == nullptr || body->IsFrozen() || body->GetMode() != PhysicsBody::MotionMode::Character) { return; }
+	if (!CurrentCollisionManager::Exists()) { return; }
+
+	// ジャンプの出だしなど、上へ向かっている間は、地面にいるとみなさない(二重にジャンプしないように)
+	if (body->GetVelocity().y > 10.0f) { return; }
+
+	RaycastHit hit;
+	const float maxDistance = 20.0f + stepClimb.maxGroundClearance + 30.0f;
+	if (CurrentCollisionManager::Get().RaycastStage(Vector3(trans.pos.x, trans.pos.y + 20.0f, trans.pos.z), Vector3(0.0f, -1.0f, 0.0f), maxDistance, hit)
+		&& (trans.pos.y - hit.point.y) <= stepClimb.maxGroundClearance)
+	{
+		groundedLoose = true;
+	}
+}
+void CharacterBase::SetStepClimb(bool enabled, float maxHeight, float radius, float bodyHeight)
+{
+	stepClimbEnabled = enabled;
+	stepClimb.maxHeight = maxHeight;
+	stepClimb.radius = radius;
+	stepClimb.bodyHeight = bodyHeight;
+}
+
+void CharacterBase::UpdateStepClimb(void)
+{
+	// 物理が有効なキャラクターだけが対象。地面にいるかは、判定の中で直下のレイで調べる
+	// (接地フラグは、縁石に押しつけて歩くと、角に押し上げられて外れるので使わない)
+	if (!stepClimbEnabled) { stepClimbDebug.result = StepClimbResult::Disabled; return; }
+
+	PhysicsBody* body = GetPhysicsBody();
+	if (body == nullptr || body->IsFrozen() || body->GetMode() != PhysicsBody::MotionMode::Character) { return; }
+	if (!CurrentCollisionManager::Exists()) { return; }
+
+	// 進む向き: 入力があれば入力の向き。縁石に斜めに押しつけて、物理に縁石に沿って滑らされている時は、
+	// 速度の向きが縁石と平行になって壁に当たらないので、進みたい向き(入力)で判定する
+	const Vector3 velocity = body->GetVelocity();
+	Vector3 moveDirection(velocity.x, 0.0f, velocity.z);
+	float speed = std::sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+	Vector3 input(0.0f);
+	if (motionController != nullptr && motionController->TakeLastInput(input))
+	{
+		input.y = 0.0f;
+		if (input.LengthSq() > 0.01f)
+		{
+			moveDirection = input;
+			speed = (std::max)(speed, 3.0f);   // 壁に止められて速度が小さくても、押しつけている間は判定する
+		}
+	}
+	if (speed < 0.5f) { stepClimbDebug.result = StepClimbResult::NotMoving; return; }
+
+	// ジャンプの出だしなど、上へ向かっている間は登らない
+	if (velocity.y > 10.0f) { stepClimbDebug.result = StepClimbResult::NotGrounded; return; }
+
+	// ステージだけを対象にしたレイで、進行方向の低い壁(段差)の上面の高さを調べる
+	CollisionManager& collision = CurrentCollisionManager::Get();
+	const float rise = ComputeStepRise(trans.pos, moveDirection, speed, stepClimb,
+		[&collision](const Vector3& origin, const Vector3& direction, float maxDistance)
+		{
+			StepRayHit result;
+			RaycastHit hit;
+			if (collision.RaycastStage(origin, direction, maxDistance, hit))
+			{
+				result.hit = true;
+				result.distance = hit.distance;
+				result.point = hit.point;
+				result.normal = hit.normal;
+			}
+			return result;
+		}, &stepClimbDebug);
+	if (rise <= 0.0f) { return; }
+
+	// 段差の高さだけ持ち上げる。落下速度は0にして、持ち上げた分がすぐ戻らないようにする
+	trans.pos.y += rise;
+
+	// 壁に押しつけている間は、物理が壁へ向かう速度を毎フレーム打ち消していて、速度がほぼ0になっている。
+	// そのままだと、持ち上げた後に加速し直すまで止まって見えるので、入力の向きへ、通常の移動速度まで引き上げる
+	Vector3 horizontal(velocity.x, 0.0f, velocity.z);
+	const float cruise = (motionController != nullptr) ? motionController->GetCruiseSpeed() : 0.0f;
+	if (moveDirection.LengthSq() > 1.0e-6f)
+	{
+		horizontal = moveDirection.Normalized() * (std::max)(speed, cruise);
+	}
+	body->SetVelocity(Vector3(horizontal.x, (std::max)(velocity.y, 0.0f), horizontal.z));
+}
+
+#pragma endregion
 void CharacterBase::AddMotionController(MotionControllerBase* controller)
 {
 	// 同一ポインタの再登録では何もしない。

@@ -1,8 +1,11 @@
 #include "NavGrid.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <fstream>
+#include <functional>
+#include <queue>
 #include <sstream>
 
 namespace
@@ -45,6 +48,20 @@ namespace
 		return (std::min)(d0, (std::min)(d1, d2));
 	}
 
+	// 点が三角形の内側にあるか(XZ平面。距離は求めないので軽い)
+	bool PointInTriangle(float px, float pz, const Vector3 p[3])
+	{
+		const auto side = [](float px, float pz, const Vector3& a, const Vector3& b)
+		{
+			return (b.x - a.x) * (pz - a.z) - (b.z - a.z) * (px - a.x);
+		};
+		const float s0 = side(px, pz, p[0], p[1]);
+		const float s1 = side(px, pz, p[1], p[2]);
+		const float s2 = side(px, pz, p[2], p[0]);
+		const bool hasNeg = (s0 < 0.0f) || (s1 < 0.0f) || (s2 < 0.0f);
+		const bool hasPos = (s0 > 0.0f) || (s1 > 0.0f) || (s2 > 0.0f);
+		return !(hasNeg && hasPos);
+	}
 	// これより水平に近い面(法線のYが大きい面)は、床・屋根・坂とみなして障害物にしない
 	constexpr float WALL_NORMAL_Y_MAX = 0.7f;
 }
@@ -108,6 +125,7 @@ void NavGrid::Build(const Config& cfg)
 		walkable.clear();
 		floorHeights.clear();
 		opaque.clear();
+		nearestWalkableIdx.clear();
 		return;
 	}
 
@@ -117,10 +135,16 @@ void NavGrid::Build(const Config& cfg)
 	opaque.assign(static_cast<size_t>(width) * height, 0);
 	floorMinY = floorMaxY = config.floorY;
 
+	using Clock = std::chrono::high_resolution_clock;
+	const auto ms = [](Clock::time_point from) { return std::chrono::duration<double, std::milli>(Clock::now() - from).count(); };
+
 	// 床の高さを、ステージのメッシュから求める(坂道や歩道の段差に合わせる)
+	auto stage = Clock::now();
 	BuildFloors();
+	buildTimings.floorsMs = ms(stage);
 
 	// 壁などの判定は、セルごとの床の高さを基準にする
+	stage = Clock::now();
 	for (const ObstacleBox& box : obstacles)
 	{
 		Rasterize(box);
@@ -131,8 +155,17 @@ void NavGrid::Build(const Config& cfg)
 		RasterizeTriangle(tri);
 	}
 
+	buildTimings.obstaclesMs = ms(stage);
+
 	// 建物の内部など、歩いて行けない場所を歩行不可にする
+	stage = Clock::now();
 	if (config.keepOnlyReachable) { RestrictToReachable(config.reachableSeed); }
+	buildTimings.reachableMs = ms(stage);
+
+	// 一番近い歩けるセルの表(歩行可否が確定した後に作る)
+	stage = Clock::now();
+	BuildNearestWalkable();
+	buildTimings.nearestMs = ms(stage);
 }
 
 void NavGrid::BuildFloors(void)
@@ -140,9 +173,9 @@ void NavGrid::BuildFloors(void)
 	const float cs = config.cellSize;
 	const size_t cellCount = walkable.size();
 
-	// 各セルの中心の真下/真上にある、床とみなせる面の高さを集める
-	std::vector<std::vector<float>> candidates(cellCount);
-	bool any = false;
+	// 各セルの中心の真下/真上にある、床とみなせる面の高さを、(セル番号, 高さ)の組として集める
+	std::vector<std::pair<int, float>> entries;
+	entries.reserve(cellCount * 2);
 
 	for (const ObstacleTriangle& tri : triangles)
 	{
@@ -167,17 +200,27 @@ void NavGrid::BuildFloors(void)
 				const float cz = config.minPos.z + (y + 0.5f) * cs;
 
 				// セルの中心が三角形の内側にある時だけ、その面の高さを候補にする
-				if (DistancePointTriangle(cx, cz, p) > 0.0f) { continue; }
+				if (!PointInTriangle(cx, cz, p)) { continue; }
 
 				const float h = p[0].y - (normal.x * (cx - p[0].x) + normal.z * (cz - p[0].z)) / normal.y;
-				candidates[Index(x, y)].push_back(h);
-				any = true;
+				entries.emplace_back(Index(x, y), h);
 			}
 		}
 	}
 
 	// 床の面がなければ、基準の高さの平らな床のままにする(ボックスだけで障害物を作った場合など)
-	if (!any) { return; }
+	if (entries.empty()) { return; }
+
+	// セルごとにまとめる(個数を数えてから並べる。セルごとに小さな配列を作るより速い)
+	std::vector<int> candStart(cellCount + 1, 0);
+	for (const auto& e : entries) { ++candStart[e.first + 1]; }
+	for (size_t i = 0; i < cellCount; ++i) { candStart[i + 1] += candStart[i]; }
+	std::vector<float> candHeights(entries.size());
+	{
+		std::vector<int> fill(candStart.begin(), candStart.end() - 1);
+		for (const auto& e : entries) { candHeights[fill[e.first]++] = e.second; }
+	}
+	// セルiの床の候補は、candHeights[candStart[i]] ? candHeights[candStart[i + 1] - 1]
 
 	// 出発点のすぐ近くで、出発点の高さに近い床のセルを探す
 	// 近くに床がなければ(床のメッシュがない場合など)、平らな床のままにする
@@ -193,10 +236,14 @@ void NavGrid::BuildFloors(void)
 		{
 			const Vector2I cell(seedCell.x + dx, seedCell.y + dy);
 			if (!InBounds(cell)) { continue; }
-			for (float h : candidates[Index(cell.x, cell.y)])
+			const int idx = Index(cell.x, cell.y);
+			for (int k = candStart[idx]; k < candStart[idx + 1]; ++k)
 			{
+				const float h = candHeights[k];
+
 				// 出発点の高さから離れすぎた面(屋根の上など)は出発点にしない
 				if (std::abs(h - config.reachableSeed.y) > 200.0f) { continue; }
+
 				// 距離を優先し、高さの違いも少し効かせる(別の階の床を選ばないように)
 				const float score = static_cast<float>(dx * dx + dy * dy) * cs * cs + std::abs(h - config.reachableSeed.y) * 10.0f;
 				if (score < bestScore) { bestScore = score; startCell = cell; startHeight = h; found = true; }
@@ -230,13 +277,17 @@ void NavGrid::BuildFloors(void)
 			const int next = Index(nx, ny);
 			if (assigned[next]) { continue; }
 
-			const std::vector<float>& cand = candidates[next];
 			float chosen = currentHeight;
-			if (!cand.empty())
+			const int begin = candStart[next];
+			const int end = candStart[next + 1];
+			if (begin != end)
 			{
 				// 今の床の高さに一番近い面を選ぶ。高さが離れすぎていれば(崖・屋根の上)、歩けない
-				float best = cand[0];
-				for (float h : cand) { if (std::abs(h - currentHeight) < std::abs(best - currentHeight)) { best = h; } }
+				float best = candHeights[begin];
+				for (int k = begin; k < end; ++k)
+				{
+					if (std::abs(candHeights[k] - currentHeight) < std::abs(best - currentHeight)) { best = candHeights[k]; }
+				}
 				if (std::abs(best - currentHeight) > config.maxFloorStep) { continue; }
 				chosen = best;
 			}
@@ -258,7 +309,6 @@ void NavGrid::BuildFloors(void)
 		floorMaxY = (std::max)(floorMaxY, floorHeights[i]);
 	}
 }
-
 void NavGrid::Rasterize(const ObstacleBox& box)
 {
 	const float bottom = box.center.y - box.halfSize.y;
@@ -448,9 +498,79 @@ float NavGrid::GetFloorY(const Vector2I& cell) const
 	return floorHeights[Index(cell.x, cell.y)];
 }
 
+void NavGrid::BuildNearestWalkable(void)
+{
+	// 歩けるセルすべてを出発点にして、各セルに「一番近い歩けるセル」を覚えさせる。
+	// 2回の走査(左上から右下、右下から左上)で距離を伝える方式(斜めは14、縦横は10)。
+	// 厳密な最短ではなく、わずかに誤差があるが、使い道(近くの歩ける場所へ補正する)には十分で、とても速い
+	const int w = width;
+	const int h = height;
+	const int kFar = 1 << 28;
+
+	nearestWalkableIdx.assign(walkable.size(), -1);
+	std::vector<int> dist(walkable.size(), kFar);
+	for (size_t i = 0; i < walkable.size(); ++i)
+	{
+		if (walkable[i] != 0)
+		{
+			dist[i] = 0;
+			nearestWalkableIdx[i] = static_cast<int>(i);
+		}
+	}
+
+	// 隣のセルから距離と出発点を受け取る
+	const auto relax = [&](int self, int x, int y, int cost)
+	{
+		if (x < 0 || y < 0 || x >= w || y >= h) { return; }
+		const int from = y * w + x;
+		if (dist[from] + cost < dist[self])
+		{
+			dist[self] = dist[from] + cost;
+			nearestWalkableIdx[self] = nearestWalkableIdx[from];
+		}
+	};
+
+	for (int y = 0; y < h; ++y)
+	{
+		for (int x = 0; x < w; ++x)
+		{
+			const int i = y * w + x;
+			relax(i, x - 1, y, 10);
+			relax(i, x - 1, y - 1, 14);
+			relax(i, x, y - 1, 10);
+			relax(i, x + 1, y - 1, 14);
+		}
+	}
+
+	for (int y = h - 1; y >= 0; --y)
+	{
+		for (int x = w - 1; x >= 0; --x)
+		{
+			const int i = y * w + x;
+			relax(i, x + 1, y, 10);
+			relax(i, x + 1, y + 1, 14);
+			relax(i, x, y + 1, 10);
+			relax(i, x - 1, y + 1, 14);
+		}
+	}
+}
 std::optional<Vector2I> NavGrid::FindNearestWalkable(const Vector2I& cell, int maxRadius) const
 {
 	if (IsWalkable(cell)) { return cell; }
+
+	// 事前に作った表があれば、それを使う(探索半径が大きくても一瞬で引ける)
+	if (!nearestWalkableIdx.empty())
+	{
+		const int cx = (std::min)((std::max)(cell.x, 0), width - 1);
+		const int cy = (std::min)((std::max)(cell.y, 0), height - 1);
+		const int idx = nearestWalkableIdx[Index(cx, cy)];
+		if (idx < 0) { return std::nullopt; }
+
+		const Vector2I found(idx % width, idx / width);
+		const int dist = (std::max)(std::abs(found.x - cell.x), std::abs(found.y - cell.y));
+		if (dist > maxRadius) { return std::nullopt; }
+		return found;
+	}
 
 	std::optional<Vector2I> best;
 	float bestDistSq = 0.0f;

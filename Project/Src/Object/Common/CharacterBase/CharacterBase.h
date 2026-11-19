@@ -2,6 +2,8 @@
 
 #include "../ActorBase/ActorBase.h"
 
+#include "StepClimb.h"
+
 #include <map>
 
 class CharacterStateBase;
@@ -45,6 +47,20 @@ private:
 	// モーションコントローラーのインスタンス
 	MotionControllerBase* motionController; // CharacterBaseが所有し、解放する
 
+	// 段差を自動で登る設定
+	StepClimbParams stepClimb;
+	bool stepClimbEnabled;
+	StepClimbDebug stepClimbDebug;
+
+	// 地面にいるか(接地フラグ、または、直下の地面が近い)。ジャンプや移動の加速に使う
+	bool groundedLoose;
+
+	// groundedLooseを更新する。状態の更新より前に呼ぶ
+	void UpdateGroundedLoose(void);
+
+	// 進行方向の低い段差を登る(持ち上げる)。接地中で、動いている時だけ働く
+	void UpdateStepClimb(void);
+
 	// キャラクターベース固有の更新処理
 	void BaseUpdate(void) override final;
 	// キャラクターベース固有の解放処理
@@ -86,6 +102,31 @@ protected:
 
 	// モーションコントローラー取得
 	MotionControllerBase* GetMotionController(void)const { return motionController; }
+
+#pragma endregion
+
+#pragma region 段差の自動登り
+
+	// 段差を自動で登る設定。初期設定で有効(最大50cm、コライダー半径40cm)
+	// 進行方向の低い段差(縁石・階段など)を、持ち上げて登る。プレイヤーも敵も同じ処理で登れる
+	// ナビゲーションの「乗り越えられる段差(NavGrid::Config::stepHeight)」と、maxHeightをそろえること
+	void SetStepClimb(bool enabled, float maxHeight = 50.0f, float radius = 40.0f, float bodyHeight = 180.0f);
+
+public:
+
+	// 直近の段差判定の結果(なぜ登った/登らなかったか。デバッグ表示用)
+	const StepClimbDebug& GetStepClimbDebug(void)const { return stepClimbDebug; }
+
+	// 接地フラグそのものと、直下の地面が近いかを含めた判定(デバッグ表示用)
+	bool GetGroundFlag(void)const { return isGround; }
+	bool IsGroundedLoose(void)const { return groundedLoose; }
+
+protected:
+
+	// 移動制御(GroundMotionController)の接地判定の参照先として渡す。
+	// 接地フラグは、縁石の角などに押し上げられると、地面のすぐ近くにいても外れてジャンプできなくなるので、
+	// 直下の地面が近い場合も「地面にいる」とみなす判定を渡す
+	const bool* GroundedFlag(void)const { return &groundedLoose; }
 
 #pragma endregion
 

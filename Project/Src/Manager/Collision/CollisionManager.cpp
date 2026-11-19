@@ -3136,7 +3136,7 @@ RaycastHit CollisionManager::Raycast(const Vector3& origin, const Vector3& direc
     return hit;
 }
 
-bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result)
+bool CollisionManager::RaycastImpl(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result, bool stageOnly)
 {
     result = RaycastHit{};
     constexpr float eps = 1.0e-6f;
@@ -3178,6 +3178,8 @@ bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, 
 
         for (ColliderBase* collider : groupColliders[i].colliders) {
             if (!collider || !collider->GetJudgeFlg()) { continue; }
+		// ステージだけを調べる場合は、それ以外のグループを飛ばす
+		if (stageOnly && i != (int)COLLIDER_GROUP::Stage) { continue; }
 			if (
 				collider->GetTag() == COLLIDER_TAG::CameraLine ||
 				collider->GetTag() == COLLIDER_TAG::CameraPoint
@@ -3275,7 +3277,13 @@ bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, 
             case COLLIDER_SHAPE::Mesh: {
                 auto* mesh = static_cast<MeshCollider*>(collider);
                 const Vector3 end = origin + dir * nearest;
-                for (unsigned int i = 0; i < mesh->GetTriangleNum(); ++i) {
+
+                // 線分のAABBと重なる三角形だけを調べる(BVH)。全三角形の総当たりは、大きなステージでは1回で数十msかかる
+                ColliderBase::AABB segmentBox;
+                segmentBox.min = Vector3((std::min)(origin.x, end.x) - 1.0f, (std::min)(origin.y, end.y) - 1.0f, (std::min)(origin.z, end.z) - 1.0f);
+                segmentBox.max = Vector3((std::max)(origin.x, end.x) + 1.0f, (std::max)(origin.y, end.y) + 1.0f, (std::max)(origin.z, end.z) + 1.0f);
+                mesh->QueryTriangles(segmentBox, raycastTriangleBuffer);
+                for (unsigned int i : raycastTriangleBuffer) {
                     Vector3 a, b, c, normal, point;
                     mesh->GetWorldTriangle(i, a, b, c, normal);
                     float rate = 0.0f;
@@ -3299,6 +3307,16 @@ bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, 
 #pragma endregion
 
 #pragma region デバッグ描画
+bool CollisionManager::Raycast(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result)
+{
+	return RaycastImpl(origin, direction, maxDistance, result, false);
+}
+
+bool CollisionManager::RaycastStage(const Vector3& origin, const Vector3& direction, float maxDistance, RaycastHit& result)
+{
+	return RaycastImpl(origin, direction, maxDistance, result, true);
+}
+
 
 // チャンクのグリッド線描画
 void CollisionManager::DrawChunkGrid(const Vector3& cameraPos) const

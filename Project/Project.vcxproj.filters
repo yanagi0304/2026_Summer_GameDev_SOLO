@@ -16,6 +16,7 @@
     <ClCompile Include="Src\Manager\Sound\SoundManager.cpp" />
     <ClCompile Include="Src\Object\Common\ActorBase\ActorBase.cpp" />
     <ClCompile Include="Src\Object\Common\CharacterBase\CharacterBase.cpp" />
+    <ClCompile Include="Src\Object\Common\CharacterBase\StepClimb.cpp" />
     <ClCompile Include="Src\Object\Common\DataLoad\ParameterLoad.cpp" />
     <ClCompile Include="Src\Scene\GameClear\GameClearScene.cpp" />
     <ClCompile Include="Src\Scene\GameOver\GameOverScene.cpp" />
@@ -126,6 +127,7 @@
     <ClInclude Include="Src\Manager\Sound\SoundManager.h" />
     <ClInclude Include="Src\Object\Common\ActorBase\ActorBase.h" />
     <ClInclude Include="Src\Object\Common\CharacterBase\CharacterBase.h" />
+    <ClInclude Include="Src\Object\Common\CharacterBase\StepClimb.h" />
     <ClInclude Include="Src\Object\Common\Collider\BoxCollider.h" />
     <ClInclude Include="Src\Object\Common\Collider\ColliderBase.h" />
     <ClInclude Include="Src\Object\Common\Collider\CapsuleCollider.h" />

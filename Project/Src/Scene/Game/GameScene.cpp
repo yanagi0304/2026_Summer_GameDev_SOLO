@@ -27,6 +27,7 @@
 #include "../../Object/Mannequin/MannequinManager.h"
 #include "../../Object/Stage/StageTutrial/StageTutrial.h"
 #include "../../Object/Enemy/Enemy.h"
+#include "../../Manager/Collision/CurrentCollisionManager.h"
 
 #include "../../Object/Common/CuttableActor/CuttableActor.h"
 
@@ -160,7 +161,53 @@ void GameScene::SubUiDraw(void)
 		DrawFormatString(0, 160, 0xffffff, "grid %dx%d  cell=%.0fcm  area=%.0fm x %.0fm",
 			navGrid.GetWidth(), navGrid.GetHeight(), navGrid.GetCellSize(),
 			(navGrid.GetConfig().maxPos.x - navGrid.GetConfig().minPos.x) / 100.0f, (navGrid.GetConfig().maxPos.z - navGrid.GetConfig().minPos.z) / 100.0f);
-	}
+
+		// グリッド生成の内訳(ミリ秒)
+		const NavGrid::BuildTimings& bt = navGrid.GetBuildTimings();
+		DrawFormatString(0, 180, 0xffffff, "build detail: floors=%.0f walls=%.0f reachable=%.0f nearest=%.0f", bt.floorsMs, bt.obstaclesMs, bt.reachableMs, bt.nearestMs);
+
+		// プレイヤーの段差判定の結果(なぜ登れた/登れないか)
+		if (const CharacterBase* player = dynamic_cast<const CharacterBase*>(operatorObject))
+		{
+			static const char* const NAMES[] = { "Disabled", "NotGrounded", "NotMoving", "NoWallAhead", "SlopeAhead", "WallTooTall", "NoTopSurface", "RiseOutOfRange", "Ceiling", "Climbed" };
+			static StepClimbDebug lastEvent;
+			const StepClimbDebug& sd = player->GetStepClimbDebug();
+
+			// 動いていない・空中・壁なしは入れ替わりが速いので、それ以外の結果だけ残す
+			if (sd.result != StepClimbResult::NotMoving && sd.result != StepClimbResult::NotGrounded && sd.result != StepClimbResult::NoWallAhead) { lastEvent = sd; }
+
+			DrawFormatString(0, 200, 0xffffff, "Step now : %s  wallDist=%.0f  rise=%.0f  y=%.1f  clearance=%.1f", NAMES[static_cast<int>(sd.result)], sd.wallDistance, sd.rise, player->GetTrans().pos.y, sd.groundClearance);
+			DrawFormatString(0, 220, 0xffff00, "Step last: %s  wallDist=%.0f  rise=%.0f", NAMES[static_cast<int>(lastEvent.result)], lastEvent.wallDistance, lastEvent.rise);
+			DrawFormatString(0, 280, 0xffffff, "Grounded: flag=%d  nearGround(used for jump)=%d", player->GetGroundFlag() ? 1 : 0, player->IsGroundedLoose() ? 1 : 0);
+		}
+
+		// ステージへのレイの実測値(段差の高さと、レイが機能しているかを調べるため)
+		if (operatorObject != nullptr && CurrentCollisionManager::Exists())
+		{
+			CollisionManager& cm = CurrentCollisionManager::Get();
+			const Vector3 pp = operatorObject->GetTrans().pos;
+			Vector3 fwd = operatorObject->GetTrans().rotation.Rotate(Vector3(0.0f, 0.0f, 1.0f));
+			fwd.y = 0.0f;
+			fwd = fwd.LengthSq() > 1.0e-6f ? fwd.Normalized() : Vector3(0.0f, 0.0f, 1.0f);
+
+			RaycastHit hit;
+			const bool down = cm.RaycastStage(pp + Vector3(0.0f, 50.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), 250.0f, hit);
+			DrawFormatString(0, 240, 0xffffff, "RayDown(stage): %s  groundY=%.1f  playerY=%.1f", down ? "HIT" : "MISS", down ? hit.point.y : 0.0f, pp.y);
+
+			// 進行(正面)方向へ、足元から指定の高さで飛ばした時の、壁までの距離(cm)。当たらなければ--
+			// 地面(真下のレイが当たった高さ)を基準にする。当たらなければ足元の高さ
+			const float groundY = down ? hit.point.y : pp.y;
+			const float heights[5] = { 2.0f, 5.0f, 10.0f, 20.0f, 40.0f };
+			char buffer[160];
+			int length = snprintf(buffer, sizeof(buffer), "RayFwd(150cm) above GROUND:");
+			for (float h : heights)
+			{
+				const bool ok = cm.RaycastStage(Vector3(pp.x, groundY + h, pp.z), fwd, 150.0f, hit);
+				length += snprintf(buffer + length, sizeof(buffer) - length, "  +%.0f:", h);
+				length += ok ? snprintf(buffer + length, sizeof(buffer) - length, "%.0f", hit.distance) : snprintf(buffer + length, sizeof(buffer) - length, "--");
+			}
+			DrawString(0, 260, buffer, 0xffffff);
+		}	}
 	DrawStringToHandle(0, 0, "ゲーム", 0xffffff, Font::GetIns().GetFont(FontKinds::Marumiya40));
 }
 
@@ -220,7 +267,10 @@ void GameScene::NavDebugInit(void)
 	cfg.cellSize = (std::max)((std::max)(sizeX, sizeZ) / 400.0f, 100.0f);
 	cfg.agentRadius = 45.0f;
 	cfg.agentHeight = 220.0f;
-	cfg.stepHeight = 30.0f;
+	// 縁石や段差: この高さまでの障害物は乗り越えられるものとして無視する(壁にしない)
+	// maxFloorStep(隣のセルとの床の高さの差の上限。初期値60)がこれ以上であること
+	cfg.stepHeight = 50.0f;
+	cfg.maxFloorStep = 60.0f;
 
 	// プレイヤーのいる場所から歩いて行けないセル(建物の内部など)は、歩行不可にする
 	cfg.keepOnlyReachable = true;
@@ -264,4 +314,15 @@ void GameScene::NavDebugDraw(void) const
 	navGrid.DrawDebug(false);
 
 	if (enemyManager) { enemyManager->DrawDebug(); }
-}
+
+	// プレイヤーの段差判定のレイ(足元の地面=黄、足元の壁=水色、壁の高さの探索=青、段差の上面=緑、頭上=紫。当たった点は赤)
+	if (const CharacterBase* player = dynamic_cast<const CharacterBase*>(operatorObject))
+	{
+		static const unsigned int COLORS[5] = { 0xffff00, 0x00ffff, 0x4060ff, 0x00ff00, 0xff00ff };
+		const auto& probes = player->GetStepClimbDebug().probes;
+		for (size_t i = 0; i < probes.size(); ++i)
+		{
+			DrawLine3D(probes[i].from.ToVECTOR(), probes[i].to.ToVECTOR(), COLORS[probes[i].kind % 5]);
+			if (probes[i].hit) { DrawSphere3D(probes[i].to.ToVECTOR(), 4.0f, 6, 0xff0000, 0xff0000, TRUE); }
+		}
+	}}
