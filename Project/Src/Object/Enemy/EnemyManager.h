@@ -26,7 +26,9 @@ public:
 	/// <param name="targetPos">敵が追う目標の座標(参照先はこのクラスより長く生きていること)</param>
 	/// <param name="addActor">シーンにActorを追加する関数</param>
 	/// <param name="removeActor">シーンからActorを外して解放する関数(Update中に呼べない点に注意)</param>
-	EnemyManager(const NavGrid& grid, NavManager& nav, const Vector3* targetPos, ActorFunc addActor, ActorFunc removeActor);
+	/// <param name="onHitPlayer">敵の攻撃がプレイヤーに当たった時に呼ぶ関数(引数は、攻撃した敵の位置)</param>
+	EnemyManager(const NavGrid& grid, NavManager& nav, const Vector3* targetPos, ActorFunc addActor, ActorFunc removeActor,
+		std::function<void(const Vector3&)> onHitPlayer = nullptr);
 
 	~EnemyManager(void);
 
@@ -63,6 +65,12 @@ private:
 
 	// 敵のモデルの複製元(シーンの読み込み時に1回だけ読み込む)
 	int baseModel;
+
+	// 敵が持つ弧月のモデルの複製元(同じく、シーンの読み込み時に1回だけ読み込む)
+	int swordModel;
+
+	// 攻撃がプレイヤーに当たった時の通知
+	std::function<void(const Vector3&)> onHitPlayer;
 
 	// ウェーブの進行
 	WaveController wave;

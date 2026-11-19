@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <vector>
 
 #include "../Common/CharacterBase/CharacterBase.h"
@@ -11,6 +12,8 @@
 class NavGrid;
 class NavManager;
 class EnemyChaseState;
+class EnemyAttackHitbox;
+class Kogetsu;
 
 // 敵
 // 目標(プレイヤー)を視界に入れたら、経路探索しながら追いかける
@@ -27,12 +30,23 @@ public:
 		NavManager* manager;
 	};
 
+	// 戦闘まわりの設定(弧月と、攻撃がプレイヤーに当たった時の通知)
+	struct Combat
+	{
+		// 複製元の弧月モデル(-1ならファイルから読み込む)
+		int swordModel = -1;
+
+		// 攻撃がプレイヤーに当たった時に呼ぶ(引数は、攻撃した敵の位置)
+		std::function<void(const Vector3&)> onHitPlayer;
+	};
+
 	/// <param name="nav">経路探索の共有情報</param>
 	/// <param name="targetPos">追う目標の座標(参照先は敵より長く生きていること)</param>
 	/// <param name="spawnPos">出現位置</param>
 	/// <param name="baseModel">複製元のモデルハンドル(-1ならファイルから読み込む。毎回の読み込みは重いので、複製を使う)</param>
 	/// <param name="peers">同じ場にいる敵の一覧(互いに離れるために使う。自分も含んでよい)</param>
-	Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel = -1);
+	/// <param name="combat">弧月の複製元と、攻撃が当たった時の通知</param>
+	Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel = -1, const Combat& combat = Combat());
 
 	~Enemy()override = default;
 
@@ -68,6 +82,7 @@ private:
 
 		Idle,
 		Chase,
+		Attack,
 
 		Max
 	};
@@ -126,6 +141,9 @@ private:
 	// 追う目標の座標(見えていれば現在位置、見えなければ最後に見た位置)
 	Vector3 GetChaseGoal(void)const;
 
+	// 攻撃を始めてよいか(クールダウン明けで、目標が見えていて、射程内)
+	bool CanStartAttack(void)const;
+
 	// 近くにいる他の敵から離れる向き(長さ0?1)
 	Vector3 ComputeSeparation(void)const;
 
@@ -144,6 +162,9 @@ private:
 	// 複製元のモデル(-1なら読み込む)
 	const int baseModel;
 
+	// 戦闘まわりの設定
+	const Combat combat;
+
 	static inline double lastModelLoadMs = 0.0;
 
 	// 倒されたか
@@ -161,4 +182,13 @@ private:
 
 	// 目標を見失ってからの経過フレーム
 	float lostFrames;
+
+	// 弧月(Actorの所有は、この敵の子アクター)
+	Kogetsu* kogetsu;
+
+	// 攻撃の判定(Characterの前方に出す球。所有は、この敵の子アクター)
+	EnemyAttackHitbox* attackHitbox;
+
+	// 次に攻撃できるまでの残りフレーム
+	float attackCooldown;
 };

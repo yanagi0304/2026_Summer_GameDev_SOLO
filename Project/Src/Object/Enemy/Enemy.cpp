@@ -18,6 +18,10 @@
 #include "Navigation/NavManager.h"
 #include "State/EnemyIdleState.h"
 #include "State/EnemyChaseState.h"
+#include "State/EnemyAttackState.h"
+#include "EnemyAttackHitbox.h"
+
+#include "../Weapon/Kogetsu/Kogetsu.h"
 
 namespace
 {
@@ -41,9 +45,14 @@ namespace
 	// 目の高さ / 目標を狙う高さ(足元からの高さ)
 	constexpr float EYE_HEIGHT = 160.0f;
 	constexpr float TARGET_AIM_HEIGHT = 120.0f;
+
+	// 攻撃を始める距離(水平)/ 目標との高さの差の許容 / 攻撃の後の、次の攻撃までの間隔(フレーム)
+	constexpr float ATTACK_RANGE = 230.0f;
+	constexpr float ATTACK_HEIGHT_TOLERANCE = 150.0f;
+	constexpr float ATTACK_COOLDOWN_FRAMES = 120.0f;
 }
 
-Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel) :
+Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel, const Combat& combat) :
 	CharacterBase(),
 
 	nav(nav),
@@ -51,6 +60,7 @@ Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spa
 	spawnPos(spawnPos),
 	peers(peers),
 	baseModel(baseModel),
+	combat(combat),
 	defeated(false),
 
 	chaseState(nullptr),
@@ -58,7 +68,11 @@ Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spa
 	canSeeTarget(false),
 	hasLastKnownPos(false),
 	lastKnownPos(),
-	lostFrames(0.0f)
+	lostFrames(0.0f),
+
+	kogetsu(nullptr),
+	attackHitbox(nullptr),
+	attackCooldown(0.0f)
 {
 }
 
@@ -96,7 +110,7 @@ void Enemy::Load(void)
 	// 仮のモデル(プレイヤーと同じ)。複製元があれば複製する(ファイルからの読み込みは重い)
 	const auto modelStart = std::chrono::high_resolution_clock::now();
 	if (baseModel >= 0) { ModelDuplicate(baseModel); }
-	else { trans.LoadModel("Character/WoChamolenium/WoChamolenium"); }
+	else { trans.LoadModel("Character/Rasenoniumu/Rasenoniumu"); }
 	lastModelLoadMs = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - modelStart).count();
 	trans.SetLocalRotation(Quaternion::FromRotationY(Deg2Rad(180.0f)));
 
@@ -148,10 +162,40 @@ void Enemy::Load(void)
 	);
 	AddState(STATE::Chase, chaseState);
 
+	// 弧月を持たせる(右手のボーンに追従する)。
+	// 弧月に付いているコライダーはメッシュカット専用なので、攻撃の判定には使わない(On/Offも呼ばない)
+	kogetsu = new Kogetsu(trans, combat.swordModel);
+	AddChildActor(kogetsu);
+	kogetsu->SetIsActive(true);
+
+	// 攻撃の判定(前方に出す球)。プレイヤーに当たったら、通知する
+	attackHitbox = new EnemyAttackHitbox(trans,
+		[this]() { if (combat.onHitPlayer) { combat.onHitPlayer(trans.pos); } });
+	AddChildActor(attackHitbox);
+
+	// 攻撃状態
+	EnemyAttackState::Callbacks attack;
+	attack.canStart = [this]() { return CanStartAttack(); };
+	attack.getTargetDirection = [this]() { return targetPos != nullptr ? (*targetPos - trans.pos) : Vector3(0.0f, 0.0f, 0.0f); };
+	attack.playAnimeAttack = [this]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); };
+	attack.getAnimeRatio = [this]() { return GetAnimeRatio(); };
+	attack.isAnimeEnd = [this]() { return IsAnimeEnd(); };
+	attack.hitboxOn = [this]() { attackHitbox->On(); };
+	attack.hitboxOff = [this]() { attackHitbox->Off(); };
+	attack.onFinished = [this]()
+	{
+		attackCooldown = ATTACK_COOLDOWN_FRAMES;
+		ChangeState(ShouldChase() ? STATE::Chase : STATE::Idle);
+	};
+	AddState(STATE::Attack, new EnemyAttackState(EnemyAttackState::Params(), *motion, attack));
+
 	// 「待機」->「追跡」(追跡する理由ができたら)
 	RegisterStateTransition(STATE::Idle, STATE::Chase);
 	// 「追跡」->「待機」(追跡する理由がなくなったら)
 	RegisterStateTransition(STATE::Chase, STATE::Idle);
+	// 攻撃できる状況になったら攻撃へ(攻撃が終わったら、状態の中から次の状態へ移る)
+	RegisterStateTransition(STATE::Idle, STATE::Attack);
+	RegisterStateTransition(STATE::Chase, STATE::Attack);
 
 #pragma endregion
 }
@@ -169,6 +213,8 @@ void Enemy::SubUpdate(void)
 {
 	// 状態の更新(BaseUpdate)より先に、目標が見えているかを更新しておく
 	UpdatePerception();
+
+	if (attackCooldown > 0.0f) { attackCooldown -= TimeScale::Get(); }
 }
 
 bool Enemy::IsChasing(void)const
@@ -187,7 +233,7 @@ void Enemy::UpdatePerception(void)
 		const Vector3 toTarget = aim - eye;
 
 		// 1) 距離(追跡中は少し遠くまで見える)
-		const bool chasing = IsChasing();
+		const bool chasing = IsChasing() || GetState() == static_cast<int>(STATE::Attack);
 		const float range = SIGHT_RANGE * (chasing ? CHASE_SIGHT_RANGE_RATE : 1.0f);
 		bool inSight = toTarget.LengthSq() <= range * range;
 
@@ -227,6 +273,17 @@ bool Enemy::ShouldChase(void)const
 
 	// 見失っても、最後に見た位置を一定時間は探す
 	return hasLastKnownPos && lostFrames < LOSE_SIGHT_FRAMES;
+}
+
+bool Enemy::CanStartAttack(void)const
+{
+	if (defeated || attackCooldown > 0.0f || !canSeeTarget || targetPos == nullptr) { return false; }
+
+	const float dx = targetPos->x - trans.pos.x;
+	const float dz = targetPos->z - trans.pos.z;
+	if (dx * dx + dz * dz > ATTACK_RANGE * ATTACK_RANGE) { return false; }
+
+	return std::abs(targetPos->y - trans.pos.y) <= ATTACK_HEIGHT_TOLERANCE;
 }
 
 Vector3 Enemy::GetChaseGoal(void)const
@@ -275,7 +332,7 @@ void Enemy::DrawDebug(void)const
 	const Vector3 base = trans.pos;
 
 	// 状態(待機=灰色、追跡=赤)を頭上の球で表す
-	const unsigned int stateColor = IsChasing() ? 0xff3030 : 0x909090;
+	const unsigned int stateColor = GetState() == static_cast<int>(STATE::Attack) ? 0xffff30 : (IsChasing() ? 0xff3030 : 0x909090);
 	DrawSphere3D((base + Vector3(0.0f, 280.0f, 0.0f)).ToVECTOR(), 18.0f, 8, stateColor, stateColor, TRUE);
 
 	// 向いている方向の線(目標が見えていれば緑)

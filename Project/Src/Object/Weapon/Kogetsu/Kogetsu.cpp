@@ -15,22 +15,26 @@
 Kogetsu::Kogetsu()
 	:
 	WeaponBase(Transform(), "Data/Parameter/Weapon/Kogetsu/"),
-	isSheathed(false)
+	isSheathed(false),
+	baseModel(-1)
 {
 }
 
-Kogetsu::Kogetsu(const Transform& ownerTrans)
+Kogetsu::Kogetsu(const Transform& ownerTrans, int baseModel)
 	:
 	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Kogetsu/"),
 	attackColl(new CapsuleCollider(COLLIDER_TAG::Kogetsu,
 		BladeDirHand()* BLADE_START, BladeDirHand()* (BLADE_START + BLADE_LENGTH), BLADE_RADIUS)),
-	isSheathed(false)
+	isSheathed(false),
+	baseModel(baseModel)
 {
 }
 
 void Kogetsu::Load(void)
 {
-	trans.LoadModel("Weapon/Kogetsu");
+	// 複製元があれば複製する(ファイルからの読み込みは重い)
+	if (baseModel >= 0) { ModelDuplicate(baseModel); }
+	else { trans.LoadModel("Weapon/Kogetsu"); }
 
 	trans.SetLocalRotation(Quaternion::FromRotationZ(Deg2Rad(-90.0f)));
 

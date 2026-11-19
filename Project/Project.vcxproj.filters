@@ -88,6 +88,8 @@
     <ClCompile Include="Src\Object\Enemy\Enemy.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyIdleState.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyChaseState.cpp" />
+    <ClCompile Include="Src\Object\Enemy\State\EnemyAttackState.cpp" />
+    <ClCompile Include="Src\Object\Enemy\EnemyAttackHitbox.cpp" />
     <ClCompile Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.cpp" />
     <ClCompile Include="Src\Manager\Collision\ContactSolver.cpp" />
     <ClCompile Include="Src\Object\Common\MotionController\GroundMotionController.cpp" />
@@ -220,6 +222,9 @@
     <ClInclude Include="Src\Object\Enemy\Enemy.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyIdleState.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyChaseState.h" />
+    <ClInclude Include="Src\Object\Enemy\State\EnemyAttackState.h" />
+    <ClInclude Include="Src\Object\Enemy\EnemyAttackHitbox.h" />
+    <ClInclude Include="Src\Object\Jazz\TrionGauge.h" />
     <ClInclude Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.h" />
     <ClInclude Include="Src\Manager\Collision\ContactSolver.h" />
     <ClInclude Include="Src\Object\Common\MotionController\GroundMotionController.h" />

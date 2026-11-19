@@ -34,6 +34,7 @@ enum class COLLIDER_TAG
 	Shield,
 
 	Enemy,
+	EnemyAttack,
 
 	Stage,
 

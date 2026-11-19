@@ -16,7 +16,8 @@ public:
 
 
 	Kogetsu();
-    Kogetsu(const Transform& ownerTrans);
+    // baseModel: 複製元の弧月モデル(-1ならファイルから読み込む。敵を多く出す時は、複製の方が軽い)
+    Kogetsu(const Transform& ownerTrans, int baseModel = -1);
 	~Kogetsu() override = default;
 
     void Load(void) override;
@@ -74,6 +75,9 @@ private:
 
 	//納刀中かどうかのフラグ
     bool isSheathed;
+
+    // 複製元のモデル(-1ならファイルから読み込む)
+    int baseModel;
 
     // 手に持つときのボーン名
     static constexpr const char* HAND_BONE_NAME = "mixamorig:RightHand";
