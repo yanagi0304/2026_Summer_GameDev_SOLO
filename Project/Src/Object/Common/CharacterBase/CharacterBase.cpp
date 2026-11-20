@@ -31,7 +31,8 @@ CharacterBase::CharacterBase() :
 	stepLastPosValid(false),
 	groundedLoose(false),
 
-	anime(nullptr)
+	anime(nullptr),
+	trion(new Trion())
 {
 }
 
@@ -50,7 +51,8 @@ CharacterBase::CharacterBase(const std::string& parameterPath):
 	stepLastPosValid(false),
 	groundedLoose(false),
 
-	anime(nullptr)
+	anime(nullptr),
+	trion(new Trion())
 {
 }
 
@@ -99,6 +101,9 @@ void CharacterBase::BaseRelease(void)
 		delete anime;
 		anime = nullptr;
 	}
+
+	delete trion;
+	trion = nullptr;
 }
 
 #pragma region ステート管理関数

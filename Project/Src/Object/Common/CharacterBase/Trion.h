@@ -41,8 +41,8 @@ public:
 
 private:
 
-	float trionMax;
-	float trionCurrent;
+	float trionMax = 100.0f;
+	float trionCurrent = 100.0f;
 
 };
 

@@ -2,6 +2,7 @@
 
 #include "../../pch.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "../../Utility/Utility.h"
@@ -414,6 +415,17 @@ Vector3 Jazz::InputVec(void) const
 
 void Jazz::SubDraw(void)
 {
+	// ÅyâºÅzécÇËÉgÉäÉIÉìÇÃï`âÊ
+	const int gaugeX = Application ::SCREEN_SIZE_X_HALF;
+	const int gaugeY = Application::SCREEN_SIZE_Y - 60;
+	const int gaugeW = 360;
+	const int gaugeH = 22;
+	const float trionRatio = std::clamp(GetTrionRatio(), 0.0f, 1.0f);
+	DrawBox(gaugeX - 3, gaugeY - 3, gaugeX + gaugeW + 3, gaugeY + gaugeH + 3, 0x000000, TRUE);
+	DrawBox(gaugeX, gaugeY, gaugeX + static_cast<int>(gaugeW * trionRatio), gaugeY + gaugeH, 0x30c0ff, TRUE);
+	DrawBox(gaugeX - 3, gaugeY - 3, gaugeX + gaugeW + 3, gaugeY + gaugeH + 3, 0xffffff, FALSE);
+	DrawFormatString(gaugeX, gaugeY - 22, 0xffffff, "TRION  %.0f%%", trionRatio * 100.0f);
+
 	//DrawFormatString(0, 120, 0x000000, "%f,%f,%f", trans.pos.x, trans.pos.y, trans.pos.z);
 }
 

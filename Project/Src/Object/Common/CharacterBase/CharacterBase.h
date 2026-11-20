@@ -225,6 +225,6 @@ protected:
 	bool IsDeadCharacter(void)const;
 
 
-#pragma end region
+#pragma endregion
 
 };

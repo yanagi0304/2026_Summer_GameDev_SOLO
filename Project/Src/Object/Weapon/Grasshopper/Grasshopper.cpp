@@ -60,6 +60,7 @@ void Grasshopper::Create(void)
 {
 	SetIsDraw(true);
 	SetJudgeFlg(true);
+	decreaseTrion(100.0f);
 	// 動的オブジェクトとしての処理を有効にする
 	SetColliderMobility(COLLIDER_MOBILITY::Movable);
 	MV1SetOpacityRate(trans.model, 0.4f);

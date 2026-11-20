@@ -1,4 +1,5 @@
 #include "Trion.h"
+#include "../../../Scene/SceneManager.h"
 
 void Trion::Load(void)
 {
@@ -33,4 +34,5 @@ bool Trion::Decrease(const float decrease)
 
 void Trion::OnDead(void)
 {
+	SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameOver);
 }

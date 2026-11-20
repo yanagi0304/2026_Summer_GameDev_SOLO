@@ -71,7 +71,6 @@ void Asteroid::Appear(void)
 {
 	// 更新・描画・当たり判定をオンにする
 	SetIsActive(true);
-
 	// 待機状態に戻す
 	Recall();
 }
