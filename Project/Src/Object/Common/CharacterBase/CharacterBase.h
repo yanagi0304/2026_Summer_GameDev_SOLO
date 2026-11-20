@@ -12,6 +12,8 @@ class MotionControllerBase;
 
 class AnimationController;
 
+class Trion;
+
 class CharacterBase : public ActorBase
 {
 public:
@@ -75,6 +77,9 @@ protected:
 
 	// アニメーションコントローラーのインスタンス
 	AnimationController* anime;
+
+	// トリオンのインスタンス
+	Trion* trion;
 
 #pragma region ステート管理関数
 
@@ -204,4 +209,22 @@ protected:
 	void SetPositionCorrection(bool enabled);
 
 #pragma endregion
+
+#pragma region トリオン
+
+	// トリオンの最大値を設定
+	void SetTrionMax(float max);
+
+	// ダメージ・トリオン消費
+	void DecreaseTrion(const float decrease);
+
+	// 残りのトリオンの割合
+	float GetTrionRatio(void)const;
+
+	// 死亡判定
+	bool IsDeadCharacter(void)const;
+
+
+#pragma end region
+
 };

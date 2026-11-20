@@ -37,13 +37,6 @@
 
 namespace
 {
-	// 敵の攻撃1回で漏れるトリオン(最大100)
-	constexpr float TRION_LEAK_PER_HIT = 20.0f;
-
-	// 攻撃を受けた時の吹き飛び(1フレームあたりの速度)
-	constexpr float KNOCKBACK_SPEED = 14.0f;
-	constexpr float KNOCKBACK_UP = 5.0f;
-
 	// グリッド生成にかかった時間(ミリ秒。デバッグ表示用)
 	double g_navBuildMs = 0.0;
 }
@@ -69,8 +62,7 @@ void GameScene::SubPostLoad(void)
 	enemyManager = std::make_unique<EnemyManager>(
 		navGrid, navManager, &operatorObject->GetTrans().pos,
 		[this](ActorBase* actor) { AddActor(actor); },
-		[this](ActorBase* actor) { RemoveActor(actor); },
-		[this](const Vector3& enemyPos) { OnPlayerHit(enemyPos); });
+		[this](ActorBase* actor) { RemoveActor(actor); });
 
 	//int debugObjNum = 50;
 	//float debugObjSpace = 10.0f;
@@ -97,19 +89,14 @@ void GameScene::SubPostInit(void)
 
 void GameScene::SubPostUpdate(void)
 {
+
 	NavDebugUpdate();
 
 	// 敵が出した探索依頼を処理し(1フレームの件数に上限あり)、敵の出現・撤去を進める
 	navManager.Update();
 	if (enemyManager) { enemyManager->Update(); }
 
-	// トリオン(無敵時間・被弾演出の更新)。尽きたら戦えない = ゲームオーバー
-	trion.Update(TimeScale::Get());
-	if (trion.IsEmpty())
-	{
-		SceneManager::GetIns().ChangeSceneFade(SCENE_ID::GameOver);
-	}
-
+	// 判定が終わった後で、切断依頼を実行する
 	for (const CutRequest& request : CutRequestQueue::Drain()) {
 		CuttableActor* fragment = request.target->Cut(request.plane, request.cutId);
 		if (fragment != nullptr) { AddActor(fragment); }
@@ -230,48 +217,7 @@ void GameScene::SubUiDraw(void)
 			}
 			DrawString(0, 260, buffer, 0xffffff);
 		}	}
-	DrawTrionGauge();
 	DrawStringToHandle(0, 0, "ゲーム", 0xffffff, Font::GetIns().GetFont(FontKinds::Marumiya40));
-}
-
-void GameScene::OnPlayerHit(const Vector3& enemyPos)
-{
-	// 無敵時間中は、何も起きない
-	if (!trion.Leak(TRION_LEAK_PER_HIT)) { return; }
-	if (operatorObject == nullptr) { return; }
-
-	// 攻撃を受けた向き(敵から離れる方向)へ、少し吹き飛ぶ
-	Vector3 away = operatorObject->GetTrans().pos - enemyPos;
-	away.y = 0.0f;
-	away = away.LengthSq() > 1.0e-6f ? away.Normalized() : Vector3(0.0f, 0.0f, 1.0f);
-	operatorObject->Launch(away * KNOCKBACK_SPEED + Vector3(0.0f, KNOCKBACK_UP, 0.0f));
-}
-
-void GameScene::DrawTrionGauge(void) const
-{
-	const int x = 40;
-	const int h = 22;
-	const int w = 360;
-	const int y = Application::SCREEN_SIZE_Y - 60;
-
-	// 被弾した瞬間に、画面を赤く光らせる
-	const float flash = trion.GetFlashRatio();
-	if (flash > 0.0f)
-	{
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(90.0f * flash));
-		DrawBox(0, 0, Application::SCREEN_SIZE_X, Application::SCREEN_SIZE_Y, 0xff0000, TRUE);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	}
-
-	// 枠と中身(残りが少ないと赤くなる。無敵時間中は白っぽく点滅する)
-	const float ratio = trion.GetRatio();
-	unsigned int color = ratio > 0.5f ? 0x30c0ff : (ratio > 0.25f ? 0xffc030 : 0xff3030);
-	if (trion.IsInvincible() && (GetNowCount() / 80) % 2 == 0) { color = 0xffffff; }
-
-	DrawBox(x - 3, y - 3, x + w + 3, y + h + 3, 0x000000, TRUE);
-	DrawBox(x, y, x + static_cast<int>(w * ratio), y + h, color, TRUE);
-	DrawBox(x - 3, y - 3, x + w + 3, y + h + 3, 0xffffff, FALSE);
-	DrawFormatString(x, y - 22, 0xffffff, "TRION  %.0f / %.0f", trion.GetValue(), trion.GetMax());
 }
 
 void GameScene::CreateCamera(void)

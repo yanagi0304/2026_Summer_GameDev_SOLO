@@ -31,8 +31,8 @@ static int MakeGlowGraph(void)
 	return graph;
 }
 
-Asteroid::Asteroid(const Transform& ownerTrans, const ShooterConfig& config) :
-	WeaponBase(ownerTrans, config.parameterPath),
+Asteroid::Asteroid(const Transform& ownerTrans, const ShooterConfig& config, const DecreaseTrionFunc& decreaseTrion) :
+	WeaponBase(ownerTrans, config.parameterPath, decreaseTrion),
 
 	state_(STATE::Hold),
 	moveDir_(Vector3::Zonly(1.0f)),

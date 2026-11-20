@@ -20,9 +20,9 @@ Kogetsu::Kogetsu()
 {
 }
 
-Kogetsu::Kogetsu(const Transform& ownerTrans, int baseModel)
+Kogetsu::Kogetsu(const Transform& ownerTrans, int baseModel, const DecreaseTrionFunc& decreaseTrion)
 	:
-	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Kogetsu/"),
+	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Kogetsu/", decreaseTrion),
 	attackColl(new CapsuleCollider(COLLIDER_TAG::Kogetsu,
 		BladeDirHand()* BLADE_START, BladeDirHand()* (BLADE_START + BLADE_LENGTH), BLADE_RADIUS)),
 	isSheathed(false),
@@ -66,14 +66,19 @@ void Kogetsu::Off(void)
 	attackColl->SetJudgeFlg(false);
 }
 
-void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
+void Kogetsu::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other,
+	const CollisionResult& result)
 {
+	if (other.GetTag() != COLLIDER_TAG::Mannequin) { return; }
 	CuttableActor* target = dynamic_cast<CuttableActor*>(other.GetActor());
 	if (target == nullptr) { return; }
-	if (target->GetLastCutId() == cutId_) { return; }   // この一振りで切った相手（断片も）は除く
+	// この一振りで切った相手は除く
+	if (target->GetLastCutId() == cutId_) { return; }
 
 	CutPlane plane;
-	if (!slash_.GetPlane(plane)) { return; }            // 突き・停止中は見送る
+	// 突き・停止中は見送る
+	if (!slash_.GetPlane(plane)) { return; }
+	// リクエストをキューに追加する
 	CutRequestQueue::Push(target, plane, cutId_);
 }
 

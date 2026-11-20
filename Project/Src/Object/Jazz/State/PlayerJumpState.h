@@ -11,8 +11,6 @@ public:
 	PlayerJumpState(
 		GroundMotionController& motion,
 
-		bool& isGrashopper,
-
 		const std::function<void(void)>& playAnimeJumpStart,
 		const std::function<void(void)>& playAnimeJumpLoop,
 		const std::function<void(void)>& playAnimeStamp,
@@ -40,9 +38,6 @@ private:
 
 	// 地上・空中の移動とジャンプを制御
 	GroundMotionController& motion;
-
-	//グラスホッパー使用確認フラグ
-	bool& isGrashopper;
 
 	// ジャンプ開始アニメーションの再生関数のポインタ
 	const std::function<void(void)> playAnimeJumpStart;

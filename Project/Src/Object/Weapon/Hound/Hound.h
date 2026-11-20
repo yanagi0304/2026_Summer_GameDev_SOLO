@@ -12,7 +12,7 @@ public:
 
     const float SIZE = GetParameter("Init", "scale");
 
-    Hound(const Vector3& vec);
+    Hound(const Vector3& vec, const DecreaseTrionFunc& decreaseTrion = nullptr);
     ~Hound() override = default;
 
     void Load(void) override;

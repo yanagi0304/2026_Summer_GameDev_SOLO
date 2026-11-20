@@ -10,7 +10,6 @@
 #include "../../Object/Enemy/Navigation/AStar.h"
 #include "../../Object/Enemy/Navigation/NavManager.h"
 #include "../../Object/Enemy/EnemyManager.h"
-#include "../../Object/Jazz/TrionGauge.h"
 
 class GameScene : public SceneBase
 {
@@ -44,15 +43,6 @@ private:
 	void CreateCamera(void)override;
 
 	int CountMannequins(void) const;
-
-	// 敵の攻撃がプレイヤーに当たった時(トリオンが漏れて、少し吹き飛ぶ)
-	void OnPlayerHit(const Vector3& enemyPos);
-
-	// トリオンゲージの表示
-	void DrawTrionGauge(void) const;
-
-	// トリオン(プレイヤーの体力)。尽きたらゲームオーバー
-	TrionGauge trion;
 
 	//操縦オブジェ
 	ActorBase* operatorObject;

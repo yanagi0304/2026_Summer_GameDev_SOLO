@@ -17,7 +17,7 @@ public:
 
 	Kogetsu();
     // baseModel: 複製元の弧月モデル(-1ならファイルから読み込む。敵を多く出す時は、複製の方が軽い)
-    Kogetsu(const Transform& ownerTrans, int baseModel = -1);
+    Kogetsu(const Transform& ownerTrans, int baseModel = -1, const DecreaseTrionFunc& decreaseTrion = nullptr);
 	~Kogetsu() override = default;
 
     void Load(void) override;

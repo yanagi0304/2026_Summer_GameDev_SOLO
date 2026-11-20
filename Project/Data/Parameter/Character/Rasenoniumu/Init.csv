@@ -1,0 +1,11 @@
+Scale,2
+LoseSightFrames,180
+AttackRange,230
+AttackCooldownFrames,120
+SightRange,2500
+SightHalfAngleDeg,60
+SeparationRadius,130
+ChaseSightRangeRate,1.5
+EyeHeight,160
+AttackHeightTolerance,150
+TargetAimHeight,120

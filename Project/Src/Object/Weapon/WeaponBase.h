@@ -2,6 +2,7 @@
 
 #include "../Common/ActorBase/ActorBase.h"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -12,10 +13,13 @@ class WeaponBase : public ActorBase
 {
 public:
 
+	// トリオンを消費する関数(引数: 消費量)
+	using DecreaseTrionFunc = std::function<void(float)>;
+
 	// デフォルトコンストラクタ
-	WeaponBase(const Transform& ownerTrans);
+	WeaponBase(const Transform& ownerTrans, const DecreaseTrionFunc& decreaseTrion = nullptr);
 	// パラメーターを外部から読み込む場合に使うコンストラクタ
-	WeaponBase(const Transform& ownerTrans, const std::string& parameterPath);
+	WeaponBase(const Transform& ownerTrans, const std::string& parameterPath, const DecreaseTrionFunc& decreaseTrion = nullptr);
 
 	~WeaponBase() override = default;
 
@@ -132,5 +136,8 @@ protected:
 #pragma endregion
 
 	const Transform& ownerTrans;
+
+	// トリオンを消費する関数(持ち主から渡される。未設定ならnullptr)
+	const DecreaseTrionFunc decreaseTrion;
 };
 

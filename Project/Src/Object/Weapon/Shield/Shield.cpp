@@ -7,8 +7,8 @@ Shield::Shield()
 {
 }
 
-Shield::Shield(const Transform& ownerTrans)
-	: WeaponBase(ownerTrans, "Data/Parameter/Weapon/Shield/")
+Shield::Shield(const Transform& ownerTrans, const DecreaseTrionFunc& decreaseTrion)
+	: WeaponBase(ownerTrans, "Data/Parameter/Weapon/Shield/", decreaseTrion)
 {
 }
 

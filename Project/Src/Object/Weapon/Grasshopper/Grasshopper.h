@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "../WeaponBase.h"
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
@@ -8,7 +9,7 @@ class Grasshopper :
 {
 
 public:
-    Grasshopper(const Transform& ownerTrans,bool& isGrashpper);
+    Grasshopper(const Transform& ownerTrans, const std::function<void(bool)>& onLaunchedPlayer, const DecreaseTrionFunc& decreaseTrion = nullptr);
     ~Grasshopper() override = default;
 
     void Load(void) override;
@@ -47,7 +48,8 @@ private:
     float tiltRoll_;   // 現在のロール角(ラジアン)
 
 #pragma region 受け取り参照
-    bool& isGrashpper;
+    // プレイヤーを打ち上げたときに呼ぶ(引数: 真上に打ち上げたか)
+    std::function<void(bool)> onLaunchedPlayer;
 #pragma endregion
 
 };

@@ -17,9 +17,10 @@
 ShooterManager::ShooterManager(
 	const Transform& ownerTrans,
 	const ShooterConfig& config,
-	const std::function<void(void)>& playAnime
+	const std::function<void(void)>& playAnime,
+	const DecreaseTrionFunc& decreaseTrion
 ) :
-	WeaponBase(ownerTrans),
+	WeaponBase(ownerTrans, decreaseTrion),
 
 	config_(config),
 	playAnime(playAnime),
@@ -40,7 +41,7 @@ void ShooterManager::Load(void)
 	// 弾を27発作って、群れにまとめる
 	for (int i = 0; i < AsteroidSwarm::BULLET_NUM; i++)
 	{
-		Asteroid* bullet = new Asteroid(ownerTrans, config_);
+		Asteroid* bullet = new Asteroid(ownerTrans, config_, decreaseTrion);
 
 		AddChildActor(bullet);
 

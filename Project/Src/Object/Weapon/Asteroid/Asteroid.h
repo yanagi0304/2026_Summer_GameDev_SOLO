@@ -30,7 +30,7 @@ public:
 
 	// コンストラクタ
 	// ownerTrans: 持ち主(Jazz)のTransform / config: 弾の設定
-	Asteroid(const Transform& ownerTrans, const ShooterConfig& config);
+	Asteroid(const Transform& ownerTrans, const ShooterConfig& config, const DecreaseTrionFunc& decreaseTrion = nullptr);
 
 	~Asteroid() override = default;
 

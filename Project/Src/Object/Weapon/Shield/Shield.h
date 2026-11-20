@@ -8,7 +8,7 @@ class Shield :
 {
 public:
     Shield();
-    Shield(const Transform& ownerTrans);
+    Shield(const Transform& ownerTrans, const DecreaseTrionFunc& decreaseTrion = nullptr);
     ~Shield() override = default;
 
     void Load(void) override;

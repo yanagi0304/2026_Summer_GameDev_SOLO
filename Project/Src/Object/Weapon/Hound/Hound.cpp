@@ -1,7 +1,7 @@
 #include "Hound.h"
 
-Hound::Hound(const Vector3& vec)
-	:WeaponBase(Transform(), "Data/Parameter/Weapon/Asteroid/"),
+Hound::Hound(const Vector3& vec, const DecreaseTrionFunc& decreaseTrion)
+	:WeaponBase(Transform(), "Data/Parameter/Weapon/Asteroid/", decreaseTrion),
 	vec(vec)
 {
 }

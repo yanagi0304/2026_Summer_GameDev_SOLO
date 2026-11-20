@@ -166,7 +166,6 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Enemy\State\EnemyIdleState.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyChaseState.cpp" />
     <ClCompile Include="Src\Object\Enemy\State\EnemyAttackState.cpp" />
-    <ClCompile Include="Src\Object\Enemy\EnemyAttackHitbox.cpp" />
     <ClCompile Include="Src\Object\Mannequin\MannequinManager.cpp" />
     <ClCompile Include="Src\Object\MessageWindow\MessageWindow.cpp" />
     <ClCompile Include="Src\Application\Application.cpp" />
@@ -221,6 +220,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Jazz\Jazz.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerIdleState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerJumpState.cpp" />
+    <ClCompile Include="Src\Object\Jazz\State\PlayerGrasshopperJumpState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerKogetsuState.cpp" />
     <ClCompile Include="Src\Object\Jazz\State\PlayerMoveState.cpp" />
     <ClCompile Include="Src\Object\Mannequin\Mannequin.cpp" />
@@ -252,6 +252,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Scene\SceneManager.cpp" />
     <ClCompile Include="Src\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Src\Object\Common\Collider\SweepLineCollider.cpp" />
+    <ClCompile Include="Src\Object\Common\CharacterBase\Trion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.h" />
@@ -273,8 +274,6 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Enemy\State\EnemyIdleState.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyChaseState.h" />
     <ClInclude Include="Src\Object\Enemy\State\EnemyAttackState.h" />
-    <ClInclude Include="Src\Object\Enemy\EnemyAttackHitbox.h" />
-    <ClInclude Include="Src\Object\Jazz\TrionGauge.h" />
     <ClInclude Include="Src\Object\Mannequin\MannequinManager.h" />
     <ClInclude Include="Src\Object\MessageWindow\MessageWindow.h" />
     <ClInclude Include="Src\Application\resource.h" />
@@ -350,6 +349,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Jazz\Jazz.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerIdleState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerJumpState.h" />
+    <ClInclude Include="Src\Object\Jazz\State\PlayerGrasshopperJumpState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerKogetsuState.h" />
     <ClInclude Include="Src\Object\Jazz\State\PlayerMoveState.h" />
     <ClInclude Include="Src\Object\Mannequin\Mannequin.h" />
@@ -389,6 +389,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Scene\Title\TitleScene.h" />
     <ClInclude Include="Src\Utility\Utility.h" />
     <ClInclude Include="Src\Object\Common\Collider\SweepLineCollider.h" />
+    <ClInclude Include="Src\Object\Common\CharacterBase\Trion.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />

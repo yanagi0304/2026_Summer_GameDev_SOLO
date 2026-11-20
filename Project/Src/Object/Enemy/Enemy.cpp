@@ -19,41 +19,11 @@
 #include "State/EnemyIdleState.h"
 #include "State/EnemyChaseState.h"
 #include "State/EnemyAttackState.h"
-#include "EnemyAttackHitbox.h"
 
 #include "../Weapon/Kogetsu/Kogetsu.h"
 
-namespace
-{
-	// 単位はcm(プレイヤーのコライダー半径40、全高220に合わせる)
-
-	// 視界の距離
-	constexpr float SIGHT_RANGE = 2500.0f;
-
-	// 視野角(正面から左右それぞれ)。追跡中は全方位を見られるものとする
-	constexpr float SIGHT_HALF_ANGLE_DEG = 60.0f;
-
-	// 追跡中は、見失いにくいように視界の距離を伸ばす倍率
-	constexpr float CHASE_SIGHT_RANGE_RATE = 1.5f;
-
-	// 見失ってから、最後に見た位置を探し続けるフレーム数
-	constexpr float LOSE_SIGHT_FRAMES = 180.0f;
-
-	// 他の敵から離れ始める距離(コライダーの直径80より少し大きい)
-	constexpr float SEPARATION_RADIUS = 130.0f;
-
-	// 目の高さ / 目標を狙う高さ(足元からの高さ)
-	constexpr float EYE_HEIGHT = 160.0f;
-	constexpr float TARGET_AIM_HEIGHT = 120.0f;
-
-	// 攻撃を始める距離(水平)/ 目標との高さの差の許容 / 攻撃の後の、次の攻撃までの間隔(フレーム)
-	constexpr float ATTACK_RANGE = 230.0f;
-	constexpr float ATTACK_HEIGHT_TOLERANCE = 150.0f;
-	constexpr float ATTACK_COOLDOWN_FRAMES = 120.0f;
-}
-
 Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel, const Combat& combat) :
-	CharacterBase(),
+	CharacterBase("Data/Parameter/Character/Rasenoniumu/"),
 
 	nav(nav),
 	targetPos(targetPos),
@@ -71,7 +41,6 @@ Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spa
 	lostFrames(0.0f),
 
 	kogetsu(nullptr),
-	attackHitbox(nullptr),
 	attackCooldown(0.0f)
 {
 }
@@ -130,9 +99,9 @@ void Enemy::Load(void)
 	AddCollider(
 		new CapsuleCollider(
 			COLLIDER_TAG::Enemy,
-			Vector3(0.0f, 35.0f, 0.0f),
-			Vector3(0.0f, 220.0f, 0.0f),
-			40.0f
+			GetParameterToVector3("Collider", "ColliderStartPos"),
+			GetParameterToVector3("Collider", "ColliderEndPos"),
+			GetParameter("Collider", "Radius")
 		)
 	);
 
@@ -168,11 +137,6 @@ void Enemy::Load(void)
 	AddChildActor(kogetsu);
 	kogetsu->SetIsActive(true);
 
-	// 攻撃の判定(前方に出す球)。プレイヤーに当たったら、通知する
-	attackHitbox = new EnemyAttackHitbox(trans,
-		[this]() { if (combat.onHitPlayer) { combat.onHitPlayer(trans.pos); } });
-	AddChildActor(attackHitbox);
-
 	// 攻撃状態
 	EnemyAttackState::Callbacks attack;
 	attack.canStart = [this]() { return CanStartAttack(); };
@@ -180,8 +144,6 @@ void Enemy::Load(void)
 	attack.playAnimeAttack = [this]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); };
 	attack.getAnimeRatio = [this]() { return GetAnimeRatio(); };
 	attack.isAnimeEnd = [this]() { return IsAnimeEnd(); };
-	attack.hitboxOn = [this]() { attackHitbox->On(); };
-	attack.hitboxOff = [this]() { attackHitbox->Off(); };
 	attack.onFinished = [this]()
 	{
 		attackCooldown = ATTACK_COOLDOWN_FRAMES;
@@ -203,7 +165,7 @@ void Enemy::Load(void)
 void Enemy::SubInit(void)
 {
 	trans.pos = spawnPos;
-	trans.scale = Vector3(3.0f, 3.0f, 3.0f);
+	trans.scale = Vector3(SCALE);
 
 	// 最初は待機状態から始める
 	ChangeState(STATE::Idle);

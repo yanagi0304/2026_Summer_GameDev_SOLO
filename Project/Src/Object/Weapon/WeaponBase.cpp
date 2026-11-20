@@ -2,18 +2,20 @@
 
 #include "../Common/AnimationController/AnimationController.h"
 
-WeaponBase::WeaponBase(const Transform& ownerTrans)
+WeaponBase::WeaponBase(const Transform& ownerTrans, const DecreaseTrionFunc& decreaseTrion)
 	:
 	ownerTrans(ownerTrans),
+	decreaseTrion(decreaseTrion),
 	anime(nullptr),
 	isActive(false)
 {
 }
 
-WeaponBase::WeaponBase(const Transform& ownerTrans, const std::string& parameterPath)
+WeaponBase::WeaponBase(const Transform& ownerTrans, const std::string& parameterPath, const DecreaseTrionFunc& decreaseTrion)
 	:
 	ActorBase(parameterPath),
 	ownerTrans(ownerTrans),
+	decreaseTrion(decreaseTrion),
 	anime(nullptr),
 	isActive(false)
 {

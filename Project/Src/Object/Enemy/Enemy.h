@@ -12,7 +12,6 @@
 class NavGrid;
 class NavManager;
 class EnemyChaseState;
-class EnemyAttackHitbox;
 class Kogetsu;
 
 // 敵
@@ -36,8 +35,6 @@ public:
 		// 複製元の弧月モデル(-1ならファイルから読み込む)
 		int swordModel = -1;
 
-		// 攻撃がプレイヤーに当たった時に呼ぶ(引数は、攻撃した敵の位置)
-		std::function<void(const Vector3&)> onHitPlayer;
 	};
 
 	/// <param name="nav">経路探索の共有情報</param>
@@ -186,9 +183,38 @@ private:
 	// 弧月(Actorの所有は、この敵の子アクター)
 	Kogetsu* kogetsu;
 
-	// 攻撃の判定(Characterの前方に出す球。所有は、この敵の子アクター)
-	EnemyAttackHitbox* attackHitbox;
-
 	// 次に攻撃できるまでの残りフレーム
 	float attackCooldown;
+
+
+	// 単位はcm(プレイヤーのコライダー半径40、全高220に合わせる)
+
+	// 視界の距離
+	const float SIGHT_RANGE = GetParameter("Init", "SightRange");
+
+	// 視野角。追跡中は全方位を見られるものとする
+	const float SIGHT_HALF_ANGLE_DEG = GetParameter("Init", "SightHalfAngleDeg");
+
+	// 追跡中は、見失いにくいように視界の距離を伸ばす倍率
+	const float CHASE_SIGHT_RANGE_RATE = GetParameter("Init", "ChaseSightRangeRate");
+
+	// 見失ってから、最後に見た位置を探し続けるフレーム数
+	const float LOSE_SIGHT_FRAMES = GetParameter("Init", "LoseSightFrames");
+
+	// 他の敵から離れ始める距離(コライダーの直径80より少し大きい)
+	const float SEPARATION_RADIUS = GetParameter("Init", "SeparationRadius");
+
+	// 目の高さ / 目標を狙う高さ(足元からの高さ)
+	const float EYE_HEIGHT = GetParameter("Init", "EyeHeight");
+	const float TARGET_AIM_HEIGHT = GetParameter("Init", "TargetAimHeight");
+
+	// 攻撃を始める距離(水平)/ 目標との高さの差の許容 / 攻撃の後の、次の攻撃までの間隔
+	const float ATTACK_RANGE = GetParameter("Init", "AttackRange");
+	const float ATTACK_HEIGHT_TOLERANCE = GetParameter("Init", "AttackHeightTolerance");
+	const float ATTACK_COOLDOWN_FRAMES = GetParameter("Init", "AttackCooldownFrames");
+
+	// モデルサイズ
+	const float SCALE = GetParameter("Init", "Scale");
+
+
 };

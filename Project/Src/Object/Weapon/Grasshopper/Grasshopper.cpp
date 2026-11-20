@@ -7,12 +7,12 @@
 #include "../../Common/Collider/BoxCollider.h"
 #include "../../../Manager/Camera/CurrentCamera.h"
 
-Grasshopper::Grasshopper(const Transform& ownerTrans, bool& isGrashpper)
+Grasshopper::Grasshopper(const Transform& ownerTrans, const std::function<void(bool)>& onLaunchedPlayer, const DecreaseTrionFunc& decreaseTrion)
 	:
-	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Grasshopper/"),
+	WeaponBase(ownerTrans, "Data/Parameter/Weapon/Grasshopper/", decreaseTrion),
 	tiltPitch_(0),
 	tiltRoll_(0),
-	isGrashpper(isGrashpper)
+	onLaunchedPlayer(onLaunchedPlayer)
 {
 }
 
@@ -34,9 +34,7 @@ void Grasshopper::Load(void)
 void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
 
-	if (other.GetTag() != COLLIDER_TAG::Player) { return; }
-	//SetJudgeFlg(false);
-	isGrashpper = true;
+	if (other.GetTag() != COLLIDER_TAG::Player && other.GetTag() != COLLIDER_TAG::Enemy) { return; }
 
 	const VECTOR localUp = VGet(0.0f, 1.0f, 0.0f);
 	const Vector3 launchDir = VNorm(VTransformSR(localUp, rotationMat));
@@ -45,9 +43,9 @@ void Grasshopper::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, co
 	const Vector3 launchVelocity = launchDir * 40.0f;
 	other.GetActor()->Launch(launchVelocity);
 
-	// 真上に飛んだ時は操作を可能にする
+	// プレイヤーなら、専用のステートに入れる(真上なら最初から移動できる)
 	const bool isStraightUp = launchDir.y > 0.99f;
-	isGrashpper = !isStraightUp;
+	if (other.GetTag() == COLLIDER_TAG::Player && onLaunchedPlayer) { onLaunchedPlayer(isStraightUp); }
 }
 
 void Grasshopper::OnEquip(void)

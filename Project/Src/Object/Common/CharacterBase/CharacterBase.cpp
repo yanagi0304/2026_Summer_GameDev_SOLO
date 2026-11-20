@@ -8,6 +8,8 @@
 
 #include "CharacterStateBase.h"
 
+#include "Trion.h"
+
 #include "../MotionController/MotionControllerBase.h"
 #include "../../../Manager/TimeScale/TimeScale.h"
 #include "../../../Manager/Collision/CurrentCollisionManager.h"
@@ -298,3 +300,8 @@ bool CharacterBase::SetPositionCorrectionFrame(const std::string& frameName) { r
 void CharacterBase::SetPositionCorrection(bool enabled) { anime->SetPositionCorrection(enabled); }
 
 #pragma endregion
+
+void CharacterBase::SetTrionMax(float max) { trion->SetMax(max); }
+void CharacterBase::DecreaseTrion(const float decrease) { trion->Decrease(decrease); }
+float CharacterBase::GetTrionRatio(void) const{ return trion->GetRatio(); }
+bool CharacterBase::IsDeadCharacter(void) const{ return trion->IsDead(); }

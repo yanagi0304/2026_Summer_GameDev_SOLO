@@ -33,6 +33,7 @@
 
 #include "State/PlayerIdleState.h"
 #include "State/PlayerJumpState.h"
+#include "State/PlayerGrasshopperJumpState.h"
 #include "State/PlayerMoveState.h"
 #include "State/PlayerKogetsuState.h"
 
@@ -49,7 +50,6 @@ Jazz::Jazz() :
 
 	trigger(nullptr),
 
-	isGrashpper(false),
 
 	currentWeaponID(TriggerType::NONE),
 
@@ -151,8 +151,11 @@ void Jazz::Load(void)
 
 	//メイントリガー
 
+	// 武器がトリオンを消費するときに呼ぶ関数
+	const auto decreaseTrion = [this](float value) { DecreaseTrion(value); };
+
 	// 「弧月」生成
-	mainWeaponSet.emplace(TriggerType::KOGETSU, new Kogetsu(trans));
+	mainWeaponSet.emplace(TriggerType::KOGETSU, new Kogetsu(trans, -1, decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::KOGETSU));
 
@@ -160,18 +163,21 @@ void Jazz::Load(void)
 	mainWeaponSet.emplace(TriggerType::ASTEROID, new ShooterManager(
 		trans,
 		ShooterConfig::MakeAsteroid(),
-		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
+		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); } },
+		decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::ASTEROID));
 
 	// 「シールド」生成
-	mainWeaponSet.emplace(TriggerType::SHIELD, new Shield(trans));
+	mainWeaponSet.emplace(TriggerType::SHIELD, new Shield(trans, decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
 	mainWeaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(
-		trans,isGrashpper));
+		trans,
+		[&](bool isStraightUp) { OnGrasshopperLaunch(isStraightUp); },
+		decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(mainWeaponSet.at(TriggerType::GRASS_HOPPER));
 
@@ -183,7 +189,8 @@ void Jazz::Load(void)
 	subWeaponSet.emplace(TriggerType::HOUND, new ShooterManager(
 		trans,
 		ShooterConfig::MakeHound(),
-		[&]() {AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); }));
+		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); } },
+		decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
 	AddChildActor(subWeaponSet.at(TriggerType::HOUND));
 
@@ -216,7 +223,7 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Jump,
 		new PlayerJumpState(
-			*groundMotionController,isGrashpper,
+			*groundMotionController,
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
 			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
@@ -226,6 +233,20 @@ void Jazz::Load(void)
 		)
 	);
 
+	// グラスホッパーで打ち上げられた状態
+	AddState(
+		STATE::GrasshopperJump,
+		new PlayerGrasshopperJumpState(
+			*groundMotionController,
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_START); },
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMPING); },
+			[&]() { AnimePlay(CHARACTER_ANIME::JUMP_END); },
+			std::bind(&Jazz::IsAnimeEnd, this),
+			[&]() { PhysicsBody* body = GetPhysicsBody(); return (body != nullptr) ? body->GetVelocity().y : 0.0f; },
+			[&]() { ChangeState(STATE::Idle); },
+			[&]() { ChangeState(STATE::Jump); }
+		)
+	);
 	//弧月
 	AddState(
 		STATE::Kogetsu,
@@ -265,6 +286,11 @@ void Jazz::Load(void)
 	// 「移動状態」->「弧月」の自動遷移登録
 	RegisterStateTransition(STATE::Move, STATE::Kogetsu);
 
+	//「待機状態」->「グラスホッパー」の自動遷移登録
+	RegisterStateTransition(STATE::Idle, STATE::GrasshopperJump);
+	// 「移動状態」->「グラスホッパー」の自動遷移登録
+	RegisterStateTransition(STATE::Move, STATE::GrasshopperJump);
+
 #pragma endregion
 }
 
@@ -303,6 +329,16 @@ void Jazz::SubUpdate(void)
 	if (isAim) { AimRotate(); }
 }
 
+void Jazz::OnGrasshopperLaunch(bool isStraightUp)
+{
+	// 攻撃中などは割り込まない
+	const STATE s = static_cast<STATE>(GetState());
+	if (s == STATE::Idle || s == STATE::Move || s == STATE::Jump || s == STATE::GrasshopperJump) {
+		// 真上なら最初から移動できる(状態に入る前に設定する)
+		static_cast<PlayerGrasshopperJumpState&>(GetStateIns(STATE::GrasshopperJump)).SetControllableFromStart(isStraightUp);
+		ChangeState(STATE::GrasshopperJump);
+	}
+}
 bool Jazz::CanWeaponChange(void) const
 {
 	// 攻撃中などは不可。切り替えてよい状態だけを許可する
@@ -349,7 +385,10 @@ void Jazz::WeaponChange(TriggerType type)
 	currentWeaponID = next;
 	mainWeaponSet.at(currentWeaponID)->SetIsActive(true);
 
-	AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID());
+	// Idle中のみ即座に反映。Move/Jump中は上書きしない（Idle復帰時に現武器のIdleが再生される）
+	if (static_cast<STATE>(GetState()) == STATE::Idle) {
+		AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID());
+	}
 }
 
 Vector3 Jazz::InputVec(void) const

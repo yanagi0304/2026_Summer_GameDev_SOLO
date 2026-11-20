@@ -24,7 +24,8 @@ public:
 	ShooterManager(
 		const Transform& ownerTrans,
 		const ShooterConfig& config,
-		const std::function<void(void)>& playAnime
+		const std::function<void(void)>& playAnime,
+		const DecreaseTrionFunc& decreaseTrion = nullptr
 	);
 
 	~ShooterManager() override = default;

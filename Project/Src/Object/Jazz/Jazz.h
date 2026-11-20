@@ -24,9 +24,6 @@ public:
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
-	//グラスホッパーの使用状況取得
-	bool GetIsGrashopper(void) const { return isGrashpper; }
-
 private:
 
 
@@ -39,6 +36,7 @@ private:
 		Move,
 		Jump,
 		Kogetsu,
+		GrasshopperJump,
 
 		Max
 	};
@@ -63,7 +61,7 @@ private:
 		0.5,	// AsteroidCreate.R
 		1.5f,	// AsteroidIdleShot.R
 
-		0.5,	// JumpStart
+		1.5,	// JumpStart
 		0.5,	// Jumping
 		0.5,	// JumpEnd
 
@@ -104,6 +102,9 @@ private:
 	void SubInit(void)override;
 	void SubUpdate(void)override;
 
+	// グラスホッパーで打ち上げられたときの状態遷移
+	void OnGrasshopperLaunch(bool isStraightUp);
+
 	//武器切り替えできるか取得
 	bool CanWeaponChange(void) const;
 
@@ -141,9 +142,6 @@ private:
 
 	int mainCurrentIndex;
 	int subCurrentIndex;
-
-	//現在グラスホッパーの使用をしているか
-	bool isGrashpper;
 
 	//エイム中か
 	bool isAim;

@@ -64,7 +64,7 @@ void AnimationController::Play(int type, signed char loop)
 	playAnim = animations[type];
 
 	if (prevAnim.speed != 0) {
-		if (playAnim.model == -1) {
+		if (prevAnim.model == -1) {
 			// モデルと同じファイルからアニメーションをアタッチする
 			prevAnim.attachNo = MV1AttachAnim(modelId, prevAnim.animIndex);
 		}
@@ -105,6 +105,8 @@ void AnimationController::Play(int type, signed char loop)
 
 void AnimationController::Stop(void)
 {
+	if (playType != -1 && isDetach == -1) { MV1DetachAnim(modelId, prevAnim.attachNo); }
+	isDetach = 0;
 	MV1DetachAnim(modelId, playAnim.attachNo);
 	playType = -1;
 }
@@ -115,12 +117,13 @@ void AnimationController::Update(void)
 	// 再生
 	playAnim.step += playAnim.speed * TimeScale::Get();
 
-	if (prevAnim.speed != 0) {
+	if (prevAnim.speed != 0 && isDetach == -1) {
 		while (blendRate <= 1.0f) {
 			if (blendRate >= 0.9f) {
 
 				MV1SetAttachAnimBlendRate(modelId, playAnim.attachNo, 1.0f);
-				isDetach = MV1DetachAnim(modelId, prevAnim.attachNo);
+				MV1DetachAnim(modelId, prevAnim.attachNo);
+				isDetach = 0;
 
 				break;
 			}

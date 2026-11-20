@@ -46,16 +46,14 @@ namespace
 	constexpr float FALL_LIMIT = 5000.0f;
 }
 
-EnemyManager::EnemyManager(const NavGrid& grid, NavManager& nav, const Vector3* targetPos, ActorFunc addActor, ActorFunc removeActor,
-	std::function<void(const Vector3&)> onHitPlayer) :
+EnemyManager::EnemyManager(const NavGrid& grid, NavManager& nav, const Vector3* targetPos, ActorFunc addActor, ActorFunc removeActor) :
 	grid(grid),
 	nav(nav),
 	targetPos(targetPos),
 	addActor(addActor),
 	removeActor(removeActor),
-	baseModel(MV1LoadModel("Data/Model/Character/WoChamolenium/WoChamolenium.mv1")),
+	baseModel(MV1LoadModel("Data/Model/Character/Rasenoniumu/Rasenoniumu.mv1")),
 	swordModel(MV1LoadModel("Data/Model/Weapon/Kogetsu.mv1")),
-	onHitPlayer(onHitPlayer),
 
 	wave(WAVES, START_DELAY_FRAMES, REST_FRAMES),
 	enemies(),
@@ -183,7 +181,6 @@ void EnemyManager::Spawn(const Vector3& pos)
 
 	Enemy::Combat combat;
 	combat.swordModel = swordModel;
-	combat.onHitPlayer = onHitPlayer;
 
 	Enemy* enemy = new Enemy(Enemy::NavContext{ &grid, &nav }, targetPos, pos, &enemies, baseModel, combat);
 	enemies.push_back(enemy);
