@@ -1,4 +1,3 @@
-#include "CharacterBase.h"
 #pragma once
 
 class Trion
@@ -26,7 +25,7 @@ public:
 	bool Decrease(const float decrease);
 
 	// Žc‚è‚ÌƒgƒŠƒIƒ“‚ÌŠ„‡
-	float GetRatio(void)const { return trionCurrent / trionMax; }
+	float GetRatio(void)const { return (trionMax > 0.0f) ? trionCurrent / trionMax : 0.0f; }
 
 	// Ž€–S”»’è
 	const bool IsDead(void)const { return trionCurrent <= 0.0f; }
