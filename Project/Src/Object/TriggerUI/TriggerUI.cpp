@@ -30,6 +30,7 @@ void TriggerUI::Load()
 	icon.emplace(TriggerType::SHIELD, LoadGraph("Data/Image/TriggerUI/Shield.png"));
 	icon.emplace(TriggerType::ASTEROID, LoadGraph("Data/Image/TriggerUI/Asteroid.png"));
 	icon.emplace(TriggerType::HOUND, LoadGraph("Data/Image/TriggerUI/Hound.png"));
+	icon.emplace(TriggerType::SENKU, optionIcon);
 
 	// このアクターは「UI」として描画する
 	SetDrawType(ACTOR_DRAW_TYPE::Ui);
@@ -129,6 +130,9 @@ const char* TriggerUI::TriggerToString(TriggerType trigger)
 
 	case TriggerType::SHIELD:
 		return "Shield";
+
+	case TriggerType::SENKU:
+		return "Senku";
 
 	default:
 		return "None";

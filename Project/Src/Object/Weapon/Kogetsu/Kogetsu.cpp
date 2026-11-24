@@ -12,6 +12,10 @@
 
 #include "../../Common/Shader/RimLightShader.h"
 
+#include "../../Common/Effect/PolyDecompose/PolyDecompose.h"
+
+#include "../../../Manager/TimeScale/TimeScale.h"
+
 Kogetsu::Kogetsu()
 	:
 	WeaponBase(Transform(), "Data/Parameter/Weapon/Kogetsu/"),
@@ -52,6 +56,10 @@ void Kogetsu::Load(void)
 	
 	// シェーダーを差し替える
 	CreateShader(new RimLightShader(SHADER_VERTEX_TYPE::Frame1));
+
+	SetIsDraw(false);
+
+
 }
 
 void Kogetsu::On(void)
@@ -87,11 +95,26 @@ void Kogetsu::OnEquip(void)
 	SetJudgeFlg(false);
 	// 動的オブジェクトとしての処理を有効にする
 	SetColliderMobility(COLLIDER_MOBILITY::Movable);
+	
 }
 
 void Kogetsu::SubInit(void)
 {
 	trans.scale = Vector3(GetParameter("Init", "scale"));
+
+	// 生成演出の準備
+	if (spawnParams.frames > 0.0f)
+	{
+		trans.Attach();
+		spawnEffect = new PolyDecompose();
+		if (!spawnEffect->Init(trans.model))
+		{
+			// 準備できなければ演出なしで出す
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+		}
+	}
 }
 
 namespace
@@ -110,6 +133,18 @@ namespace
 // 更新処理: 右手に追従し、刀身の軌跡を更新する
 void Kogetsu::SubUpdate(void)
 {
+	// 生成演出を進める。終わったら通常の描画に切り替える
+	if (spawnEffect != nullptr)
+	{
+		spawnFrame += TimeScale::Get();
+		if (spawnFrame >= spawnParams.frames)
+		{
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+		}
+	}
+
 	// ボーンが見つからないときは何もしない
 	if (!FollowBone()) { return; }
 
@@ -166,4 +201,27 @@ void Kogetsu::SubDraw(void)
 
 void Kogetsu::SubRelease(void)
 {
+	if (spawnEffect != nullptr)
+	{
+		spawnEffect->Release();
+		delete spawnEffect;
+		spawnEffect = nullptr;
+	}
+}
+
+void Kogetsu::Draw(void)
+{
+	// 通常は、そのままモデルを描く
+	if (spawnEffect == nullptr)
+	{
+		WeaponBase::Draw();
+		return;
+	}
+
+	if (!GetIsDraw()) { return; }
+
+	// 生成演出中は、三角形の破片が組み上がる(進行度は1→0)
+	trans.Attach();
+	spawnEffect->Update();
+	spawnEffect->Draw(1.0f - spawnFrame / spawnParams.frames, spawnParams);
 }

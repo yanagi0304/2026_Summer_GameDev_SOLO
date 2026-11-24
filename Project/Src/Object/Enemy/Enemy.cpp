@@ -140,7 +140,7 @@ void Enemy::Load(void)
 	kogetsu = new Kogetsu(trans, combat.swordModel);
 	AddChildActor(kogetsu);
 	// 生成演出が終わるまでは出さない(演出なしならすぐ出す)
-	kogetsu->SetIsActive(SPAWN_FRAMES <= 0.0f);
+	kogetsu->SetIsActive(spawnParams.frames <= 0.0f);
 
 	// 攻撃状態
 	EnemyAttackState::Callbacks attack;
@@ -173,7 +173,7 @@ void Enemy::SubInit(void)
 	trans.scale = Vector3(SCALE);
 
 	// 生成演出の準備(モデルの姿勢を反映してから取り込む)
-	if (SPAWN_FRAMES > 0.0f)
+	if (spawnParams.frames > 0.0f)
 	{
 		trans.Attach();
 		spawnEffect = new PolyDecompose();
@@ -202,7 +202,7 @@ void Enemy::SubUpdate(void)
 	if (spawnEffect != nullptr)
 	{
 		spawnFrame += TimeScale::Get();
-		if (spawnFrame >= SPAWN_FRAMES)
+		if (spawnFrame >= spawnParams.frames)
 		{
 			spawnEffect->Release();
 			delete spawnEffect;
@@ -384,13 +384,7 @@ void Enemy::Draw(void)
 	trans.Attach();
 	spawnEffect->Update();
 
-	PolyDecompose::Params params;
-	params.spread = SPAWN_SPREAD;
-	params.spin = SPAWN_SPIN;
-	params.flatMix = 0.0f;
-	params.sweepMode = 0;
-
-	spawnEffect->Draw(1.0f - spawnFrame / SPAWN_FRAMES, params);
+	spawnEffect->Draw(1.0f - spawnFrame / spawnParams.frames, spawnParams);
 }
 
 void Enemy::SubRelease(void)

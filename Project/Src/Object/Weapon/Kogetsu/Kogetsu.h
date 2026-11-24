@@ -1,5 +1,6 @@
 #pragma once
 #include "../WeaponBase.h"
+#include "../../Common/Effect/PolyDecompose/PolyDecompose.h"
 
 #include "../../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
@@ -22,6 +23,9 @@ public:
 
     void Load(void) override;
 
+    // 描画(生成演出中は、ポリゴン分解で描く)
+    void Draw(void) override;
+
     int GetIdleAnimeID(void) const { return CHARACTER_ANIME::SWORD_IDLE_R; }
     int GetAttackAnimeID(void) const { return CHARACTER_ANIME::SLASH_A1; }
 
@@ -34,6 +38,9 @@ public:
 
     //納刀中かどうかの設定
     void SetSheathed(bool sheathed) { isSheathed = sheathed; }
+
+    // 生成演出の設定(長さ・破片の動き)を変える。シーンに追加する前に呼ぶ
+    void SetSpawnParams(const PolyDecompose::Params& params) { spawnParams = params; }
 
     //デフォルト描画タイプの設定
     ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
@@ -86,6 +93,15 @@ private:
 
     // 腰に付けるときの追加回転
     Quaternion SheathRotation(void) const { return Quaternion::FromRotationY(Deg2Rad(SHEATH_ROTATION_OFFSET.x)); }
+
+    // 生成演出
+    PolyDecompose* spawnEffect = nullptr;
+
+    // 生成演出の経過フレーム
+    float spawnFrame = 0.0f;
+
+    // 生成演出の設定(初期値はPolyDecompose::Paramsの固定値)
+    PolyDecompose::Params spawnParams;
 
 };
 

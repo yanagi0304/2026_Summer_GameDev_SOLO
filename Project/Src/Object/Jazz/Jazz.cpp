@@ -30,7 +30,10 @@
 #include "../Weapon/Manager/ShooterManager.h"
 #include "../Weapon/Shield/Shield.h"
 #include "../Weapon/Grasshopper/Grasshopper.h"
+#include "../Weapon/Senku/Senku.h"
+
 #include "../Common/Effect/PolyDecompose/PolyDecompose.h"
+
 #include "../../Manager/TimeScale/TimeScale.h"
 
 #include "State/PlayerIdleState.h"
@@ -47,13 +50,8 @@ Jazz::Jazz() :
 	weaponTrans(),
 	prevPos(),
 
-	mainCurrentIndex(0),
-	subCurrentIndex(0),
-
 	trigger(nullptr),
 
-
-	currentWeaponID(TriggerType::NONE),
 
 	isAim(false),
 
@@ -147,7 +145,7 @@ void Jazz::Load(void)
 #pragma region 下位アクター生成
 
 	// トリガーUIの生成
-	trigger = new TriggerUI(mainCurrentIndex, subCurrentIndex);
+	trigger = new TriggerUI(mainSlot.currentIndex, subSlot.currentIndex);
 
 	// トリガーUI管理クラスをJazzクラスの下位クラスとして登録
 	AddChildActor(trigger);
@@ -160,46 +158,53 @@ void Jazz::Load(void)
 	const auto decreaseTrion = [this](float value) { DecreaseTrion(value); };
 
 	// 「弧月」生成
-	mainWeaponSet.emplace(TriggerType::KOGETSU, new Kogetsu(trans, -1, decreaseTrion));
+	mainSlot.set.emplace(TriggerType::KOGETSU, new Kogetsu(trans, -1, decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(mainWeaponSet.at(TriggerType::KOGETSU));
+	AddChildActor(mainSlot.set.at(TriggerType::KOGETSU));
 
 	// 「アステロイド」生成
-	mainWeaponSet.emplace(TriggerType::ASTEROID, new ShooterManager(
+	mainSlot.set.emplace(TriggerType::ASTEROID, new ShooterManager(
 		trans,
 		ShooterConfig::MakeAsteroid(),
-		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); } },
+		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainSlot.set.at(mainSlot.currentID)->GetIdleAnimeID()); } },
 		decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(mainWeaponSet.at(TriggerType::ASTEROID));
+	AddChildActor(mainSlot.set.at(TriggerType::ASTEROID));
 
 	// 「シールド」生成
-	mainWeaponSet.emplace(TriggerType::SHIELD, new Shield(trans, decreaseTrion));
+	mainSlot.set.emplace(TriggerType::SHIELD, new Shield(trans, decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(mainWeaponSet.at(TriggerType::SHIELD));
+	AddChildActor(mainSlot.set.at(TriggerType::SHIELD));
 
 	// 「グラスホッパー」生成
-	mainWeaponSet.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(
+	mainSlot.set.emplace(TriggerType::GRASS_HOPPER, new Grasshopper(
 		trans,
 		[&](bool isStraightUp) { OnGrasshopperLaunch(isStraightUp); },
 		decreaseTrion));
 	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(mainWeaponSet.at(TriggerType::GRASS_HOPPER));
+	AddChildActor(mainSlot.set.at(TriggerType::GRASS_HOPPER));
 
 	// トリガーUIの登録
-	for (auto& w : mainWeaponSet) { trigger->AddMain(w.first); }
+	for (auto& w : mainSlot.set) { trigger->AddMain(w.first); }
 
 	//サブトリガー
-	// 「ハウンド」生成
-	subWeaponSet.emplace(TriggerType::HOUND, new ShooterManager(
+	
+	//「ハウンド」生成
+	subSlot.set.emplace(TriggerType::HOUND, new ShooterManager(
 		trans,
 		ShooterConfig::MakeHound(),
-		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); } },
+		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainSlot.set.at(mainSlot.currentID)->GetIdleAnimeID()); } },
 		decreaseTrion));
-	// Jazzクラスの下位クラスとして登録する
-	AddChildActor(subWeaponSet.at(TriggerType::HOUND));
 
-	for (auto& w : subWeaponSet) { trigger->AddSub(w.first); }
+	// Jazzクラスの下位クラスとして登録する
+	AddChildActor(subSlot.set.at(TriggerType::HOUND));
+
+	//「旋空」生成
+	subSlot.set.emplace(TriggerType::SENKU, new Senku(trans, decreaseTrion));
+	// Jazzクラスの下位クラスとして登録する
+	AddChildActor(subSlot.set.at(TriggerType::SENKU));
+
+	for (auto& w : subSlot.set) { trigger->AddSub(w.first); }
 
 #pragma endregion
 
@@ -210,7 +215,7 @@ void Jazz::Load(void)
 	// 待機状態
 	AddState(
 		STATE::Idle,
-		new PlayerIdleState([&]() { AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID()); })
+		new PlayerIdleState([&]() { AnimePlay(mainSlot.set.at(mainSlot.currentID)->GetIdleAnimeID()); })
 	);
 
 	// 移動状態
@@ -266,7 +271,7 @@ void Jazz::Load(void)
 				0.7f,
 				0.9f
 			},
-			*mainWeaponSet.at(TriggerType::KOGETSU),
+			*mainSlot.set.at(TriggerType::KOGETSU),
 			[&]() { return IsTrigger(TriggerType::KOGETSU); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A2); },
@@ -316,11 +321,11 @@ void Jazz::SubInit(void)
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
 	AnimePlay(CHARACTER_ANIME::IDLE);
-//	for (auto& w : mainWeaponSet) { w.second->SetIsActive(false); }
+//	for (auto& w : mainSlot.set) { w.second->SetIsActive(false); }
 	WeaponChange(TriggerType::KOGETSU);
 
-	// 生成演出の準備(モデルの姿勢を反映してから取り込む)
-	if (SPAWN_FRAMES > 0.0f)
+	// 生成演出の準備
+	if (spawnParams.frames > 0.0f)
 	{
 		trans.Attach();
 		spawnEffect = new PolyDecompose();
@@ -340,7 +345,7 @@ void Jazz::SubUpdate(void)
 	if (spawnEffect != nullptr)
 	{
 		spawnFrame += TimeScale::Get();
-		if (spawnFrame >= SPAWN_FRAMES)
+		if (spawnFrame >= spawnParams.frames)
 		{
 			spawnEffect->Release();
 			delete spawnEffect;
@@ -352,7 +357,8 @@ void Jazz::SubUpdate(void)
 	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
 	if (cam != nullptr) { isAim = cam->IsAiming(); }
 
-	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down && CanWeaponChange()) { WeaponChange(); }
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerMainSwitch).down && CanWeaponChange()) { SwitchWeapon(mainSlot, trigger->GetMainTrigger()); }
+	if (Input::GetIns().GetInfo(KEY_TYPE::PlayerSubSwitch).down && CanWeaponChange()) { SwitchWeapon(subSlot, trigger->GetSubTrigger()); }
 
 	// 弧月を手に持つか腰に付けるかを更新
 	UpdateKogetsuSheath();
@@ -374,17 +380,17 @@ bool Jazz::CanWeaponChange(void) const
 {
 	// 攻撃中などは不可。切り替えてよい状態だけを許可する
 	const STATE s = static_cast<STATE>(GetState());
-	return s == STATE::Idle || s == STATE::Move || s == STATE::Jump;
+	return s == STATE::Idle || s == STATE::Move || s == STATE::Jump || s == STATE::GrasshopperJump;
 }
 
 void Jazz::UpdateKogetsuSheath(void)
 {
-	Kogetsu* kogetsu = dynamic_cast<Kogetsu*>(mainWeaponSet.at(TriggerType::KOGETSU));
+	Kogetsu* kogetsu = dynamic_cast<Kogetsu*>(mainSlot.set.at(TriggerType::KOGETSU));
 	if (kogetsu == nullptr) { return; }
 
 	// Idle と Kogetsu(攻撃)ステートのときだけ手に持つ
 	const STATE s = static_cast<STATE>(GetState());
-	kogetsu->SetSheathed(!(s == STATE::Idle || s == STATE::Kogetsu));
+	kogetsu->SetSheathed(!(s == STATE::Kogetsu));
 }
 
 void Jazz::WeaponChange(TriggerType type)
@@ -394,31 +400,65 @@ void Jazz::WeaponChange(TriggerType type)
 	if (mains.empty()) { return; }
 
 	if (type == TriggerType::NONE) {
-		mainCurrentIndex = (mainCurrentIndex + 1) % (int)mains.size();
+		mainSlot.currentIndex = (mainSlot.currentIndex + 1) % (int)mains.size();
 	}
 	else if (auto it = std::find(mains.begin(), mains.end(), type); it != mains.end()) {
-		mainCurrentIndex = (int)(it - mains.begin());
+		mainSlot.currentIndex = (int)(it - mains.begin());
 	}
 	else {
 		return;   // 未登録の武器は無視する
 	}
 
 	// 同じ武器なら何もしない
-	const TriggerType next = mains[mainCurrentIndex];
-	if (next == currentWeaponID) { return; }
+	const TriggerType next = mains[mainSlot.currentIndex];
+	if (next == mainSlot.currentID) { return; }
 
 	// 前の武器だけ止める
-	if (auto prev = mainWeaponSet.find(currentWeaponID); prev != mainWeaponSet.end()) {
+	if (auto prev = mainSlot.set.find(mainSlot.currentID); prev != mainSlot.set.end()) {
 		prev->second->SetIsActive(false);
 	}
 
 	// 新しい武器だけ起動する
-	currentWeaponID = next;
-	mainWeaponSet.at(currentWeaponID)->SetIsActive(true);
+	mainSlot.currentID = next;
+	mainSlot.set.at(mainSlot.currentID)->SetIsActive(true);
 
 	// Idle中のみ即座に反映。Move/Jump中は上書きしない（Idle復帰時に現武器のIdleが再生される）
 	if (static_cast<STATE>(GetState()) == STATE::Idle) {
-		AnimePlay(mainWeaponSet.at(currentWeaponID)->GetIdleAnimeID());
+		AnimePlay(mainSlot.set.at(mainSlot.currentID)->GetIdleAnimeID());
+	}
+}
+
+void Jazz::SwitchWeapon(WeaponSlot& slot, const std::vector<TriggerType>& triggers, TriggerType type)
+{
+
+	if (triggers.empty()) { return; }
+
+	if (type == TriggerType::NONE) {
+		slot.currentIndex = (slot.currentIndex + 1) % (int)triggers.size();
+	}
+	else if (auto it = std::find(triggers.begin(), triggers.end(), type); it != triggers.end()) {
+		slot.currentIndex = (int)(it - triggers.begin());
+	}
+	else {
+		return;   // 未登録の武器は無視する
+	}
+
+	// 同じ武器なら何もしない
+	const TriggerType next = triggers[slot.currentIndex];
+	if (next == slot.currentID) { return; }
+
+	// 前の武器だけ止める
+	if (auto prev = slot.set.find(slot.currentID); prev != slot.set.end()) {
+		prev->second->SetIsActive(false);
+	}
+
+	// 新しい武器だけ起動する
+	slot.currentID = next;
+	slot.set.at(slot.currentID)->SetIsActive(true);
+
+	// Idle中のみ即座に反映。Move/Jump中は上書きしない（Idle復帰時に現武器のIdleが再生される）
+	if (static_cast<STATE>(GetState()) == STATE::Idle) {
+		AnimePlay(slot.set.at(slot.currentID)->GetIdleAnimeID());
 	}
 }
 
@@ -461,7 +501,7 @@ void Jazz::SubDraw(void)
 
 bool Jazz::IsTrigger(TriggerType trigger)
 {
-	return currentWeaponID == trigger;
+	return mainSlot.currentID == trigger;
 }
 
 void Jazz::AimRotate(void)
@@ -497,13 +537,7 @@ void Jazz::Draw(void)
 	trans.Attach();
 	spawnEffect->Update();
 
-	PolyDecompose::Params params;
-	params.spread = SPAWN_SPREAD;
-	params.spin = SPAWN_SPIN;
-	params.flatMix = 0.0f;
-	params.sweepMode = 0;
-
-	spawnEffect->Draw(1.0f - spawnFrame / SPAWN_FRAMES, params);
+	spawnEffect->Draw(1.0f - spawnFrame / spawnParams.frames, spawnParams);
 }
 
 void Jazz::SubRelease(void)

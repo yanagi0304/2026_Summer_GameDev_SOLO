@@ -10,6 +10,7 @@ enum class TriggerType
 	HOUND,
 	VIPER,
 	SHIELD,
+	SENKU,
 
 	MAX,
 };

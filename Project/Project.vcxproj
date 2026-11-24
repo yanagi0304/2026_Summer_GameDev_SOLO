@@ -148,6 +148,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Object\Weapon\Senku\Senku.cpp" />
     <ClCompile Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.cpp" />
     <ClCompile Include="Src\Manager\Collision\ContactSolver.cpp" />
     <ClCompile Include="Src\Object\CameraCollOperator\CameraLineCollOperator.cpp" />
@@ -256,6 +257,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Common\CharacterBase\Trion.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Object\Weapon\Senku\Senku.h" />
     <ClInclude Include="Src\Manager\Camera\ShoulderCamera\ShoulderCamera.h" />
     <ClInclude Include="Src\Manager\Collision\ContactSolver.h" />
     <ClInclude Include="Src\Object\CameraCollOperator\CameraLineCollOperator.h" />

@@ -70,6 +70,10 @@ void InputManager::Init(void)
 	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_E);
 	SET_C_BUTTON(KEY_TYPE::PlayerMainSwitch, XINPUT_BUTTON_RIGHT_SHOULDER);
 
+	//サブトリガー切り替え
+	SET_KEYBOARD(KEY_TYPE::PlayerSubSwitch, KEY_INPUT_Q);
+	SET_C_BUTTON(KEY_TYPE::PlayerSubSwitch, XINPUT_BUTTON_LEFT_SHOULDER);
+
 	SET_KEYBOARD(KEY_TYPE::PlayerDebug, KEY_INPUT_T);
 
 #pragma endregion

@@ -58,6 +58,7 @@ public:
 		PlayerMain,
 
 		PlayerMainSwitch,
+		PlayerSubSwitch,
 
 		PlayerDebug,
 

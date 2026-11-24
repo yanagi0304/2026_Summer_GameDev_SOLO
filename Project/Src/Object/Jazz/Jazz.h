@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/CharacterBase/CharacterBase.h"
+#include "../Common/Effect/PolyDecompose/PolyDecompose.h"
 
 #include <map>
 #include <memory>
@@ -11,7 +12,6 @@
 
 class TriggerUI;
 class WeaponBase;
-class PolyDecompose;
 
 
 class Jazz : public CharacterBase
@@ -28,6 +28,9 @@ public:
 
 	// 生成演出の最中か
 	bool IsSpawning(void)const { return spawnEffect != nullptr; }
+
+	// 生成演出の設定(長さ・破片の動き)を変える。シーンに追加する前に呼ぶ
+	void SetSpawnParams(const PolyDecompose::Params& params) { spawnParams = params; }
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
@@ -77,6 +80,10 @@ private:
 
 		0.5,	// Run
 
+		0.5,	// Sheathed
+		0.5,	// Draw
+
+
 	};
 
 	// アニメーションループ再生フラグテーブル
@@ -103,11 +110,22 @@ private:
 
 		true,	// Run
 
+		false,	// Sheathed
+		false,	// Draw
+
 	};
 
 #pragma endregion
 
 private:
+
+	// 武器スロット(所持武器・現在の武器・UI用の番号をまとめたもの)
+	struct WeaponSlot
+	{
+		std::map<TriggerType, WeaponBase*> set;
+		TriggerType currentID = TriggerType::NONE;
+		int currentIndex = 0;
+	};
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
@@ -124,6 +142,9 @@ private:
 	
 	//武器の切り替え（引数省略で次の番号のウェポンへ切り替え）
 	void WeaponChange(TriggerType type = TriggerType::NONE);
+
+	// 指定スロットの武器を切り替える(NONEなら次の武器へ)
+	void SwitchWeapon(WeaponSlot& slot,  const std::vector<TriggerType>& triggers,TriggerType type = TriggerType::NONE );
 
 	Vector3 InputVec(void) const;
 
@@ -144,29 +165,21 @@ private:
 	Transform weaponTrans;
 	Vector3 prevPos;
 
-	//所持武器
-	std::map<TriggerType, WeaponBase*> mainWeaponSet;
-	std::map<TriggerType, WeaponBase*> subWeaponSet;
-
-	//現在の装備を保存
-	TriggerType currentWeaponID;
-
-	int mainCurrentIndex;
-	int subCurrentIndex;
+	// メイン/サブそれぞれの武器スロット
+	WeaponSlot mainSlot;
+	WeaponSlot subSlot;
 
 	//エイム中か
 	bool isAim;
 
-	// 生成演出(演出が終わったらnullptr)
+	// 生成演出
 	PolyDecompose* spawnEffect;
 
 	// 生成演出の経過フレーム
 	float spawnFrame;
 
-	// 生成演出の長さ(フレーム。0なら演出なし) / 破片の移動量の倍率 / 破片の回転量
-	const float SPAWN_FRAMES = GetParameter("Init", "SpawnFrames");
-	const float SPAWN_SPREAD = GetParameter("Init", "SpawnSpread");
-	const float SPAWN_SPIN = GetParameter("Init", "SpawnSpin");
+	// 生成演出の設定(初期値はPolyDecompose::Paramsの固定値)
+	PolyDecompose::Params spawnParams;
 
 #pragma region 受け取り参照
 

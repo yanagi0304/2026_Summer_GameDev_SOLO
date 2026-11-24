@@ -20,6 +20,9 @@ public:
 	// 見た目の調整値
 	struct Params
 	{
+		// 演出の長さ(フレーム)。0以下なら演出なし
+		float frames = 90.0f;
+
 		// 破片の移動量の倍率
 		float spread = 1.0f;
 

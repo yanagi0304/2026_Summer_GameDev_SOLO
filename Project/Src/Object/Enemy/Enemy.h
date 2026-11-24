@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../Common/CharacterBase/CharacterBase.h"
+#include "../Common/Effect/PolyDecompose/PolyDecompose.h"
 
 #include "../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
@@ -13,7 +14,6 @@ class NavGrid;
 class NavManager;
 class EnemyChaseState;
 class Kogetsu;
-class PolyDecompose;
 
 // 敵
 // 目標(プレイヤー)を視界に入れたら、経路探索しながら追いかける
@@ -55,6 +55,9 @@ public:
 
 	// 生成演出の最中か
 	bool IsSpawning(void)const { return spawnEffect != nullptr; }
+
+	// 生成演出の設定(長さ・破片の動き)を変える。シーンに追加する前に呼ぶ
+	void SetSpawnParams(const PolyDecompose::Params& params) { spawnParams = params; }
 
 	// 目標が見えているか
 	bool CanSeeTarget(void)const { return canSeeTarget; }
@@ -194,11 +197,14 @@ private:
 	// 次に攻撃できるまでの残りフレーム
 	float attackCooldown;
 
-	// 生成演出(演出が終わったらnullptr)
+	// 生成演出
 	PolyDecompose* spawnEffect;
 
 	// 生成演出の経過フレーム
 	float spawnFrame;
+
+	// 生成演出の設定(初期値はPolyDecompose::Paramsの固定値)
+	PolyDecompose::Params spawnParams;
 
 
 	// 単位はcm(プレイヤーのコライダー半径40、全高220に合わせる)
@@ -229,11 +235,6 @@ private:
 
 	// モデルサイズ
 	const float SCALE = GetParameter("Init", "Scale");
-
-	// 生成演出の長さ(フレーム。0なら演出なし) / 破片の移動量の倍率 / 破片の回転量
-	const float SPAWN_FRAMES = GetParameter("Init", "SpawnFrames");
-	const float SPAWN_SPREAD = GetParameter("Init", "SpawnSpread");
-	const float SPAWN_SPIN = GetParameter("Init", "SpawnSpin");
 
 
 };

@@ -30,13 +30,16 @@ bool PolyDecompose::Init(int model)
 {
 	if (model < 0) { return false; }
 
+	// 非同期読み込み中・読み込み失敗のモデルは使えない(頂点数が不正な値になる)
+	if (CheckHandleASyncLoad(model) != FALSE) { return false; }
+
 	this->model = model;
 
 	// 参照用メッシュ: 全フレーム、ワールド座標で取得する
 	MV1SetupReferenceMesh(model, -1, TRUE);
 	MV1RefreshReferenceMesh(model, -1, TRUE);
 	const MV1_REF_POLYGONLIST ref = MV1GetReferenceMesh(model, -1, TRUE);
-	if (ref.VertexNum <= 0 || ref.PolygonNum <= 0) { return false; }
+	if (ref.VertexNum <= 0 || ref.PolygonNum <= 0 || ref.Vertexs == nullptr || ref.Polygons == nullptr) { return false; }
 
 	// 頂点バッファ
 	vertices.assign(ref.VertexNum, VERTEX3DSHADER{});

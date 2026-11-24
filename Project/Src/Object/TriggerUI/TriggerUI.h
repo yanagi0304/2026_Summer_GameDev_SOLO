@@ -17,6 +17,7 @@ public:
 	void AddSub(TriggerType trigger) { subTrig_.push_back(trigger); }
 	void Setweapon(const TriggerType trigger) { currentTrig_ = trigger; }
 	std::vector<TriggerType> GetMainTrigger(void) const { return mainTrig_; }
+	std::vector<TriggerType> GetSubTrigger(void) const { return subTrig_; }
 
 private:
 
