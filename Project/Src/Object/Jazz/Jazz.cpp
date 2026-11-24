@@ -30,6 +30,7 @@
 #include "../Weapon/Manager/ShooterManager.h"
 #include "../Weapon/Shield/Shield.h"
 #include "../Weapon/Grasshopper/Grasshopper.h"
+#include "../Common/Effect/PolyDecompose/PolyDecompose.h"
 #include "../../Manager/TimeScale/TimeScale.h"
 
 #include "State/PlayerIdleState.h"
@@ -54,7 +55,10 @@ Jazz::Jazz() :
 
 	currentWeaponID(TriggerType::NONE),
 
-	isAim(false)
+	isAim(false),
+
+	spawnEffect(nullptr),
+	spawnFrame(0.0f)
 {
 }
 
@@ -314,10 +318,36 @@ void Jazz::SubInit(void)
 	AnimePlay(CHARACTER_ANIME::IDLE);
 //	for (auto& w : mainWeaponSet) { w.second->SetIsActive(false); }
 	WeaponChange(TriggerType::KOGETSU);
+
+	// 生成演出の準備(モデルの姿勢を反映してから取り込む)
+	if (SPAWN_FRAMES > 0.0f)
+	{
+		trans.Attach();
+		spawnEffect = new PolyDecompose();
+		if (!spawnEffect->Init(trans.model))
+		{
+			// 準備できなければ演出なしで出す
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+		}
+	}
 }
 
 void Jazz::SubUpdate(void)
 {
+	// 生成演出を進める。終わったら通常の描画に切り替える
+	if (spawnEffect != nullptr)
+	{
+		spawnFrame += TimeScale::Get();
+		if (spawnFrame >= SPAWN_FRAMES)
+		{
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+		}
+	}
+
 	//エイム中か
 	ShoulderCamera* cam = dynamic_cast<ShoulderCamera*>(&CurrentCamera::Get());
 	if (cam != nullptr) { isAim = cam->IsAiming(); }
@@ -447,4 +477,41 @@ void Jazz::AimRotate(void)
 			TimeScale::Get()
 		)
 	);
+}
+
+void Jazz::Draw(void)
+{
+	// 通常は、そのままモデルを描く
+	if (spawnEffect == nullptr)
+	{
+		CharacterBase::Draw();
+		return;
+	}
+
+	if (!GetIsDraw()) { return; }
+
+	// トリオンゲージなどは、通常の描画と同じように出す
+	SubDraw();
+
+	// 生成演出中は、三角形の破片が足元から組み上がる(進行度は1→0)
+	trans.Attach();
+	spawnEffect->Update();
+
+	PolyDecompose::Params params;
+	params.spread = SPAWN_SPREAD;
+	params.spin = SPAWN_SPIN;
+	params.flatMix = 0.0f;
+	params.sweepMode = 0;
+
+	spawnEffect->Draw(1.0f - spawnFrame / SPAWN_FRAMES, params);
+}
+
+void Jazz::SubRelease(void)
+{
+	if (spawnEffect != nullptr)
+	{
+		spawnEffect->Release();
+		delete spawnEffect;
+		spawnEffect = nullptr;
+	}
 }

@@ -106,4 +106,53 @@ void ShaderResourceManager::ReleaseAllShader(void)
 {
 	ReleaseAllVertexShader();
 	ReleaseAllPixelShader();
+	ReleaseAllGeometryShader();
+}
+
+void ShaderResourceManager::CreateGeometryShader(GEOMETRY_SHADER_TYPE type)
+{
+	// 既に生成済みのシェーダーの場合は生成しない
+	if (geometryShaderList.contains(type)) { return; }
+
+	// テーブルに指定されたパスが存在しない場合は生成しない
+	if (!GEOMETRY_SHADER_NAME_TABLE.contains(type)) {
+		// エラー処理
+		throw std::runtime_error("指定されたジオメトリシェーダーの名前指定が存在しません");
+	}
+
+	// シェーダーを読み込む
+	geometryShaderList[type] = LoadGeometryShader(ShaderNameToPath(GEOMETRY_SHADER_NAME_TABLE.at(type)).c_str());
+}
+
+int ShaderResourceManager::GetGeometryShader(GEOMETRY_SHADER_TYPE type)
+{
+	// 指定されたシェーダーが生成されていない場合はエラーを返す
+	if (!geometryShaderList.contains(type)) {
+		// エラー処理
+		throw std::runtime_error("取得を試みたジオメトリシェーダーが生成されていません");
+	}
+
+	// シェーダーを返す
+	return geometryShaderList.at(type);
+}
+
+void ShaderResourceManager::ReleaseGeometryShader(GEOMETRY_SHADER_TYPE type)
+{
+	// 指定されたシェーダーが生成されていない場合は処理しない
+	if (!geometryShaderList.contains(type)) { return; }
+
+	// シェーダーを解放
+	DeleteShader(geometryShaderList.at(type));
+
+	// テーブルから削除
+	geometryShaderList.erase(type);
+}
+
+void ShaderResourceManager::ReleaseAllGeometryShader(void)
+{
+	// すべてのシェーダーを解放
+	for (auto& shader : geometryShaderList) { DeleteShader(shader.second); }
+
+	// テーブルをクリア
+	geometryShaderList.clear();
 }

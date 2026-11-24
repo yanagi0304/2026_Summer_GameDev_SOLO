@@ -153,6 +153,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\CameraCollOperator\CameraLineCollOperator.cpp" />
     <ClCompile Include="Src\Object\CameraCollOperator\CameraPointCollOperator.cpp" />
     <ClCompile Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.cpp" />
+    <ClCompile Include="Src\Object\Common\Effect\PolyDecompose\PolyDecompose.cpp" />
     <ClCompile Include="Src\Object\Common\MotionController\GroundMotionController.cpp" />
     <ClCompile Include="Src\Object\Common\PhysicsBody\PhysicsBody.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\SmokeBurstShader.cpp" />
@@ -260,6 +261,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\CameraCollOperator\CameraLineCollOperator.h" />
     <ClInclude Include="Src\Object\CameraCollOperator\CameraPointCollOperator.h" />
     <ClInclude Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.h" />
+    <ClInclude Include="Src\Object\Common\Effect\PolyDecompose\PolyDecompose.h" />
     <ClInclude Include="Src\Object\Common\MotionController\GroundMotionController.h" />
     <ClInclude Include="Src\Object\Common\MotionController\MotionControllerBase.h" />
     <ClInclude Include="Src\Object\Common\PhysicsBody\PhysicsBody.h" />
@@ -393,6 +395,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />
+    <None Include="Src\Shader\PolyDecompose\PolyDecompose.hlsli" />
     <None Include="Src\Shader\Common\Pixel\ModelLighting.hlsli" />
     <None Include="Src\Shader\Common\Pixel\ModelPixelCommon.hlsli" />
     <None Include="Src\Shader\Common\Pixel\PixelShader3DHeader.hlsli" />
@@ -617,6 +620,18 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposeVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposeGS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Src\Shader\Water\WaterPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

@@ -28,6 +28,9 @@ enum class VERTEX_SHADER_TYPE
 
     //煙エフェクト
     SmokeBurst,
+
+    // ポリゴン分解
+    PolyDecompose,
 };
 
 // ピクセルシェーダーの種類
@@ -69,6 +72,9 @@ enum class PIXEL_SHADER_TYPE
     //煙エフェクト
     SmokeBurst,
 
+    // ポリゴン分解
+    PolyDecompose,
+
 #pragma endregion
 
 };
@@ -82,4 +88,11 @@ enum SHADER_VERTEX_TYPE
     NMapFrame1,
     NMapFrame4,
     NMapFrame8,
+};
+
+// ジオメトリシェーダーの種類
+enum class GEOMETRY_SHADER_TYPE
+{
+    // ポリゴン分解(四角形化)
+    PolyDecompose,
 };

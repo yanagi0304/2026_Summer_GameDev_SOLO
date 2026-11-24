@@ -105,6 +105,7 @@
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterSplitState.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\SmokeBurstShader.cpp" />
     <ClCompile Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.cpp" />
+    <ClCompile Include="Src\Object\Common\Effect\PolyDecompose\PolyDecompose.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Application\resource.h" />
@@ -241,9 +242,11 @@
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterStateBase.h" />
     <ClInclude Include="Src\Object\Common\Shader\SmokeBurstShader.h" />
     <ClInclude Include="Src\Object\Common\Effect\SmokeBurst\SmokeBurst.h" />
+    <ClInclude Include="Src\Object\Common\Effect\PolyDecompose\PolyDecompose.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Src\Shader\Common\Pixel\ModelFog.hlsli" />
+    <None Include="Src\Shader\PolyDecompose\PolyDecompose.hlsli" />
     <None Include="Src\Shader\Common\Pixel\ModelLighting.hlsli" />
     <None Include="Src\Shader\Common\Pixel\ModelPixelCommon.hlsli" />
     <None Include="Src\Shader\Common\Pixel\PixelShader3DHeader.hlsli" />
@@ -313,5 +316,8 @@
     <FxCompile Include="Src\Shader\SkyBox\SkyBoxVS.hlsl" />
     <FxCompile Include="Src\Shader\SmokeBurst\SmokeBurstPS.hlsl" />
     <FxCompile Include="Src\Shader\SmokeBurst\SmokeBurstVS.hlsl" />
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposeVS.hlsl" />
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposeGS.hlsl" />
+    <FxCompile Include="Src\Shader\PolyDecompose\PolyDecomposePS.hlsl" />
   </ItemGroup>
 </Project>

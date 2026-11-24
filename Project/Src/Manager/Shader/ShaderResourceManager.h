@@ -13,7 +13,8 @@ private:
 
 	ShaderResourceManager() :
 		vertexShaderList(),
-		pixelShaderList()
+		pixelShaderList(),
+			geometryShaderList()
 	{
 	}
 	~ShaderResourceManager() = default;
@@ -55,6 +56,19 @@ public:
 
 	// ピクセルシェーダーを全て解放する
 	void ReleaseAllPixelShader(void);
+
+
+	// ジオメトリシェーダーの生成
+	void CreateGeometryShader(GEOMETRY_SHADER_TYPE type);
+
+	// ジオメトリシェーダーの取得
+	int GetGeometryShader(GEOMETRY_SHADER_TYPE type);
+
+	// ジオメトリシェーダーの解放
+	void ReleaseGeometryShader(GEOMETRY_SHADER_TYPE type);
+
+	// ジオメトリシェーダーを全て解放する
+	void ReleaseAllGeometryShader(void);
 
 
 	// 全てのシェーダーの解放
@@ -141,6 +155,12 @@ private:
 			VERTEX_SHADER_TYPE::SmokeBurst,
 			"SmokeBurstVS"
 		},
+
+		// ポリゴン分解
+		{
+			VERTEX_SHADER_TYPE::PolyDecompose,
+			"PolyDecomposeVS"
+		},
 	};
 
 	// 頂点シェーダー
@@ -209,10 +229,30 @@ private:
 			"SmokeBurstPS"
 		},
 
+		// ポリゴン分解
+		{
+			PIXEL_SHADER_TYPE::PolyDecompose,
+			"PolyDecomposePS"
+		},
+
 		#pragma endregion
 
 	};
 
 	// ピクセルシェーダー
 	std::map<PIXEL_SHADER_TYPE, int> pixelShaderList;
+
+
+	// ジオメトリシェーダーの名前テーブル
+	const std::map<GEOMETRY_SHADER_TYPE, std::string> GEOMETRY_SHADER_NAME_TABLE = {
+
+		// ポリゴン分解
+		{
+			GEOMETRY_SHADER_TYPE::PolyDecompose,
+			"PolyDecomposeGS"
+		},
+	};
+
+	// ジオメトリシェーダー
+	std::map<GEOMETRY_SHADER_TYPE, int> geometryShaderList;
 };

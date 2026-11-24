@@ -13,6 +13,7 @@ class NavGrid;
 class NavManager;
 class EnemyChaseState;
 class Kogetsu;
+class PolyDecompose;
 
 // 敵
 // 目標(プレイヤー)を視界に入れたら、経路探索しながら追いかける
@@ -48,6 +49,12 @@ public:
 	~Enemy()override = default;
 
 	void Load(void)override;
+
+	// 描画(生成演出中は、ポリゴン分解で描く)
+	void Draw(void)override;
+
+	// 生成演出の最中か
+	bool IsSpawning(void)const { return spawnEffect != nullptr; }
 
 	// 目標が見えているか
 	bool CanSeeTarget(void)const { return canSeeTarget; }
@@ -128,6 +135,7 @@ private:
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
+	void SubRelease(void)override;
 
 	// 目標が見えているかを更新する
 	void UpdatePerception(void);
@@ -186,6 +194,12 @@ private:
 	// 次に攻撃できるまでの残りフレーム
 	float attackCooldown;
 
+	// 生成演出(演出が終わったらnullptr)
+	PolyDecompose* spawnEffect;
+
+	// 生成演出の経過フレーム
+	float spawnFrame;
+
 
 	// 単位はcm(プレイヤーのコライダー半径40、全高220に合わせる)
 
@@ -215,6 +229,11 @@ private:
 
 	// モデルサイズ
 	const float SCALE = GetParameter("Init", "Scale");
+
+	// 生成演出の長さ(フレーム。0なら演出なし) / 破片の移動量の倍率 / 破片の回転量
+	const float SPAWN_FRAMES = GetParameter("Init", "SpawnFrames");
+	const float SPAWN_SPREAD = GetParameter("Init", "SpawnSpread");
+	const float SPAWN_SPIN = GetParameter("Init", "SpawnSpin");
 
 
 };

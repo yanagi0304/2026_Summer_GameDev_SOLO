@@ -11,6 +11,7 @@
 
 class TriggerUI;
 class WeaponBase;
+class PolyDecompose;
 
 
 class Jazz : public CharacterBase
@@ -21,6 +22,12 @@ public:
 	~Jazz() override = default;
 
 	void Load(void)override;
+
+	// 描画(生成演出中は、ポリゴン分解で描く)
+	void Draw(void)override;
+
+	// 生成演出の最中か
+	bool IsSpawning(void)const { return spawnEffect != nullptr; }
 
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
@@ -104,6 +111,7 @@ private:
 
 	void SubInit(void)override;
 	void SubUpdate(void)override;
+	void SubRelease(void)override;
 
 	// グラスホッパーで打ち上げられたときの状態遷移
 	void OnGrasshopperLaunch(bool isStraightUp);
@@ -148,6 +156,17 @@ private:
 
 	//エイム中か
 	bool isAim;
+
+	// 生成演出(演出が終わったらnullptr)
+	PolyDecompose* spawnEffect;
+
+	// 生成演出の経過フレーム
+	float spawnFrame;
+
+	// 生成演出の長さ(フレーム。0なら演出なし) / 破片の移動量の倍率 / 破片の回転量
+	const float SPAWN_FRAMES = GetParameter("Init", "SpawnFrames");
+	const float SPAWN_SPREAD = GetParameter("Init", "SpawnSpread");
+	const float SPAWN_SPIN = GetParameter("Init", "SpawnSpin");
 
 #pragma region 受け取り参照
 

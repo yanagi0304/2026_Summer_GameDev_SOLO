@@ -9,3 +9,6 @@ ChaseSightRangeRate,1.5
 EyeHeight,160
 AttackHeightTolerance,150
 TargetAimHeight,120
+SpawnFrames,90
+SpawnSpread,1
+SpawnSpin,6

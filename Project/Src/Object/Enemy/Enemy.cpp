@@ -21,6 +21,7 @@
 #include "State/EnemyAttackState.h"
 
 #include "../Weapon/Kogetsu/Kogetsu.h"
+#include "../Common/Effect/PolyDecompose/PolyDecompose.h"
 
 Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spawnPos, const std::vector<Enemy*>* peers, int baseModel, const Combat& combat) :
 	CharacterBase("Data/Parameter/Character/Rasenoniumu/"),
@@ -41,7 +42,10 @@ Enemy::Enemy(const NavContext& nav, const Vector3* targetPos, const Vector3& spa
 	lostFrames(0.0f),
 
 	kogetsu(nullptr),
-	attackCooldown(0.0f)
+	attackCooldown(0.0f),
+
+	spawnEffect(nullptr),
+	spawnFrame(0.0f)
 {
 }
 
@@ -135,7 +139,8 @@ void Enemy::Load(void)
 	// 弧月に付いているコライダーはメッシュカット専用なので、攻撃の判定には使わない(On/Offも呼ばない)
 	kogetsu = new Kogetsu(trans, combat.swordModel);
 	AddChildActor(kogetsu);
-	kogetsu->SetIsActive(true);
+	// 生成演出が終わるまでは出さない(演出なしならすぐ出す)
+	kogetsu->SetIsActive(SPAWN_FRAMES <= 0.0f);
 
 	// 攻撃状態
 	EnemyAttackState::Callbacks attack;
@@ -167,6 +172,21 @@ void Enemy::SubInit(void)
 	trans.pos = spawnPos;
 	trans.scale = Vector3(SCALE);
 
+	// 生成演出の準備(モデルの姿勢を反映してから取り込む)
+	if (SPAWN_FRAMES > 0.0f)
+	{
+		trans.Attach();
+		spawnEffect = new PolyDecompose();
+		if (!spawnEffect->Init(trans.model))
+		{
+			// 準備できなければ演出なしで出す
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+			kogetsu->SetIsActive(true);
+		}
+	}
+
 	// 最初は待機状態から始める
 	ChangeState(STATE::Idle);
 }
@@ -177,6 +197,19 @@ void Enemy::SubUpdate(void)
 	UpdatePerception();
 
 	if (attackCooldown > 0.0f) { attackCooldown -= TimeScale::Get(); }
+
+	// 生成演出を進める。終わったら通常の描画に切り替えて、武器を出す
+	if (spawnEffect != nullptr)
+	{
+		spawnFrame += TimeScale::Get();
+		if (spawnFrame >= SPAWN_FRAMES)
+		{
+			spawnEffect->Release();
+			delete spawnEffect;
+			spawnEffect = nullptr;
+			kogetsu->SetIsActive(true);
+		}
+	}
 }
 
 bool Enemy::IsChasing(void)const
@@ -231,6 +264,9 @@ void Enemy::UpdatePerception(void)
 
 bool Enemy::ShouldChase(void)const
 {
+	// 生成演出中は動かない
+	if (IsSpawning()) { return false; }
+
 	if (canSeeTarget) { return true; }
 
 	// 見失っても、最後に見た位置を一定時間は探す
@@ -239,7 +275,7 @@ bool Enemy::ShouldChase(void)const
 
 bool Enemy::CanStartAttack(void)const
 {
-	if (defeated || attackCooldown > 0.0f || !canSeeTarget || targetPos == nullptr) { return false; }
+	if (IsSpawning() || defeated || attackCooldown > 0.0f || !canSeeTarget || targetPos == nullptr) { return false; }
 
 	const float dx = targetPos->x - trans.pos.x;
 	const float dz = targetPos->z - trans.pos.z;
@@ -331,4 +367,38 @@ void Enemy::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const Co
 
 	Defeat();
 
+}
+
+void Enemy::Draw(void)
+{
+	// 通常は、そのままモデルを描く
+	if (spawnEffect == nullptr)
+	{
+		CharacterBase::Draw();
+		return;
+	}
+
+	if (!GetIsDraw()) { return; }
+
+	// 生成演出中は、三角形の破片が足元から組み上がる(進行度は1→0)
+	trans.Attach();
+	spawnEffect->Update();
+
+	PolyDecompose::Params params;
+	params.spread = SPAWN_SPREAD;
+	params.spin = SPAWN_SPIN;
+	params.flatMix = 0.0f;
+	params.sweepMode = 0;
+
+	spawnEffect->Draw(1.0f - spawnFrame / SPAWN_FRAMES, params);
+}
+
+void Enemy::SubRelease(void)
+{
+	if (spawnEffect != nullptr)
+	{
+		spawnEffect->Release();
+		delete spawnEffect;
+		spawnEffect = nullptr;
+	}
 }
