@@ -46,7 +46,30 @@ private:
 	// 最低でもロード画面を表示する時間
 	static constexpr int MIN_LOAD_TIME = 0;	// 60fps(1秒) * x
 
+	// 走りアニメーションのコマ数
+	static constexpr int RUN_FRAME_NUM = 8;
+
+	// 走りアニメーション1コマの大きさ
+	static constexpr int RUN_FRAME_SIZE = 196;
+
+	// 走りアニメーションのコマ送り間隔(フレーム)
+	static constexpr int RUN_FRAME_INTERVAL = 5;
+
+	// 走りアニメーションを表示する大きさ
+	static constexpr int RUN_DRAW_SIZE = 100;
+
+	// 文字の左端を基準にしたキャラ中心の位置
+	static constexpr int RUN_OFFSET_X = -40;
+
+	// 画面下端を基準にしたキャラ中心の位置
+	static constexpr int RUN_OFFSET_Y = -44;
+
 	// 画像ハンドル
+	int runImages[RUN_FRAME_NUM];
+
+	// 走りアニメーションの現在コマと経過フレーム
+	int runFrame;
+	int runInterval;
 
 
 	int animCounter;

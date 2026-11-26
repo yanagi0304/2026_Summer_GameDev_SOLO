@@ -45,7 +45,10 @@ public:
 
 		std::function<float(void)> getAnimeRatio,
 
-		std::function<void(void)> changeStateIdle
+		std::function<void(void)> changeStateIdle,
+
+		std::function<void(void)> attackOn,
+		std::function<void(void)> attackOff
 	);
 
 	~PlayerKogetsuState()override = default;
@@ -107,6 +110,10 @@ private:
 
 	// 待機状態に戻る関数のポインタ
 	const std::function<void(void)> changeStateIdle;
+
+	// 攻撃判定のオンオフ関数のポインタ
+	const std::function<void(void)> attackOn;
+	const std::function<void(void)> attackOff;
 
 #pragma endregion
 

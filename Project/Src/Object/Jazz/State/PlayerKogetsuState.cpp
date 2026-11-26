@@ -20,7 +20,10 @@ PlayerKogetsuState::PlayerKogetsuState(
 
 	std::function<float(void)> getAnimeRatio,
 
-	std::function<void(void)> changeStateIdle
+	std::function<void(void)> changeStateIdle,
+
+	std::function<void(void)> attackOn,
+	std::function<void(void)> attackOff
 ) :
 	COLL_START_TIME(COLL_START_TIME),
 	COLL_END_TIME(COLL_END_TIME),
@@ -36,6 +39,9 @@ PlayerKogetsuState::PlayerKogetsuState(
 	getAnimeRatio(getAnimeRatio),
 
 	changeStateIdle(changeStateIdle),
+
+	attackOn(attackOn),
+	attackOff(attackOff),
 
 	step()
 {
@@ -87,6 +93,7 @@ void PlayerKogetsuState::Update(void)
 
 			// 当たり判定を発生
 			kogetsu.On();
+			attackOn();
 		}
 
 		break;
@@ -108,6 +115,7 @@ void PlayerKogetsuState::Update(void)
 
 			// 当たり判定を消去
 			kogetsu.Off();
+			attackOff();
 		}
 
 		break;

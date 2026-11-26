@@ -207,7 +207,7 @@ private:
 	PolyDecompose::Params spawnParams;
 
 
-	// 単位はcm(プレイヤーのコライダー半径40、全高220に合わせる)
+#pragma region 外部パラメータの読み込み
 
 	// 視界の距離
 	const float SIGHT_RANGE = GetParameter("Init", "SightRange");
@@ -233,8 +233,14 @@ private:
 	const float ATTACK_HEIGHT_TOLERANCE = GetParameter("Init", "AttackHeightTolerance");
 	const float ATTACK_COOLDOWN_FRAMES = GetParameter("Init", "AttackCooldownFrames");
 
+	// 攻撃判定(前方に出す球)の大きさ / キャラから見た中心 / 当てた時のトリオンダメージ
+	const float ATTACK_RADIUS = GetParameter("Init", "AttackRadius");
+	const Vector3 ATTACK_OFFSET = GetParameterToVector3("Init", "AttackOffset");
+	const float ATTACK_DAMAGE = GetParameter("Init", "AttackDamage");
+
 	// モデルサイズ
 	const float SCALE = GetParameter("Init", "Scale");
 
+#pragma endregion
 
 };

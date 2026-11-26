@@ -13,6 +13,9 @@ Loading::Loading()
 	, loadTimer(0)
 	, animInterval()
 	, animCounter()
+	, runImages()
+	, runFrame(0)
+	, runInterval(0)
 {}
 
 // デストラクタ
@@ -27,11 +30,16 @@ void Loading::Init(void)
 
 	animCounter = 0;
 	animInterval = 0;
+	runFrame = 0;
+	runInterval = 0;
 }
 
 // 読み込み
 void Loading::Load(void)
 {
+	// 非同期読み込みに切り替える前に、ロード画面用の画像を読み込んでおく
+	LoadDivGraph("Data/Image/Loading/LoadingRun.png", RUN_FRAME_NUM, RUN_FRAME_NUM, 1,
+		RUN_FRAME_SIZE, RUN_FRAME_SIZE, runImages);
 }
 
 // 更新
@@ -48,6 +56,12 @@ void Loading::Update(void)
 	// 読み込み中
 	else
 	{
+		// 走りアニメーションのコマ送り
+		if (++runInterval >= RUN_FRAME_INTERVAL) {
+			runInterval = 0;
+			runFrame = (runFrame + 1) % RUN_FRAME_NUM;
+		}
+
 		// ロード画面を動作させるならここに記述
 		if (++animInterval >= 10) {
 			animInterval = 0;
@@ -74,11 +88,22 @@ void Loading::Draw(void)
 	SetFontSize(fontSize);
 	DrawString(xx - fontSize * 6, yy - fontSize, st.c_str(), 0xffffff);
 	SetFontSize(16);
+
+	// 文字の左隣で、左右反転して縮小表示する
+	double scale = static_cast<double>(RUN_DRAW_SIZE) / RUN_FRAME_SIZE;
+	SetDrawMode(DX_DRAWMODE_BILINEAR);
+	DrawRotaGraph(xx - fontSize * 6 + RUN_OFFSET_X, yy + RUN_OFFSET_Y,
+		scale, 0.0, runImages[runFrame], true, true);
+	SetDrawMode(DX_DRAWMODE_NEAREST);
 }
 
 // 解放
 void Loading::Release(void)
 {
+	for (int& image : runImages) {
+		DeleteGraph(image);
+		image = -1;
+	}
 }
 
 // 非同期読み込みに切り替える

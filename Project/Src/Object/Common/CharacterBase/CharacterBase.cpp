@@ -10,6 +10,8 @@
 
 #include "Trion.h"
 
+#include "../Collider/SphereCollider.h"
+
 #include "../MotionController/MotionControllerBase.h"
 #include "../../../Manager/TimeScale/TimeScale.h"
 #include "../../../Manager/Collision/CurrentCollisionManager.h"
@@ -310,3 +312,66 @@ void CharacterBase::SetTrionMax(float max) { trion->SetMax(max); }
 void CharacterBase::DecreaseTrion(const float decrease) { trion->Decrease(decrease); }
 float CharacterBase::GetTrionRatio(void) const{ return trion->GetRatio(); }
 bool CharacterBase::IsDeadCharacter(void) const{ return trion->IsDead(); }
+
+#pragma region 攻撃判定
+
+namespace
+{
+	// 攻撃を受けた時の吹き飛び(1フレームあたりの速度)
+	constexpr float KNOCKBACK_SPEED = 14.0f;
+	constexpr float KNOCKBACK_UP = 5.0f;
+}
+
+void CharacterBase::CreateAttackCollider(COLLIDER_TAG tag, COLLIDER_TAG targetTag, float radius, const Vector3& localPos, float damage)
+{
+	attackTag = tag;
+	attackTargetTag = targetTag;
+	attackDamage = damage;
+
+	attackCollider = new SphereCollider(tag, radius, localPos);
+	attackCollider->SetJudgeFlg(false);
+	AddCollider(attackCollider);
+}
+
+void CharacterBase::AttackOn(void)
+{
+	attackActive = true;
+	attackHit = false;
+	if (attackCollider != nullptr) { attackCollider->SetJudgeFlg(true); }
+}
+
+void CharacterBase::AttackOff(void)
+{
+	attackActive = false;
+	if (attackCollider != nullptr) { attackCollider->SetJudgeFlg(false); }
+}
+
+bool CharacterBase::HandleAttackCollision(COLLIDER_TAG ownTag, const ColliderBase& other)
+{
+	// 攻撃判定以外の衝突は、呼び出し元に任せる
+	if (attackCollider == nullptr || ownTag != attackTag) { return false; }
+
+	// 判定が出ていない、すでに当てた、相手が攻撃対象でない、なら何もしない
+	if (!attackActive || attackHit) { return true; }
+	if (other.GetTag() != attackTargetTag) { return true; }
+
+	CharacterBase* target = dynamic_cast<CharacterBase*>(other.GetActor());
+	if (target == nullptr) { return true; }
+
+	attackHit = true;
+	target->ReceiveAttack(attackDamage, trans.pos);
+	return true;
+}
+
+void CharacterBase::ReceiveAttack(float damage, const Vector3& attackerPos)
+{
+	DecreaseTrion(damage);
+
+	// 攻撃者から離れる向きへ、少し吹き飛ぶ
+	Vector3 away = trans.pos - attackerPos;
+	away.y = 0.0f;
+	away = away.LengthSq() > 1.0e-6f ? away.Normalized() : Vector3(0.0f, 0.0f, 1.0f);
+	Launch(away * KNOCKBACK_SPEED + Vector3(0.0f, KNOCKBACK_UP, 0.0f));
+}
+
+#pragma endregion

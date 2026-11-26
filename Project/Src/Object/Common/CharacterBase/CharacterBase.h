@@ -14,6 +14,9 @@ class AnimationController;
 
 class Trion;
 
+class SphereCollider;
+class ColliderBase;
+
 class CharacterBase : public ActorBase
 {
 public:
@@ -58,6 +61,14 @@ private:
 	// 前のフレームの位置(入力した向きに、実際にどれだけ進めたかを求めるため)
 	Vector3 stepLastPos;
 	bool stepLastPosValid;
+
+	// 攻撃判定(前方に出す球)。CreateAttackCollider で作る。初期は判定オフ
+	SphereCollider* attackCollider = nullptr;
+	COLLIDER_TAG attackTag = COLLIDER_TAG::None;
+	COLLIDER_TAG attackTargetTag = COLLIDER_TAG::None;
+	float attackDamage = 0.0f;
+	bool attackActive = false;
+	bool attackHit = false;
 
 	// 地面にいるか(接地フラグ、または、直下の地面が近い)。ジャンプや移動の加速に使う
 	bool groundedLoose;
@@ -130,6 +141,9 @@ public:
 	// 接地フラグそのものと、直下の地面が近いかを含めた判定(デバッグ表示用)
 	bool GetGroundFlag(void)const { return isGround; }
 	bool IsGroundedLoose(void)const { return groundedLoose; }
+
+	// 攻撃を受ける(トリオンが減り、攻撃者から離れる向きへ少し吹き飛ぶ)
+	void ReceiveAttack(float damage, const Vector3& attackerPos);
 
 protected:
 
@@ -207,6 +221,23 @@ protected:
 	bool SetPositionCorrectionFrame(const std::string& frameName);
 
 	void SetPositionCorrection(bool enabled);
+
+#pragma endregion
+
+#pragma region 攻撃判定
+
+	// キャラの前方に出す攻撃判定(球)を作る。初期は判定オフ。
+	// tag: この判定のタグ / targetTag: 当てる相手のタグ / localPos: キャラから見た中心(体の回転が掛かる)
+	void CreateAttackCollider(COLLIDER_TAG tag, COLLIDER_TAG targetTag, float radius, const Vector3& localPos, float damage);
+
+	// 判定を出す(1振りで当たるのは1回だけ。出すたびに、まだ当たっていない状態に戻す)
+	void AttackOn(void);
+
+	// 判定を消す
+	void AttackOff(void);
+
+	// OnCollision の先頭で呼ぶ。攻撃判定の衝突ならtrue(相手が攻撃対象なら、ダメージも与える)
+	bool HandleAttackCollision(COLLIDER_TAG ownTag, const ColliderBase& other);
 
 #pragma endregion
 

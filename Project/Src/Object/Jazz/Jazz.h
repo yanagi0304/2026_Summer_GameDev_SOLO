@@ -181,9 +181,11 @@ private:
 	// 生成演出の設定(初期値はPolyDecompose::Paramsの固定値)
 	PolyDecompose::Params spawnParams;
 
-#pragma region 受け取り参照
+#pragma region 外部パラメータの読み込み
 
-	
+	const float CAPSULE_RADIUS = GetParameter("Collider", "Radius");	// カプセルコライダーの半径
+	const Vector3 CAPSULE_START = GetParameterToVector3("Collider", "ColliderStartPos");	// カプセルコライダーの高さの半分
+	const Vector3 CAPSULE_END = GetParameterToVector3("Collider", "ColliderEndPos");		// カプセルコライダーの高さの半分
 
 #pragma endregion
 

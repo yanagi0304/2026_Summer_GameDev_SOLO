@@ -21,7 +21,7 @@ ShooterConfig ShooterConfig::MakeHound(const std::function<std::optional<Vector3
 	config.parameterPath = "Data/Parameter/Weapon/Asteroid/";
 
 	// サブ武器用のボタンがまだ無いので、いまはメインと同じボタンにしておく
-	config.advanceKey = KEY_TYPE::PlayerMain;
+	config.advanceKey = KEY_TYPE::PlayerSub;
 
 	// ロックオン先を渡すと、追尾弾になる
 	config.getLockOnPos = getLockOnPos;

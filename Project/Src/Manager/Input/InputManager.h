@@ -55,8 +55,11 @@ public:
 
 		PlayerKickDownAttack,
 
+		// トリガーの攻撃
 		PlayerMain,
+		PlayerSub,
 
+		// トリガーの切り替え
 		PlayerMainSwitch,
 		PlayerSubSwitch,
 

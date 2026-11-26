@@ -66,6 +66,10 @@ void InputManager::Init(void)
 	SET_MOUSE_BUTTON(KEY_TYPE::PlayerMain, MOUSE_INPUT_LEFT);
 	SET_C_BUTTON(KEY_TYPE::PlayerMain, XINPUT_BUTTON_B);
 
+	//サブトリガー使用
+	SET_MOUSE_BUTTON(KEY_TYPE::PlayerSub, MOUSE_INPUT_RIGHT);
+
+
 	//メイントリガー切り替え
 	SET_KEYBOARD(KEY_TYPE::PlayerMainSwitch, KEY_INPUT_E);
 	SET_C_BUTTON(KEY_TYPE::PlayerMainSwitch, XINPUT_BUTTON_RIGHT_SHOULDER);

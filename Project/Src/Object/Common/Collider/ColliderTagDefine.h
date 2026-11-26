@@ -22,7 +22,7 @@ enum class COLLIDER_TAG
 	None = -1,
 
 	Player,
-	PlayerKickDownAttack,
+	PlayerAttack,
 
 	Asteroid,
 	EnemyAsteroid,

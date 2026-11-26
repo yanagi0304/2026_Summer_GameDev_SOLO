@@ -135,11 +135,21 @@ void Jazz::Load(void)
 	AddCollider(
 		new CapsuleCollider(
 			COLLIDER_TAG::Player,
-			GetParameterToVector3("Collider", "ColliderStartPos"),
-			GetParameterToVector3("Collider", "ColliderEndPos"),
-			GetParameter("Collider", "Radius")
+			CAPSULE_START,
+			CAPSULE_END,
+			CAPSULE_RADIUS
 		)
 	);
+
+	// プレイヤーのアタックコライダーの生成
+	CreateAttackCollider(
+		COLLIDER_TAG::PlayerAttack,
+		COLLIDER_TAG::Enemy,
+		CAPSULE_RADIUS,
+		Vector3(0.0f, 30.0f, 80.0f),
+		10.0f
+	);
+
 #pragma endregion
 
 #pragma region 下位アクター生成
@@ -277,7 +287,9 @@ void Jazz::Load(void)
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A2); },
 			[&]() { AnimePlay(CHARACTER_ANIME::SLASH_A3); },
 			[&]() {return GetAnimeRatio(); },
-			[&]() {ChangeState(STATE::Idle); }
+			[&]() {ChangeState(STATE::Idle); },
+			[&]() {AttackOn(); },
+			[&]() {AttackOff(); }
 		)
 	);
 

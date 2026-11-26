@@ -3096,6 +3096,12 @@ bool CollisionManager::NeedContactResponse(ColliderBase* a, ColliderBase* b)cons
     ActorBase* actorB = b->GetActor();
     if (!actorA || !actorB) { return false; }
     if (!actorA->IsContactResponseEnabled() || !actorB->IsContactResponseEnabled()) { return false; }
+
+    // 攻撃判定は、当たりを知らせるだけで、押し出さない
+	if (a->GetTag() == COLLIDER_TAG::EnemyAttack || b->GetTag() == COLLIDER_TAG::EnemyAttack) { return false; }
+	if (a->GetTag() == COLLIDER_TAG::PlayerAttack || b->GetTag() == COLLIDER_TAG::PlayerAttack) { return false; }
+
+
     return a->GetMobility() == COLLIDER_MOBILITY::Movable ||
            b->GetMobility() == COLLIDER_MOBILITY::Movable;
 }

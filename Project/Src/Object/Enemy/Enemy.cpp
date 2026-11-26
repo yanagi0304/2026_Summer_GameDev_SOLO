@@ -109,6 +109,9 @@ void Enemy::Load(void)
 		)
 	);
 
+	// 攻撃判定(キャラの前方に出す球)。弧月のコライダーはメッシュカット専用なので、判定には使わない
+	CreateAttackCollider(COLLIDER_TAG::EnemyAttack, COLLIDER_TAG::Player, ATTACK_RADIUS, ATTACK_OFFSET, ATTACK_DAMAGE);
+
 #pragma endregion
 
 #pragma region 状態設定
@@ -149,6 +152,8 @@ void Enemy::Load(void)
 	attack.playAnimeAttack = [this]() { AnimePlay(CHARACTER_ANIME::SLASH_A1); };
 	attack.getAnimeRatio = [this]() { return GetAnimeRatio(); };
 	attack.isAnimeEnd = [this]() { return IsAnimeEnd(); };
+	attack.hitboxOn = [this]() { AttackOn(); };
+	attack.hitboxOff = [this]() { AttackOff(); };
 	attack.onFinished = [this]()
 	{
 		attackCooldown = ATTACK_COOLDOWN_FRAMES;
@@ -363,6 +368,9 @@ void Enemy::DrawDebug(void)const
 
 void Enemy::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)
 {
+	// 攻撃判定の当たり(プレイヤーにダメージを与える)
+	if (HandleAttackCollision(ownTag, other)) { return; }
+
 	if (other.GetTag() != COLLIDER_TAG::Asteroid) { return; }
 
 	Defeat();

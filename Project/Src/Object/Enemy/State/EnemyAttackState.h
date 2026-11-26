@@ -22,7 +22,7 @@ public:
 	{
 		// 攻撃判定を出す / 消す、アニメーションの再生割合(0?1)
 		// プレイヤーの弧月(1振り目)と同じタイミング
-		float activeStartRatio = 0.1f;
+		float activeStartRatio = 0.3f;
 		float activeEndRatio = 0.7f;
 	};
 
