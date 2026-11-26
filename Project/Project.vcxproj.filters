@@ -98,6 +98,7 @@
     <ClCompile Include="Src\Object\CameraCollOperator\CameraPointCollOperator.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\AsteroidSwarm.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\Crosshair.cpp" />
+    <ClCompile Include="Src\Object\Weapon\LockOn\LockOnSystem.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterConfig.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterCubeState.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterFireState.cpp" />
@@ -234,6 +235,7 @@
     <ClInclude Include="Src\Object\CameraCollOperator\CameraPointCollOperator.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\AsteroidSwarm.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\Crosshair.h" />
+    <ClInclude Include="Src\Object\Weapon\LockOn\LockOnSystem.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterConfig.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterCubeState.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterFireState.h" />

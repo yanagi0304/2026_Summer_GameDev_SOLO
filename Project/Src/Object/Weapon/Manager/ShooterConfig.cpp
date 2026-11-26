@@ -3,7 +3,8 @@
 ShooterConfig::ShooterConfig(void) :
 	parameterPath("Data/Parameter/Weapon/Asteroid/"),
 	advanceKey(KEY_TYPE::PlayerMain),
-	getLockOnPos(nullptr)
+	getLockOnId(nullptr),
+	getTargetPos(nullptr)
 {
 }
 
@@ -13,7 +14,9 @@ ShooterConfig ShooterConfig::MakeAsteroid(void)
 	return ShooterConfig();
 }
 
-ShooterConfig ShooterConfig::MakeHound(const std::function<std::optional<Vector3>(void)>& getLockOnPos)
+ShooterConfig ShooterConfig::MakeHound(
+	const std::function<std::optional<int>(void)>& getLockOnId,
+	const std::function<std::optional<Vector3>(int)>& getTargetPos)
 {
 	ShooterConfig config;
 
@@ -24,7 +27,8 @@ ShooterConfig ShooterConfig::MakeHound(const std::function<std::optional<Vector3
 	config.advanceKey = KEY_TYPE::PlayerSub;
 
 	// ロックオン先を渡すと、追尾弾になる
-	config.getLockOnPos = getLockOnPos;
+	config.getLockOnId = getLockOnId;
+	config.getTargetPos = getTargetPos;
 
 	return config;
 }

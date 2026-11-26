@@ -39,6 +39,9 @@ namespace
 {
 	// グリッド生成にかかった時間(ミリ秒。デバッグ表示用)
 	double g_navBuildMs = 0.0;
+
+	// 敵の足元から、ロックオンで狙う点までの高さ(cm)
+	constexpr float LOCK_AIM_HEIGHT = 120.0f;
 }
 
 GameScene::GameScene() : SceneBase()
@@ -52,7 +55,8 @@ void GameScene::SubPostLoad(void)
 	//AddActor(new BoxDebugObject(Vector3(20000, 1000, 20000), Vector3::Yonly(-500), false));
 
 	
-	operatorObject = new Jazz();
+	Jazz* jazz = new Jazz();
+	operatorObject = jazz;
 	AddActor(operatorObject);
 	mannequinManager = new MannequinManager(operatorObject->GetTrans().pos);
 	AddActor(mannequinManager);
@@ -63,6 +67,18 @@ void GameScene::SubPostLoad(void)
 		navGrid, navManager, &operatorObject->GetTrans().pos,
 		[this](ActorBase* actor) { AddActor(actor); },
 		[this](ActorBase* actor) { RemoveActor(actor); });
+
+	// ハウンドのロックオン対象を渡す(倒れた敵と、生成演出中の敵は除く)
+	jazz->SetLockCandidateSource([this](std::vector<LockCandidate>& out) {
+		if (!enemyManager) { return; }
+
+		for (const Enemy* enemy : enemyManager->GetEnemies()) {
+			if (enemy->IsDefeated() || enemy->IsSpawning()) { continue; }
+
+			// GetPosは足元なので、胴のあたりを狙う
+			out.push_back({ enemy->GetId(), enemy->GetPos() + Vector3(0.0f, LOCK_AIM_HEIGHT, 0.0f) });
+		}
+	});
 
 	//int debugObjNum = 50;
 	//float debugObjSpace = 10.0f;

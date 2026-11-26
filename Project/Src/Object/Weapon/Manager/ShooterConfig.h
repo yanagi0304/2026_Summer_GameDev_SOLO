@@ -15,10 +15,14 @@ struct ShooterConfig
 	// 次の状態へ進めるボタン
 	KEY_TYPE advanceKey;
 
-	// ロックオン中の目標座標を返す関数
+	// ロックオン中の目標の番号を返す関数(発射した瞬間に1回だけ呼ぶ)
 	// 空なら追尾しない
 	// 目標がいないときは std::nulloptを返す
-	std::function<std::optional<Vector3>(void)> getLockOnPos;
+	std::function<std::optional<int>(void)> getLockOnId;
+
+	// 番号から目標の座標を返す関数(飛んでいる間、毎フレーム呼ぶ)
+	// 目標が倒れたときは std::nulloptを返す
+	std::function<std::optional<Vector3>(int)> getTargetPos;
 
 	// 既定値
 	ShooterConfig(void);
@@ -27,6 +31,9 @@ struct ShooterConfig
 	static ShooterConfig MakeAsteroid(void);
 
 	// ハウンド用の設定
-	// getLockOnPos: 目標の座標を返す関数
-	static ShooterConfig MakeHound(const std::function<std::optional<Vector3>(void)>& getLockOnPos = nullptr);
+	// getLockOnId: ロックオン中の目標の番号を返す関数
+	// getTargetPos: 番号から目標の座標を返す関数
+	static ShooterConfig MakeHound(
+		const std::function<std::optional<int>(void)>& getLockOnId = nullptr,
+		const std::function<std::optional<Vector3>(int)>& getTargetPos = nullptr);
 };

@@ -233,6 +233,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Weapon\Kogetsu\Kogetsu.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\AsteroidSwarm.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\Crosshair.cpp" />
+    <ClCompile Include="Src\Object\Weapon\LockOn\LockOnSystem.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterConfig.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\ShooterManager.cpp" />
     <ClCompile Include="Src\Object\Weapon\Manager\State\ShooterCubeState.cpp" />
@@ -364,6 +365,7 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Weapon\Kogetsu\Kogetsu.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\AsteroidSwarm.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\Crosshair.h" />
+    <ClInclude Include="Src\Object\Weapon\LockOn\LockOnSystem.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterConfig.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\ShooterManager.h" />
     <ClInclude Include="Src\Object\Weapon\Manager\State\ShooterCubeState.h" />

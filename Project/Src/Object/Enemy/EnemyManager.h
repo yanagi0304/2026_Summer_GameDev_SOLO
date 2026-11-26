@@ -41,6 +41,9 @@ public:
 
 	const WaveController& GetWave(void)const { return wave; }
 
+	// 出現中の敵の一覧(ポインタは保持せず、そのフレーム内だけで使うこと)
+	const std::vector<Enemy*>& GetEnemies(void)const { return enemies; }
+
 	// 直近の出現(生成?シーンへの追加)にかかった時間(ミリ秒。計測用)
 	double GetLastSpawnMs(void)const { return lastSpawnMs; }
 

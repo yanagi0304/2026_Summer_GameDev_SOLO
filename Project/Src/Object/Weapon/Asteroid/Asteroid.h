@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <deque>
+#include <optional>
 
 #include "../WeaponBase.h"
 
@@ -114,6 +115,9 @@ private:
 
 	// 弾の設定
 	ShooterConfig config;
+
+	// 追尾する目標の番号(発射した瞬間に決める)
+	std::optional<int> targetId_;
 
 	// 命中時のコールバック関数
 	std::function<void(const Vector3&, const Vector3&)> onHit;

@@ -72,6 +72,9 @@ public:
 	// 現在位置
 	Vector3 GetPos(void)const { return trans.pos; }
 
+	// 敵ごとの通し番号(ロックオン先を覚えるのに使う)
+	int GetId(void)const { return id; }
+
 	// 直近のモデル準備(読み込み or 複製)にかかった時間(ミリ秒。計測用)
 	static double GetLastModelLoadMs(void) { return lastModelLoadMs; }
 
@@ -174,6 +177,10 @@ private:
 	const Combat combat;
 
 	static inline double lastModelLoadMs = 0.0;
+
+	// 次に作る敵の番号 / この敵の番号
+	static inline int nextId = 0;
+	const int id = nextId++;
 
 	// 倒されたか
 	bool defeated;

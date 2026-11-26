@@ -96,6 +96,9 @@ void Asteroid::Fire(const Vector3& dir)
 
 	trail_.clear();
 
+	// 撃った後にロックオン先が変わっても、この弾の目標は変えない
+	targetId_ = config.getLockOnId ? config.getLockOnId() : std::nullopt;
+
 	state_ = STATE::Flying;
 
 	// 飛んでいる間だけ当たり判定を有効にする
@@ -142,12 +145,13 @@ void Asteroid::SubUpdate(void)
 	trail_.push_front(trans.pos);
 	if (static_cast<int>(trail_.size()) > TRAIL_MAX) { trail_.pop_back(); }
 
-	// 追尾弾なら、ロックオン中の目標へ向きを寄せる
-	if (config.getLockOnPos) {
+	// 目標がいる追尾弾なら、目標へ向きを寄せる
+	if (targetId_.has_value() && config.getTargetPos) {
 
-		const std::optional<Vector3> lockOnPos = config.getLockOnPos();
+		const std::optional<Vector3> targetPos = config.getTargetPos(targetId_.value());
 
-		if (lockOnPos.has_value()) { Steer(lockOnPos.value()); }
+		// 目標が倒れたら、そのまま直進する
+		if (targetPos.has_value()) { Steer(targetPos.value()); }
 	}
 
 	// 進行方向へ加速させる
@@ -198,6 +202,8 @@ void Asteroid::ResetMotion(void)
 	state_ = STATE::Hold;
 
 	trail_.clear();
+
+	targetId_ = std::nullopt;
 
 	// 発射時の速度が残ってズレるのを防ぐ
 	if (GetPhysicsBody() != nullptr) { GetPhysicsBody()->SetVelocity(Vector3(0.0f)); }

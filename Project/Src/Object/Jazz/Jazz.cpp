@@ -202,7 +202,9 @@ void Jazz::Load(void)
 	//「ハウンド」生成
 	subSlot.set.emplace(TriggerType::HOUND, new ShooterManager(
 		trans,
-		ShooterConfig::MakeHound(),
+		ShooterConfig::MakeHound(
+			[this]() { return lockOn.GetTargetId(); },
+			[this](int id) { return lockOn.GetPos(id); }),
 		[&]() { if (static_cast<STATE>(GetState()) == STATE::Idle) { AnimePlay(mainSlot.set.at(mainSlot.currentID)->GetIdleAnimeID()); } },
 		decreaseTrion));
 
@@ -332,6 +334,10 @@ void Jazz::SubInit(void)
 {
 	trans.pos = Vector3(0.0f, 0.0f, 0.0f);
 	trans.scale = GetParameterToVector3("Init", "Scale");
+	// サブ武器は、UIの先頭に表示しているハウンドを装備して始める
+	// (待機アニメはメイン武器に合わせるので、アニメ再生より先に行う)
+	SwitchWeapon(subSlot, trigger->GetSubTrigger(), TriggerType::HOUND);
+
 	AnimePlay(CHARACTER_ANIME::IDLE);
 //	for (auto& w : mainSlot.set) { w.second->SetIsActive(false); }
 	WeaponChange(TriggerType::KOGETSU);
@@ -376,6 +382,9 @@ void Jazz::SubUpdate(void)
 	UpdateKogetsuSheath();
 
 	if (isAim) { AimRotate(); }
+
+	// ハウンドを装備している間だけロックオンする
+	lockOn.Update(subSlot.currentID == TriggerType::HOUND);
 }
 
 void Jazz::OnGrasshopperLaunch(bool isStraightUp)
@@ -507,6 +516,9 @@ void Jazz::SubDraw(void)
 	DrawBox(gaugeX, gaugeY, gaugeX + static_cast<int>(gaugeW * trionRatio), gaugeY + gaugeH, 0x30c0ff, TRUE);
 	DrawBox(gaugeX - 3, gaugeY - 3, gaugeX + gaugeW + 3, gaugeY + gaugeH + 3, 0xffffff, FALSE);
 	DrawFormatString(gaugeX, gaugeY - 22, 0xffffff, "TRION  %.0f%%", trionRatio * 100.0f);
+
+	// ロックオン中の目標の印
+	lockOn.DrawMarker();
 
 	//DrawFormatString(0, 120, 0x000000, "%f,%f,%f", trans.pos.x, trans.pos.y, trans.pos.z);
 }

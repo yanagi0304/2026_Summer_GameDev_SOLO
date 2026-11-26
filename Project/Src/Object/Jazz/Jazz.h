@@ -9,6 +9,7 @@
 #include "../Common/AnimationController/CharacterAnimeTypeDefine.h"
 
 #include "../Weapon/TriggerTypeDefine.h"
+#include "../Weapon/LockOn/LockOnSystem.h"
 
 class TriggerUI;
 class WeaponBase;
@@ -35,6 +36,9 @@ public:
 	void OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const CollisionResult& result)override;
 
 	ACTOR_DRAW_TYPE DefaultDrawType(void)const override { return ACTOR_DRAW_TYPE::Alpha; }
+
+	// ロックオンできる対象の一覧を作る関数を設定する
+	void SetLockCandidateSource(const LockOnSystem::CollectFunc& collect) { lockOn.SetCandidateSource(collect); }
 
 
 private:
@@ -171,6 +175,9 @@ private:
 
 	//エイム中か
 	bool isAim;
+
+	// ハウンドのロックオン
+	LockOnSystem lockOn;
 
 	// 生成演出
 	PolyDecompose* spawnEffect;
