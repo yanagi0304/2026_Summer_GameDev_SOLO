@@ -2,6 +2,8 @@
 
 #include "../../../pch.h"
 
+#include "../Transform/Transform.h"
+
 ShaderBase::ShaderBase() :
     vertexShaderHandle(-1),
     pixelShaderHandle(-1)
@@ -28,6 +30,11 @@ void ShaderBase::ResetApply(void)
     SetUsePixelShader(-1);
 
     MV1SetUseOrigShader(false);
+}
+
+void ShaderBase::DrawModel(Transform& trans)
+{
+    trans.Draw();
 }
 
 void ShaderBase::Release(void)

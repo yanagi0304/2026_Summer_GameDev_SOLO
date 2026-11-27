@@ -154,7 +154,8 @@ void ActorBase::Draw(void)
 	BaseDraw();
 
 	// モデルの描画
-	trans.Draw();
+	if (shader != nullptr) { shader->DrawModel(trans); }
+	else { trans.Draw(); }
 
 	// シェーダーのリセット
 	if (shader != nullptr) { 

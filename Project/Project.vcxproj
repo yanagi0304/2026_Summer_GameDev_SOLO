@@ -214,6 +214,9 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClCompile Include="Src\Object\Common\MeshSlicer\SlashTracker.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\DefaultShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\RimLightShader.cpp" />
+    <ClCompile Include="Src\Object\Common\Shader\HologramShader.cpp" />
+    <ClCompile Include="Src\Object\Common\Shader\HologramImageShader.cpp" />
+    <ClCompile Include="Src\Object\Common\Shader\HologramConstantBuffer.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\ShaderBase.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\TestShader.cpp" />
     <ClCompile Include="Src\Object\Common\Shader\WaterShader.cpp" />
@@ -345,6 +348,10 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <ClInclude Include="Src\Object\Common\MeshSlicer\SlashTracker.h" />
     <ClInclude Include="Src\Object\Common\Shader\DefaultShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\RimLightShader.h" />
+    <ClInclude Include="Src\Object\Common\Shader\HologramShader.h" />
+    <ClInclude Include="Src\Object\Common\Shader\HologramImageShader.h" />
+    <ClInclude Include="Src\Object\Common\Shader\HologramConstantBuffer.h" />
+    <ClInclude Include="Src\Object\Common\Shader\HologramParam.h" />
     <ClInclude Include="Src\Object\Common\Shader\ShaderBase.h" />
     <ClInclude Include="Src\Object\Common\Shader\TestShader.h" />
     <ClInclude Include="Src\Object\Common\Shader\WaterShader.h" />
@@ -413,6 +420,8 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <None Include="Src\Shader\Default\DefaultVSBody.hlsli" />
     <None Include="Src\Shader\PostEffect\PostEffectHeader.hlsli" />
     <None Include="Src\Shader\RimLight\RimLightVSBody.hlsli" />
+    <None Include="Src\Shader\Hologram\HologramCommon.hlsli" />
+    <None Include="Src\Shader\Hologram\HologramVSBody.hlsli" />
     <None Include="Src\Shader\Shadow\ShadowVSBody.hlsli" />
     <None Include="Src\Shader\Shadow\ShadowVSOutput.hlsli" />
   </ItemGroup>
@@ -548,6 +557,38 @@ $(ProjectDir)Lib\Enet;</AdditionalLibraryDirectories>
     <FxCompile Include="Src\Shader\RimLight\RimLightPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramModelPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramImagePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_1Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_4Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_8Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_NMap1Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_NMap4Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Src\Shader\Hologram\HologramVS_NMap8Frame.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Src\Shader\RimLight\RimLightVS_1Frame.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

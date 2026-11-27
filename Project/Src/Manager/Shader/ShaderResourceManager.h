@@ -161,6 +161,37 @@ private:
 			VERTEX_SHADER_TYPE::PolyDecompose,
 			"PolyDecomposeVS"
 		},
+
+		// ホログラム
+		{
+			VERTEX_SHADER_TYPE::Hologram1Frame,
+			"HologramVS_1Frame"
+		},
+
+		{
+			VERTEX_SHADER_TYPE::Hologram4Frame,
+			"HologramVS_4Frame"
+		},
+
+		{
+			VERTEX_SHADER_TYPE::Hologram8Frame,
+			"HologramVS_8Frame"
+		},
+
+		{
+			VERTEX_SHADER_TYPE::HologramNMap1Frame,
+			"HologramVS_NMap1Frame"
+		},
+
+		{
+			VERTEX_SHADER_TYPE::HologramNMap4Frame,
+			"HologramVS_NMap4Frame"
+		},
+
+		{
+			VERTEX_SHADER_TYPE::HologramNMap8Frame,
+			"HologramVS_NMap8Frame"
+		},
 	};
 
 	// 頂点シェーダー
@@ -233,6 +264,18 @@ private:
 		{
 			PIXEL_SHADER_TYPE::PolyDecompose,
 			"PolyDecomposePS"
+		},
+
+		// ホログラム(モデル)
+		{
+			PIXEL_SHADER_TYPE::HologramModel,
+			"HologramModelPS"
+		},
+
+		// ホログラム(画像)
+		{
+			PIXEL_SHADER_TYPE::HologramImage,
+			"HologramImagePS"
 		},
 
 		#pragma endregion

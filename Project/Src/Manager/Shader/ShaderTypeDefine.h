@@ -31,6 +31,14 @@ enum class VERTEX_SHADER_TYPE
 
     // ポリゴン分解
     PolyDecompose,
+
+    // ホログラム
+    Hologram1Frame,
+    Hologram4Frame,
+    Hologram8Frame,
+    HologramNMap1Frame,
+    HologramNMap4Frame,
+    HologramNMap8Frame,
 };
 
 // ピクセルシェーダーの種類
@@ -74,6 +82,12 @@ enum class PIXEL_SHADER_TYPE
 
     // ポリゴン分解
     PolyDecompose,
+
+    // ホログラム(モデル)
+    HologramModel,
+
+    // ホログラム(画像)
+    HologramImage,
 
 #pragma endregion
 

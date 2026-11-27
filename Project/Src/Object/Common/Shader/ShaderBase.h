@@ -1,5 +1,7 @@
 #pragma once
 
+struct Transform;
+
 class ShaderBase
 {
 public:
@@ -19,6 +21,9 @@ public:
 
     // シェーダーの設定リセット
     virtual void ResetApply(void);
+
+    // モデルを描画する(複数回描画するシェーダーは派生先で再定義)
+    virtual void DrawModel(Transform& trans);
 
     // このシェーダーの終了判定
     virtual bool IsEnd(void)const { return false; }
