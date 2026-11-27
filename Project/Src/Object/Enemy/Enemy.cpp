@@ -371,7 +371,7 @@ void Enemy::OnCollision(COLLIDER_TAG ownTag, const ColliderBase& other, const Co
 	// 攻撃判定の当たり(プレイヤーにダメージを与える)
 	if (HandleAttackCollision(ownTag, other)) { return; }
 
-	if (other.GetTag() != COLLIDER_TAG::Asteroid) { return; }
+	if (other.GetTag() != COLLIDER_TAG::Asteroid && other.GetTag() != COLLIDER_TAG::PlayerAttack) { return; }
 
 	Defeat();
 

@@ -97,7 +97,7 @@ void PlayerMoveState::AlwaysUpdate(void)
 {
 	// ダッシュしていないときはスタミナを回復させる
 	if (!isDash) {
-		dashStamina += TimeScale::Get();
+		dashStamina += 10*TimeScale::Get();
 		if (dashStamina >= DASH_STAMINA_MAX) {
 			dashStamina = DASH_STAMINA_MAX;
 
