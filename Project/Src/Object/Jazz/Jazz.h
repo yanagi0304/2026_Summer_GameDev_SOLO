@@ -87,6 +87,8 @@ private:
 		0.5,	// Sheathed
 		0.5,	// Draw
 
+		0.8f,	// NinjaRun
+
 
 	};
 
@@ -116,6 +118,8 @@ private:
 
 		false,	// Sheathed
 		false,	// Draw
+
+		true,	// NinjaRun
 
 	};
 

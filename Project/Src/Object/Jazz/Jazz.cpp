@@ -234,10 +234,10 @@ void Jazz::Load(void)
 	AddState(
 		STATE::Move,
 		new PlayerMoveState(
-			10.0f, 2.0f, 300,
+			10.0f, 2.0f, 500,
 			*groundMotionController,
 			[&]() { AnimePlay(CHARACTER_ANIME::WALK); },
-			[&]() { AnimePlay(CHARACTER_ANIME::RUN); }
+			[&]() { AnimePlay(CHARACTER_ANIME::NinjaRun); }
 		)
 	);
 

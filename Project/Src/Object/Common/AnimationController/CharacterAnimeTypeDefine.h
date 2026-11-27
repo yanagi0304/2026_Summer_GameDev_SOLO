@@ -19,6 +19,7 @@ enum CHARACTER_ANIME
 	RUN,
 	SHEATHED,
 	DRAW,
+	NinjaRun,
 	
 	MAX,
 };
